@@ -1,0 +1,50 @@
+/* ============================================================
+   Oda — Spacing, radii, shadows, layout
+   4px base grid. Soft rounding + gentle, warm shadows.
+   ============================================================ */
+:root {
+  /* ---- Spacing scale (4px base) ---- */
+  --space-0:  0;
+  --space-1:  0.25rem;  /* 4  */
+  --space-2:  0.5rem;   /* 8  */
+  --space-3:  0.75rem;  /* 12 */
+  --space-4:  1rem;     /* 16 */
+  --space-5:  1.5rem;   /* 24 */
+  --space-6:  2rem;     /* 32 */
+  --space-7:  3rem;     /* 48 */
+  --space-8:  4rem;     /* 64 */
+  --space-9:  6rem;     /* 96 */
+  --space-10: 8rem;     /* 128 */
+
+  /* ---- Radii — soft, organic ---- */
+  --radius-xs:   4px;
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   18px;
+  --radius-xl:   28px;
+  --radius-pill: 999px;
+  --radius-circle: 50%;
+
+  /* ---- Shadows — warm-tinted, diffuse (never hard/black) ---- */
+  --shadow-xs: 0 1px 2px rgba(90, 74, 51, 0.06);
+  --shadow-sm: 0 2px 8px rgba(90, 74, 51, 0.08);
+  --shadow-md: 0 6px 20px rgba(90, 74, 51, 0.10);
+  --shadow-lg: 0 16px 40px rgba(58, 51, 38, 0.12);
+  --shadow-focus: 0 0 0 3px rgba(167, 134, 89, 0.30);
+
+  /* ---- Borders ---- */
+  --border-width: 1px; /* @kind spacing */
+  --hairline: 1px solid var(--border-subtle); /* @kind other */
+
+  /* ---- Layout ---- */
+  --container-max: 1240px; /* @kind spacing */
+  --container-narrow: 760px; /* @kind spacing */
+  --gutter: clamp(1rem, 4vw, 3rem); /* @kind spacing */
+
+  /* ---- Motion ---- */
+  --ease-soft: cubic-bezier(0.22, 0.61, 0.36, 1); /* @kind other */
+  --ease-out:  cubic-bezier(0.16, 1, 0.3, 1); /* @kind other */
+  --dur-fast:  140ms; /* @kind other */
+  --dur-base:  240ms; /* @kind other */
+  --dur-slow:  420ms; /* @kind other */
+}

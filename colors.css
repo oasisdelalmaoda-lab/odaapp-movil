@@ -1,0 +1,73 @@
+/* ============================================================
+   Oda — Color tokens
+   Warm, earthy aromatherapy palette. Sand + golden-brown brand
+   with a 12-tone mood/scent palette mapped to Oasis del Alma's
+   product lines (Calma, Respira, Despierta, Descansa…).
+   ============================================================ */
+:root {
+  /* ---- Brand: golden-brown + warm neutrals ---- */
+  --oda-ink:       #3A3326;   /* warm near-black — primary text */
+  --oda-brown-700: #5A4A33;   /* logo brown / strong brand ink */
+  --oda-brown-600: #8A6F49;   /* hover-dark brand */
+  --oda-brown-500: #A78659;   /* PRIMARY brand gold-brown */
+  --oda-brown-400: #BE9E70;
+  --oda-brown-300: #C1AA81;   /* "Despierta" sand */
+  --oda-brown-200: #DCCBAB;
+  --oda-brown-100: #EFE6D6;   /* warm sand surface */
+
+  /* ---- Warm neutrals ---- */
+  --oda-ivory:  #FBF8F2;      /* raised cards */
+  --oda-cream:  #F7F2E9;      /* page background */
+  --oda-linen:  #EFE9DD;      /* alt section */
+  --oda-stone:  #E4DBCC;      /* borders, hairlines */
+  --oda-clay:   #B8AE9C;      /* muted accents */
+  --oda-slate:  #8A8073;      /* muted text */
+  --oda-fog:    #FFFFFF;      /* pure white surface */
+
+  /* ---- Mood / scent palette (from brand spec) ---- */
+  --scent-despierta:  #C1AA81;  /* energía  */
+  --scent-descansa:   #5D8091;  /* dormir   */
+  --scent-calma:      #6596A6;  /* ansiedad */
+  --scent-respira:    #7A9379;  /* respirar */
+  --scent-naranja:    #E8B56A;  /* cítrico  */
+  --scent-lavanda:    #9C97A2;  /* lavanda  */
+  --scent-romero:     #B8B7B8;  /* romero   */
+  --scent-limoncillo: #8AB38D;  /* limoncillo */
+  --scent-arbol-te:   #979381;  /* árbol de té */
+  --scent-menta:      #A8BEA4;  /* menta    */
+  --scent-eucalipto:  #627B60;  /* eucalipto */
+  --scent-incienso:   #C9B9A7;  /* incienso */
+
+  /* ---- Functional ---- */
+  --oda-sale:    #B5503C;   /* terracotta — sale price / discount */
+  --oda-success: #627B60;   /* eucalipto green — confirmations */
+  --oda-warning: #C9962F;
+  --oda-info:    #6596A6;
+
+  /* ============================================================
+     Semantic aliases — prefer these in components
+     ============================================================ */
+  --text-strong:  var(--oda-ink);
+  --text-body:    #574E40;
+  --text-muted:   var(--oda-slate);
+  --text-on-brand:#FBF8F2;
+  --text-inverse: #FBF8F2;
+
+  --brand-primary: var(--oda-brown-500);
+  --brand-ink:     var(--oda-brown-700);
+  --brand-hover:   var(--oda-brown-600);
+
+  --surface-page:   var(--oda-cream);
+  --surface-card:   var(--oda-fog);
+  --surface-raised: var(--oda-ivory);
+  --surface-sand:   var(--oda-brown-100);
+  --surface-linen:  var(--oda-linen);
+  --surface-ink:    var(--oda-ink);
+
+  --border-subtle: var(--oda-stone);
+  --border-strong: var(--oda-clay);
+  --border-brand:  var(--oda-brown-300);
+
+  --price-sale:    var(--oda-sale);
+  --price-regular: var(--text-muted);
+}

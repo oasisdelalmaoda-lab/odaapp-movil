@@ -1,0 +1,13 @@
+/* ============================================================
+   Oda — Webfonts
+   ------------------------------------------------------------
+   SUBSTITUTION NOTE: The real Oda brandbook fonts could not be
+   read (the brandbook PDF + .ai files were not accessible in the
+   upload set). These Google Fonts are the closest matches to the
+   logo wordmark + specimen images:
+     · Cormorant Garamond → the elegant high-contrast serif of the
+       "OdA" wordmark and the spaced small-caps scent labels.
+     · Mulish → a warm, quiet humanist sans for body + UI.
+   Replace with the licensed brand fonts when available.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Mulish:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');

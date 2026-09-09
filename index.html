@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+  <meta name="theme-color" content="#F7F2E9">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="OdA App">
+  <link rel="manifest" href="app-manifest.json">
+  <link rel="apple-touch-icon" href="app-icon-192.png">
+  <link rel="icon" href="app-icon-192.png">
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="colors.css">
+  <link rel="stylesheet" href="typography.css">
+  <link rel="stylesheet" href="spacing.css">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="styles.css">
+  <script src="_ds_bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <style>
+    html,body{margin:0;height:100%;background:#EFE9DD;font-family:'Mulish',system-ui,sans-serif;color:#3A3326;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+    a{color:#8A6F49}a:hover{color:#5A4A33}
+    input,textarea,button{font-family:inherit}
+    ::-webkit-scrollbar{width:0;height:0}
+    @keyframes oda-toast{0%{opacity:0;transform:translateY(8px)}12%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0}}
+    @keyframes oda-spin{to{transform:rotate(360deg)}}
+  </style>
+</helmet>
+<div style="min-height:100dvh;display:flex;justify-content:center;background:#EFE9DD;">
+<div style="width:100%;max-width:480px;min-height:100dvh;background:#F7F2E9;display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 1px #E4DBCC;">
+
+  <!-- ===== LOGIN ===== -->
+  <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+  <div data-screen-label="Ingreso" style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:calc(env(safe-area-inset-top) + 40px) 28px 40px;">
+    <img src="app-logo-wordmark-brown.png" alt="OdA" style="width:150px;height:auto;align-self:flex-start;">
+    <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin-top:22px;">Oasis del Alma · Operación</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;line-height:1.1;margin-top:6px;text-wrap:balance;">Bienvenido a la app del equipo</div>
+    <div style="font-size:13px;color:#574E40;margin-top:10px;line-height:1.5;">Entra con el mismo correo y contraseña del Hub.</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:28px;">
+      <input type="email" value="{{ loginEmail }}" onChange="{{ setLoginEmail }}" onKeyDown="{{ loginKey }}" placeholder="Correo" autoComplete="username" style="height:50px;border-radius:999px;border:1px solid #B8AE9C;background:#FFFFFF;padding:0 18px;font-size:15px;outline:none;color:#3A3326;">
+      <input type="password" value="{{ loginPwd }}" onChange="{{ setLoginPwd }}" onKeyDown="{{ loginKey }}" placeholder="Contraseña" autoComplete="current-password" style="height:50px;border-radius:999px;border:1px solid #B8AE9C;background:#FFFFFF;padding:0 18px;font-size:15px;outline:none;color:#3A3326;">
+      <sc-if value="{{ loginError }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#8F3A28;background:rgba(181,80,60,0.1);border-radius:14px;padding:10px 14px;line-height:1.45;">{{ loginError }}</div></sc-if>
+      <div onClick="{{ doLogin }}" style="margin-top:6px;height:50px;border-radius:999px;background:{{ loginBtnBg }};color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;gap:10px;">
+        <sc-if value="{{ loginBusy }}" hint-placeholder-val="{{ false }}"><div style="width:16px;height:16px;border-radius:999px;border:2px solid rgba(251,248,242,0.4);border-top-color:#FBF8F2;animation:oda-spin 0.8s linear infinite;"></div></sc-if>
+        {{ loginBtnLabel }}
+      </div>
+    </div>
+    <div style="font-size:12px;color:#8A8073;margin-top:26px;line-height:1.5;">Si no tienes acceso, pídele al administrador que te cree en Usuarios y permisos del Hub y en la cuenta de acceso.</div>
+  </div>
+  </sc-if>
+
+  <!-- ===== APP ===== -->
+  <sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;flex-direction:column;min-height:0;">
+    <sc-if value="{{ offline }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#3A3326;color:#FBF8F2;font-size:12px;text-align:center;padding:8px 16px;padding-top:calc(env(safe-area-inset-top) + 8px);">Sin conexión · estás viendo lo último que se cargó</div>
+    </sc-if>
+
+    <sc-if value="{{ isInicio }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="Inicio" style="flex:1;overflow:auto;padding:calc(env(safe-area-inset-top) + 16px) 20px 110px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;">{{ fechaHoy }}</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;line-height:1.1;margin-top:2px;">Hola, {{ userNombre }}</div>
+        </div>
+        <div onClick="{{ goPerfil }}" style="width:42px;height:42px;border-radius:999px;background:{{ userColor }};color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;">{{ userIni }}</div>
+      </div>
+
+      <sc-if value="{{ showInstall }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:18px;background:#3A3326;color:#FBF8F2;border-radius:18px;padding:16px 18px;display:flex;gap:14px;align-items:center;">
+          <img src="app-icon-192.png" alt="" style="width:44px;height:44px;border-radius:12px;flex:0 0 auto;">
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:14px;">Instala OdA App</div>
+            <div style="font-size:12px;opacity:0.75;margin-top:2px;line-height:1.4;">{{ installHint }}</div>
+          </div>
+          <sc-if value="{{ canPromptInstall }}" hint-placeholder-val="{{ false }}"><div onClick="{{ doInstall }}" style="flex:0 0 auto;height:36px;padding:0 14px;border-radius:999px;background:#A78659;display:flex;align-items:center;font-weight:700;font-size:12px;">Instalar</div></sc-if>
+          <div onClick="{{ dismissInstall }}" style="flex:0 0 auto;width:32px;height:32px;display:flex;align-items:center;justify-content:center;opacity:0.6;font-size:18px;">×</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ veVentas }}" hint-placeholder-val="{{ true }}">
+      <div style="margin-top:20px;background:#3A3326;color:#FBF8F2;border-radius:18px;padding:18px 20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;opacity:0.7;">{{ ventasTitulo }}</div>
+          <div style="display:flex;background:rgba(251,248,242,0.12);border-radius:999px;padding:3px;">
+            <div onClick="{{ setPerHoy }}" style="padding:6px 12px;border-radius:999px;font-size:11px;font-weight:700;background:{{ perHoyBg }};color:{{ perHoyFg }};">Hoy</div>
+            <div onClick="{{ setPerMes }}" style="padding:6px 12px;border-radius:999px;font-size:11px;font-weight:700;background:{{ perMesBg }};color:{{ perMesFg }};">Mes</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:10px;margin-top:10px;">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1;">{{ ventasValor }}</div>
+          <div style="font-size:12px;color:#C1AA81;">{{ ventasN }}</div>
+        </div>
+        <div style="margin-top:12px;font-size:12px;"><span style="opacity:0.6;">{{ deltaLabel }}</span> <span style="font-weight:700;color:{{ deltaColor }};">{{ deltaTxt }}</span></div>
+      </div>
+      </sc-if>
+
+      <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin:24px 0 10px;">Necesita tu atención</div>
+      <sc-if value="{{ sinPendientes }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;">{{ pendientesVacioTxt }}</div>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <sc-for list="{{ pendientes }}" as="p" hint-placeholder-count="2">
+          <div onClick="{{ p.go }}" style="display:flex;align-items:center;gap:14px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;">
+            <div style="width:10px;height:10px;border-radius:999px;background:{{ p.color }};flex:0 0 auto;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:700;font-size:14px;">{{ p.titulo }}</div>
+              <div style="font-size:12px;color:#8A8073;margin-top:2px;">{{ p.sub }}</div>
+            </div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:#5A4A33;">{{ p.n }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin:24px 0 10px;">Acciones rápidas</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <sc-for list="{{ modulos }}" as="m" hint-placeholder-count="4">
+          <div onClick="{{ m.go }}" style="background:#EFE6D6;border-radius:18px;padding:16px 14px;min-height:64px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;">
+            <div style="font-size:18px;color:#8A6F49;">{{ m.icono }}</div>
+            <div style="font-weight:700;font-size:13px;">{{ m.titulo }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ===== CONVERSACIONES · bandeja ===== -->
+    <sc-if value="{{ isChats }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Conversaciones" style="flex:1;overflow:auto;padding:calc(env(safe-area-inset-top) + 12px) 0 110px;">
+      <div style="padding:6px 20px 0;display:flex;align-items:baseline;justify-content:space-between;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;">Conversaciones</div>
+        <div style="font-size:12px;color:#8A8073;">{{ convsSubTxt }}</div>
+      </div>
+      <div style="padding:12px 20px 0;">
+        <input value="{{ convQ }}" onChange="{{ setConvQ }}" placeholder="Buscar cliente o teléfono" style="width:100%;box-sizing:border-box;height:42px;border-radius:999px;border:1px solid #B8AE9C;background:#FFFFFF;padding:0 16px;font-size:14px;outline:none;color:#3A3326;">
+      </div>
+      <div style="display:flex;gap:6px;padding:10px 20px 6px;overflow-x:auto;scrollbar-width:none;">
+        <sc-for list="{{ convFiltros }}" as="f" hint-placeholder-count="4">
+          <div onClick="{{ f.set }}" style="flex:0 0 auto;padding:8px 14px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.fg }};">{{ f.label }}</div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ convsVacio }}" hint-placeholder-val="{{ false }}"><div style="margin:14px 20px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;">{{ convsVacioTxt }}</div></sc-if>
+      <div style="display:flex;flex-direction:column;">
+        <sc-for list="{{ convsVis }}" as="c" hint-placeholder-count="6">
+          <div onClick="{{ c.open }}" style="display:flex;gap:12px;padding:14px 20px;border-bottom:1px solid #EFE9DD;align-items:center;min-height:64px;">
+            <div style="width:46px;height:46px;border-radius:999px;background:{{ c.canalBg }};display:flex;align-items:center;justify-content:center;flex:0 0 auto;">
+              <sc-if value="{{ c.esWa }}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.1 14c-.3.8-1.5 1.4-2.2 1.4-.6 0-1.6-.2-3.6-1.3-2.3-1.3-3.7-3.9-3.8-4.1-.2-.3-.9-1.4-.9-2.6 0-1.2.7-1.8 1-2.1.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .6l-.4.6c-.1.2-.3.3-.1.6.1.3.6 1.1 1.3 1.7.9.8 1.6 1.1 1.9 1.2.2.1.4.1.6-.1l.8-.9c.2-.2.4-.2.6-.1l1.8.9c.5.2.5.4.5.6 0 .2 0 .8-.1 1Z"></path></svg></sc-if>
+              <sc-if value="{{ c.esIg }}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="5"></rect><circle cx="12" cy="12" r="3.6"></circle><circle cx="17" cy="7" r="1.1" fill="#fff" stroke="none"></circle></svg></sc-if>
+              <sc-if value="{{ c.esMs }}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M12 3c-5 0-9 3.7-9 8.3 0 2.6 1.3 4.9 3.3 6.4V21l3-1.6c.9.2 1.8.4 2.7.4 5 0 9-3.7 9-8.3S17 3 12 3Zm.9 11-2.3-2.4L6.9 14l4-4.3 2.3 2.4 3.6-2.3-3.9 4.2Z"></path></svg></sc-if>
+              <sc-if value="{{ c.esWeb }}" hint-placeholder-val="{{ false }}"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#FBF8F2" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3C9.5 6 9.5 18 12 21"></path></svg></sc-if>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;justify-content:space-between;gap:8px;">
+                <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ c.nombre }}</div>
+                <div style="font-size:11px;color:{{ c.horaFg }};flex:0 0 auto;font-weight:{{ c.horaW }};">{{ c.hora }}</div>
+              </div>
+              <div style="display:flex;justify-content:space-between;gap:8px;margin-top:3px;align-items:center;">
+                <div style="font-size:12px;color:#574E40;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ c.ultimo }}</div>
+                <sc-if value="{{ c.noLeidos }}" hint-placeholder-val="{{ false }}"><div style="flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#B5503C;color:#FFF;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;">{{ c.noLeidos }}</div></sc-if>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:6px;align-items:center;">
+                <div style="display:inline-flex;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:{{ c.estBg }};color:{{ c.estFg }};">{{ c.estLabel }}</div>
+                <sc-if value="{{ c.asig }}" hint-placeholder-val="{{ false }}"><div style="font-size:10px;color:#8A8073;">{{ c.asig }}</div></sc-if>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ===== CONVERSACIONES · chat ===== -->
+    <sc-if value="{{ isChat }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Chat" style="flex:1;display:flex;flex-direction:column;min-height:0;">
+      <div style="display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 8px) 14px 10px;border-bottom:1px solid #E4DBCC;background:#F7F2E9;">
+        <div onClick="{{ goChats }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="width:38px;height:38px;border-radius:999px;background:{{ conv.canalBg }};display:flex;align-items:center;justify-content:center;flex:0 0 auto;">
+          <sc-if value="{{ conv.esWa }}" hint-placeholder-val="{{ false }}"><svg width="19" height="19" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.1 14c-.3.8-1.5 1.4-2.2 1.4-.6 0-1.6-.2-3.6-1.3-2.3-1.3-3.7-3.9-3.8-4.1-.2-.3-.9-1.4-.9-2.6 0-1.2.7-1.8 1-2.1.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .6l-.4.6c-.1.2-.3.3-.1.6.1.3.6 1.1 1.3 1.7.9.8 1.6 1.1 1.9 1.2.2.1.4.1.6-.1l.8-.9c.2-.2.4-.2.6-.1l1.8.9c.5.2.5.4.5.6 0 .2 0 .8-.1 1Z"></path></svg></sc-if>
+          <sc-if value="{{ conv.esIg }}" hint-placeholder-val="{{ false }}"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="5"></rect><circle cx="12" cy="12" r="3.6"></circle><circle cx="17" cy="7" r="1.1" fill="#fff" stroke="none"></circle></svg></sc-if>
+          <sc-if value="{{ conv.esMs }}" hint-placeholder-val="{{ false }}"><svg width="19" height="19" viewBox="0 0 24 24" fill="#fff"><path d="M12 3c-5 0-9 3.7-9 8.3 0 2.6 1.3 4.9 3.3 6.4V21l3-1.6c.9.2 1.8.4 2.7.4 5 0 9-3.7 9-8.3S17 3 12 3Zm.9 11-2.3-2.4L6.9 14l4-4.3 2.3 2.4 3.6-2.3-3.9 4.2Z"></path></svg></sc-if>
+          <sc-if value="{{ conv.esWeb }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FBF8F2" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3C9.5 6 9.5 18 12 21"></path></svg></sc-if>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ conv.nombre }}</div>
+          <div style="font-size:11px;color:#8A8073;">{{ conv.canalL }} · {{ conv.estLabel }}{{ conv.asigTxt }}</div>
+        </div>
+        <div onClick="{{ toggleInfo }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:#EFE6D6;font-size:14px;font-weight:700;color:#5A4A33;">i</div>
+      </div>
+      <sc-if value="{{ showInfo }}" hint-placeholder-val="{{ false }}">
+        <div style="margin:10px 14px 0;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:12px 14px;font-size:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div><div style="color:#8A8073;">Teléfono</div><div style="font-weight:700;">{{ conv.tel }}</div></div>
+          <div><div style="color:#8A8073;">Desde</div><div style="font-weight:700;">{{ conv.inicio }}</div></div>
+          <div><div style="color:#8A8073;">Asignada a</div><div style="font-weight:700;">{{ conv.asigNombre }}</div></div>
+          <div><div style="color:#8A8073;">Intención</div><div style="font-weight:700;">{{ conv.intencion }}</div></div>
+          <sc-if value="{{ conv.puedeResolver }}" hint-placeholder-val="{{ false }}"><div onClick="{{ resolverConv }}" style="grid-column:1 / -1;margin-top:4px;height:40px;border-radius:999px;border:1px solid #B8AE9C;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#5A4A33;">Marcar como resuelta</div></sc-if>
+          <sc-if value="{{ conv.puedeDevolver }}" hint-placeholder-val="{{ false }}"><div onClick="{{ devolverBot }}" style="grid-column:1 / -1;height:40px;border-radius:999px;border:1px solid #B8AE9C;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#5A4A33;">Devolver al agente IA</div></sc-if>
+        </div>
+      </sc-if>
+      <div ref="{{ msgsRef }}" style="flex:1;overflow:auto;padding:14px 14px 8px;display:flex;flex-direction:column;gap:8px;">
+        <sc-if value="{{ msgsCargando }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;font-size:12px;color:#8A8073;padding:20px;">Cargando mensajes…</div></sc-if>
+        <sc-for list="{{ conv.msgs }}" as="m" hint-placeholder-count="0">
+          <sc-if value="{{ m.nuevoDia }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#8A8073;padding:6px 0 2px;">{{ m.fechaL }}</div></sc-if>
+          <div style="display:flex;justify-content:{{ m.just }};">
+            <div style="max-width:80%;padding:{{ m.pad }};border-radius:{{ m.radius }};background:{{ m.bg }};color:{{ m.fg }};font-size:13.5px;line-height:1.4;border:{{ m.border }};text-align:{{ m.align }};overflow:hidden;">
+              <sc-if value="{{ m.etiqueta }}" hint-placeholder-val="{{ false }}"><div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;opacity:0.7;margin-bottom:4px;padding:{{ m.etPad }};">{{ m.etiqueta }}</div></sc-if>
+              <sc-if value="{{ m.esImg }}" hint-placeholder-val="{{ false }}"><img src="{{ m.img }}" loading="lazy" alt="" style="display:block;max-width:100%;max-height:260px;border-radius:12px;object-fit:cover;"></sc-if>
+              <sc-if value="{{ m.texto }}" hint-placeholder-val="{{ true }}"><div style="white-space:pre-wrap;word-break:break-word;">{{ m.texto }}</div></sc-if>
+              <sc-if value="{{ m.noEntregado }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+                  <a href="{{ m.nativoUrl }}" target="_blank" rel="noopener" style="height:32px;padding:0 12px;border-radius:999px;background:#A78659;color:#FBF8F2;display:inline-flex;align-items:center;font-size:11px;font-weight:700;text-decoration:none;">Responder en {{ m.canalL }}</a>
+                  <div onClick="{{ marcarManual }}" style="height:32px;padding:0 12px;border-radius:999px;border:1px solid #B8AE9C;display:inline-flex;align-items:center;font-size:11px;font-weight:700;color:#5A4A33;">Ya respondí a mano</div>
+                </div>
+              </sc-if>
+              <div style="font-size:10px;opacity:0.55;margin-top:4px;text-align:right;">{{ m.hora }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ convPuedeTomar }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:10px 14px calc(env(safe-area-inset-bottom) + 14px);">
+          <div onClick="{{ tomarConv }}" style="height:48px;border-radius:999px;background:#A78659;color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">Tomar la conversación</div>
+          <div style="text-align:center;font-size:11px;color:#8A8073;margin-top:6px;">{{ convTomarHint }}</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ convSoloLectura }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:10px 14px calc(env(safe-area-inset-bottom) + 14px);text-align:center;font-size:12px;color:#8A8073;line-height:1.45;">{{ convSoloLecturaTxt }}</div>
+      </sc-if>
+      <sc-if value="{{ convPuedeEscribir }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ showProductos }}" hint-placeholder-val="{{ false }}">
+          <div style="margin:10px 14px 0;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:10px 12px;max-height:220px;overflow:auto;">
+            <input value="{{ prodQ }}" onChange="{{ setProdQ }}" placeholder="Buscar producto o kit" style="width:100%;box-sizing:border-box;height:38px;border-radius:999px;border:1px solid #E4DBCC;padding:0 14px;font-size:13px;outline:none;color:#3A3326;">
+            <sc-for list="{{ prodVis }}" as="p" hint-placeholder-count="3">
+              <div onClick="{{ p.use }}" style="display:flex;justify-content:space-between;gap:8px;padding:10px 4px;border-bottom:1px solid #EFE9DD;font-size:13px;"><span style="font-weight:700;">{{ p.nombre }}</span><span style="color:#8A8073;flex:0 0 auto;">{{ p.precio }}</span></div>
+            </sc-for>
+            <sc-if value="{{ prodVacio }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#8A8073;padding:10px 4px;">{{ prodVacioTxt }}</div></sc-if>
+          </div>
+        </sc-if>
+        <div style="display:flex;gap:6px;padding:10px 14px 0;overflow-x:auto;scrollbar-width:none;">
+          <sc-for list="{{ respRapidas }}" as="r" hint-placeholder-count="3">
+            <div onClick="{{ r.use }}" style="flex:0 0 auto;padding:8px 12px;border-radius:999px;border:1px solid #E4DBCC;background:#FFFFFF;font-size:12px;color:#574E40;">{{ r.label }}</div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:6px;padding:8px 14px calc(env(safe-area-inset-bottom) + 12px);align-items:flex-end;">
+          <div onClick="{{ pickFoto }}" title="Adjuntar foto" style="width:42px;height:42px;border-radius:999px;border:1px solid #B8AE9C;background:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:17px;color:#5A4A33;flex:0 0 auto;">{{ fotoIcono }}</div>
+          <div onClick="{{ toggleProductos }}" title="Enlace de producto" style="width:42px;height:42px;border-radius:999px;border:1px solid {{ prodBtnBorder }};background:{{ prodBtnBg }};display:flex;align-items:center;justify-content:center;font-size:15px;color:#5A4A33;flex:0 0 auto;">✦</div>
+          <textarea value="{{ msgDraft }}" onChange="{{ setMsgDraft }}" placeholder="Escribe una respuesta…" rows="1" style="flex:1;min-height:42px;max-height:120px;border-radius:20px;border:1px solid #B8AE9C;background:#FFFFFF;padding:11px 16px;font-size:14px;outline:none;color:#3A3326;resize:none;line-height:1.35;box-sizing:border-box;"></textarea>
+          <div onClick="{{ enviarMsg }}" style="width:42px;height:42px;border-radius:999px;background:{{ enviarBg }};color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-size:16px;flex:0 0 auto;">➤</div>
+        </div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isModulo }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Módulo" style="flex:1;overflow:auto;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInicio }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;">{{ modulo.titulo }}</div>
+      </div>
+      <div style="margin-top:16px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:20px;">
+        <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;">{{ modulo.tag }}</div>
+        <div style="font-size:14px;color:#574E40;line-height:1.5;margin-top:8px;">{{ modulo.desc }}</div>
+        <div style="font-size:12px;color:#8A8073;margin-top:12px;">Tu nivel aquí: <b style="color:#3A3326;">{{ modulo.nivel }}</b></div>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isPerfil }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Perfil" style="flex:1;overflow:auto;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInicio }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;">Tu cuenta</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
+        <div style="width:50px;height:50px;border-radius:999px;background:{{ userColor }};color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;">{{ userIni }}</div>
+        <div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:16px;">{{ userNombreFull }}</div><div style="font-size:12px;color:#8A8073;margin-top:2px;">{{ userRol }}</div><div style="font-size:12px;color:#8A8073;">{{ userEmail }}</div></div>
+      </div>
+      <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin:22px 0 10px;">Permisos</div>
+      <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;overflow:hidden;">
+        <sc-for list="{{ permisosRows }}" as="r" hint-placeholder-count="5">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-bottom:1px solid #EFE9DD;font-size:13px;"><span style="font-weight:700;">{{ r.label }}</span><span style="color:{{ r.fg }};font-weight:700;font-size:12px;">{{ r.nivel }}</span></div>
+        </sc-for>
+      </div>
+      <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin:22px 0 10px;">App</div>
+      <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;overflow:hidden;font-size:13px;">
+        <div style="display:flex;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #EFE9DD;"><span>Versión</span><span style="color:#8A8073;">Fase 1 · cimientos</span></div>
+        <div style="display:flex;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #EFE9DD;"><span>Instalada</span><span style="color:#8A8073;">{{ instaladaTxt }}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:13px 16px;"><span>Nube</span><span style="color:#8A8073;">{{ nubeTxt }}</span></div>
+      </div>
+      <div onClick="{{ doLogout }}" style="margin-top:22px;height:48px;border-radius:999px;border:1px solid #B8AE9C;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#8F3A28;">Cerrar sesión</div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 12px);height:64px;border-radius:999px;background:rgba(251,248,242,0.92);backdrop-filter:blur(14px);border:1px solid #E4DBCC;box-shadow:0 8px 24px rgba(58,51,38,0.12);display:flex;align-items:center;justify-content:space-around;padding:0 6px;">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+        <div onClick="{{ t.go }}" style="flex:1;height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:999px;background:{{ t.bg }};position:relative;">
+          <div style="font-size:17px;color:{{ t.fg }};">{{ t.icono }}</div>
+          <div style="font-size:10px;font-weight:700;color:{{ t.fg }};">{{ t.label }}</div>
+          <sc-if value="{{ t.badge }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:6px;right:14px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#B5503C;color:#FFF;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;">{{ t.badge }}</div></sc-if>
+        </div>
+      </sc-for>
+    </div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:24px;right:24px;bottom:calc(env(safe-area-inset-bottom) + 92px);background:#3A3326;color:#FBF8F2;border-radius:14px;padding:12px 16px;font-size:13px;text-align:center;animation:oda-toast 2.6s ease forwards;box-shadow:0 8px 24px rgba(58,51,38,0.25);">{{ toast }}</div>
+  </sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  // Misma nube que el Hub — el usuario, los permisos y los datos son los mismos.
+  CLOUD_URL = 'https://xsolfiytdekybynboofa.supabase.co';
+  CLOUD_KEY = 'sb_publishable_TqTZJFOrnudKAc28SNMwEg_T8nUOJUf';
+  SESSION_KEY = 'oda_app_session_v1';
+  // Espejo de usersBase / roles / subModDef del Hub (sin contraseñas: el ingreso es Supabase Auth).
+  usersBase = [
+    { id: 'u1', name: 'Andrés Suárez', email: 'a.suarez@oasisdelalma.co', role: 'Administrador', color: '#5A4A33' },
+    { id: 'u2', name: 'Oscar Pérez', email: 'oscar.perez@oasisdelalma.co', role: 'Administración y Finanzas', color: '#6596A6' },
+    { id: 'u3', name: 'Carolina Fandiño', email: 'carolina.fandino@oasisdelalma.co', role: 'Mercadeo y Publicidad', color: '#9C97A2' },
+    { id: 'u4', name: 'Pedro Cabrales', email: 'pedro.cabrales@oasisdelalma.co', role: 'Comercial', color: '#627B60' },
+  ];
+  roles = {
+    'Administrador': { compras: 'write', desarrollo: 'write', ventas: 'write', finanzas: 'write', produccion: 'write', inventario: 'write', marketing: 'write', conversaciones: 'write', informes: 'read', admin: true },
+    'Administración y Finanzas': { compras: 'read', desarrollo: 'none', ventas: 'read', finanzas: 'write', produccion: 'none', inventario: 'read', marketing: 'read', conversaciones: 'none', informes: 'none', admin: false },
+    'Mercadeo y Publicidad': { compras: 'none', desarrollo: 'read', ventas: 'read', finanzas: 'none', produccion: 'none', inventario: 'none', marketing: 'write', conversaciones: 'write', informes: 'none', admin: false },
+    'Personalizado': { compras: 'none', desarrollo: 'none', ventas: 'none', finanzas: 'none', produccion: 'none', inventario: 'none', marketing: 'none', conversaciones: 'none', informes: 'none', admin: false },
+    'Comercial': { compras: 'none', desarrollo: 'none', ventas: 'write', finanzas: 'none', produccion: 'none', inventario: 'none', marketing: 'none', conversaciones: 'write', informes: 'none', admin: false },
+  };
+  subModDef = {
+    compras: ['resumen', 'proveedores', 'materias', 'servicios', 'reorden', 'ordenes'], desarrollo: ['mezclas', 'productos', 'kits'], produccion: ['prodmez', 'prodpt'],
+    inventario: ['resumen', 'items', 'consig', 'conteos', 'kardex'], ventas: ['registro', 'base', 'cotizador', 'servicio'], conversaciones: ['bandeja', 'informe', 'agente', 'canales'],
+    finanzas: ['finresumen', 'finpagar', 'fincobrar', 'finrecaudos', 'finbold', 'fincaja', 'gastos'], marketing: ['mktresumen', 'mktconexion'], informes: ['gerencial'],
+  };
+  // Módulos de la app móvil y qué permiso del Hub los abre.
+  MODS = [
+    { id: 'conversaciones', titulo: 'Conversaciones', icono: '◌', mod: 'conversaciones', fase: 2, listo: true, desc: 'Bandeja de chats de WhatsApp, Instagram, Messenger y web. Tomar conversaciones escaladas por el bot, responder y resolver.' },
+    { id: 'inventario', titulo: 'Inventario', icono: '▤', mod: 'inventario', fase: 3, desc: 'Existencias por categoría, registro de conteos físicos desde bodega y aprobación del administrador.' },
+    { id: 'finanzas', titulo: 'Finanzas', icono: '◇', mod: 'finanzas', fase: 4, desc: 'Caja y bancos, pagos Bold por cruzar y ventas por cobrar.' },
+    { id: 'leads', titulo: 'Leads', icono: '✦', mod: 'ventas', fase: 4, desc: 'Prospectos por etapa, asignación y seguimiento.' },
+    { id: 'reportes', titulo: 'Resumen del negocio', icono: '▥', mod: 'informes', fase: 4, desc: 'Ventas del mes, canales y tendencia semanal.' },
+    { id: 'soporte', titulo: 'Soporte', icono: '?', mod: null, fase: 4, desc: 'Reportar un problema de la app o del Hub y confirmar cuando quede resuelto.' },
+  ];
+  state = { view: 'boot', screen: 'inicio', modId: null, loginEmail: '', loginPwd: '', loginError: '', loginBusy: false, user: null, perms: {}, usersCfg: { overrides: {}, custom: [], _ts: 0 }, counts: {}, offline: typeof navigator !== 'undefined' && navigator.onLine === false, installDismissed: false, canPrompt: false, standalone: false, toast: '' };
+  _t; toast(t) { clearTimeout(this._t); this.setState({ toast: t }); this._t = setTimeout(() => this.setState({ toast: '' }), 2600); }
+  sb() { if (this._sb) return this._sb; if (window.supabase && window.supabase.createClient) { this._sb = window.supabase.createClient(this.CLOUD_URL, this.CLOUD_KEY, { auth: { persistSession: true, storageKey: 'oda-app-auth' } }); } return this._sb || null; }
+  get users() { const c = this.state.usersCfg; return this.usersBase.map(u => Object.assign({}, u, c.overrides[u.id] || {})).concat(c.custom || []); }
+  access() { const u = this.state.user; if (!u) return null; return this.state.perms[u.id] || this.roles[u.role] || null; }
+  _subAlias(p, k) { if (k !== 'inventario__items' || !p) return undefined; const rank = { none: 0, read: 1, write: 2 }; let best; ['inventario__mp', 'inventario__insumos', 'inventario__pt'].forEach(x => { if (x in p && (best === undefined || (rank[p[x]] || 0) > (rank[best] || 0))) best = p[x]; }); return best; }
+  _modLevel(p, mod) { if (!p) return 'none'; if (p.admin) return 'write'; const subs = this.subModDef[mod] || []; const ml = p[mod] || 'none'; if (!subs.length) return ml; const rank = { none: 0, read: 1, write: 2 }; let best = 'none'; subs.forEach(s => { const k = mod + '__' + s; const al = this._subAlias(p, k); const eff = (k in p) ? p[k] : (al !== undefined ? al : ml); if ((rank[eff] || 0) > (rank[best] || 0)) best = eff; }); return best; }
+  isAdmin() { const a = this.access(); return !!(a && a.admin); }
+
+  componentDidMount() {
+    this._onl = () => this.setState({ offline: false }, () => this.loadCounts()); this._off = () => this.setState({ offline: true });
+    window.addEventListener('online', this._onl); window.addEventListener('offline', this._off);
+    this._bip = (e) => { e.preventDefault(); this._installEvt = e; this.setState({ canPrompt: true }); }; window.addEventListener('beforeinstallprompt', this._bip);
+    window.addEventListener('appinstalled', () => { this.setState({ standalone: true }); this.toast('OdA App instalada'); });
+    const standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+    let dismissed = false; try { dismissed = localStorage.getItem('oda_app_install_dismiss') === '1'; } catch (e) {}
+    this.setState({ standalone, installDismissed: dismissed });
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) { navigator.serviceWorker.register('./app-sw.js').catch(() => {}); }
+    this.boot();
+  }
+  componentWillUnmount() { window.removeEventListener('online', this._onl); window.removeEventListener('offline', this._off); window.removeEventListener('beforeinstallprompt', this._bip); }
+  async boot() {
+    // Sesión guardada → entra de una (aun sin red); luego la nube confirma o corrige.
+    let cached = null; try { cached = JSON.parse(localStorage.getItem(this.SESSION_KEY)); } catch (e) {}
+    if (cached && cached.user) this.setState({ view: 'app', user: cached.user, perms: cached.perms || {}, usersCfg: cached.usersCfg || this.state.usersCfg, counts: cached.counts || {} });
+    let tries = 0; while (!this.sb() && tries++ < 40) await new Promise(r => setTimeout(r, 250));
+    const sb = this.sb(); if (!sb) { if (!cached) this.setState({ view: 'login', loginError: 'No se pudo conectar con la nube. Revisa tu conexión.' }); return; }
+    try { const { data } = await sb.auth.getSession(); const su = data && data.session && data.session.user; if (su) { await this.enter(su); return; } } catch (e) {}
+    if (!cached) this.setState({ view: 'login' });
+  }
+  async loadPermisos() {
+    const sb = this.sb(); if (!sb) return; const { data, error } = await sb.from('permisos').select('user_key,perms'); if (error) throw error;
+    const m = {}; let ucfg = null; (data || []).forEach(r => { if (r.user_key === '__usuarios__') ucfg = r.perms || null; else if (r.user_key !== '__config__') m[r.user_key] = r.perms || {}; });
+    const patch = { perms: m }; if (ucfg) patch.usersCfg = { overrides: ucfg.overrides || {}, custom: ucfg.custom || [], _ts: Number(ucfg._ts) || 0 };
+    this.setState(patch); return patch;
+  }
+  async enter(su) {
+    const email = (su.email || '').toLowerCase();
+    try { await this.loadPermisos(); } catch (e) { console.warn('permisos', e); }
+    const lu = this.users.find(x => (x.email || '').toLowerCase() === email);
+    if (!lu) { try { await this.sb().auth.signOut(); } catch (e) {} this.setState({ view: 'login', loginBusy: false, loginError: 'Tu cuenta (' + email + ') no está vinculada a un usuario del sistema. Pídele al administrador que te cree en Usuarios y permisos.' }); return; }
+    const user = { id: lu.id, name: lu.name, email: lu.email, role: lu.role, color: lu.color || '#A78659' };
+    this._authUid = su.id || '';
+    this.setState({ view: 'app', user, loginBusy: false, loginError: '', loginPwd: '' }, () => { this.persistSession(); this.loadCounts(); this.loadProfiles(); this.loadConvs(); this.subscribeConvs(); });
+  }
+  persistSession() { const s = this.state; try { localStorage.setItem(this.SESSION_KEY, JSON.stringify({ user: s.user, perms: s.perms, usersCfg: s.usersCfg, counts: s.counts })); } catch (e) {} }
+  async loadCounts() {
+    const sb = this.sb(); if (!sb || !this.state.user || this.state.offline) return; const a = this.access(); const c = {};
+    const cnt = async (tabla, col, val) => { try { const { count, error } = await sb.from(tabla).select('*', { count: 'exact', head: true }).eq(col, val); if (error) throw error; return count || 0; } catch (e) { console.warn('conteo ' + tabla, e); return null; } };
+    if (this._modLevel(a, 'conversaciones') !== 'none') c.convsNecesita = await cnt('conversaciones', 'estado', 'necesita');
+    if (this.isAdmin()) c.conteosPend = await cnt('conteos', 'estado', 'pendiente');
+    if (this._modLevel(a, 'ventas') !== 'none') c.leadsNuevos = await cnt('leads', 'estado', 'Nuevo');
+    if (this._modLevel(a, 'ventas') !== 'none' || this._modLevel(a, 'finanzas') !== 'none') Object.assign(c, await this.loadVentasResumen());
+    this.setState({ counts: c, countsAt: Date.now() }, () => this.persistSession());
+  }
+  // Resumen de ventas: baja `data` de la tabla ventas por páginas (la API corta en ~1000) y
+  // suma hoy / mes / mes pasado / por cobrar con las mismas reglas del Hub (histórico excluido).
+  async loadVentasResumen() {
+    const sb = this.sb(); const out = {}; try {
+      const hoy = new Date(), pad = n => String(n).padStart(2, '0');
+      const ymd = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+      const hoyS = ymd(hoy), mesS = hoyS.slice(0, 7); const ant = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1), antS = ymd(ant).slice(0, 7);
+      const parseF = f => { const s = String(f || '').trim(); let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/); if (m) return m[1] + '-' + m[2] + '-' + m[3]; m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); if (m) return m[3] + '-' + pad(m[1] * 0 + Number(m[2])) + '-' + pad(Number(m[1])); return ''; };
+      const total = v => (v.items || []).reduce((a, it) => a + (Number(it.unidades) || 0) * (Number(it.valorUnit) || 0), 0) + (Number(v.envio) || 0);
+      const ayer = new Date(hoy); ayer.setDate(hoy.getDate() - 1); const ayerS = ymd(ayer);
+      let hoyT = 0, hoyN = 0, ayerT = 0, mesT = 0, mesN = 0, antT = 0, cobrar = 0, from = 0; const page = 500;
+      for (let g = 0; g < 200; g++) { const { data, error } = await sb.from('ventas').select('id,data').order('id', { ascending: true }).range(from, from + page - 1); if (error) throw error; if (!data || !data.length) break;
+        data.forEach(r => { const v = r.data || {}; if (v.origen === 'historico') return; const f = parseF(v.fecha); if (!f || f < '2026-06-01') return; const t = total(v);
+          if (f === hoyS) { hoyT += t; hoyN++; } if (f === ayerS) ayerT += t; if (f.slice(0, 7) === mesS) { mesT += t; mesN++; } if (f.slice(0, 7) === antS) antT += t;
+          const pg = Number(v.pagado) || 0; if (t > pg) cobrar += (t - pg); });
+        if (data.length < page) break; from += page; }
+      out.ventasHoy = hoyT; out.ventasHoyN = hoyN; out.ventasAyer = ayerT; out.ventasMes = mesT; out.ventasMesN = mesN; out.ventasMesAnt = antT; out.porCobrar = cobrar;
+    } catch (e) { console.warn('ventas resumen', e); }
+    return out;
+  }
+  // ===== CONVERSACIONES (fase 2) =====
+  // Mismas tablas y reglas que el Hub: `conversaciones` + `mensajes` (paginados, invariante 22b),
+  // envío por `whatsapp` / `meta-send` con aviso `noEntregado` si Meta rechaza (invariantes 16/21).
+  // Regla de la app: responder solo puede quien tiene la conversación asignada (o un admin).
+  CONV_DIAS = 30;
+  RESP_RAPIDAS = ['Hola, soy {yo} del equipo de Oasis del Alma 🌿 ¿En qué te ayudo?', 'Ya te comparto la guía de envío en un momento.', '¿Me envías una foto de la novedad para revisarla?', 'Con gusto. ¿Me confirmas tu ciudad para darte los puntos de venta cercanos?'];
+  meUid() { return this._authUid || (this.state.user && this.state.user.id) || ''; }
+  _mismoUid(a, b) { if (!a || !b) return false; if (a === b) return true; const n = x => { const p = (this.state.profiles || []).find(q => q.id === x); if (p) return String(p.nombre || p.email || '').toLowerCase().trim(); const u = this.users.find(q => q.id === x); return u ? String(u.name || '').toLowerCase().trim() : ''; }; const na = n(a), nb = n(b); return !!na && na === nb; }
+  esMia(c) { return !!(c && c.asignadoA && (this._mismoUid(c.asignadoA, this.meUid()) || this._mismoUid(c.asignadoA, this.state.user && this.state.user.id))); }
+  nombreDe(uid) { if (!uid) return ''; const p = (this.state.profiles || []).find(q => q.id === uid); if (p) return p.nombre || (p.email || '').split('@')[0] || 'Usuario'; const u = this.users.find(q => q.id === uid); return u ? u.name : ''; }
+  async loadProfiles() { const sb = this.sb(); if (!sb) return; try { let r = await sb.from('profiles').select('id,nombre,rol,email'); if (r.error) r = await sb.from('profiles').select('id,nombre,rol'); if (!r.error && r.data) this.setState({ profiles: r.data }); } catch (e) {} }
+  async loadConvs() {
+    const sb = this.sb(); if (!sb || this._convLoading) return; if (this._modLevel(this.access(), 'conversaciones') === 'none') return; this._convLoading = true;
+    try { const desde = new Date(Date.now() - this.CONV_DIAS * 86400000).toISOString();
+      const { data, error } = await sb.from('conversaciones').select('*').gte('ultimo_at', desde).order('ultimo_at', { ascending: false }).limit(1000); if (error) throw error;
+      const list = (data || []).map(r => ({ id: r.id, canal: r.canal || 'web', cliente: r.cliente || r.id, telefono: r.telefono || '', estado: r.estado || 'bot', intencion: r.intencion || '', asignadoA: r.asignado_a || '', noLeidos: r.no_leidos || 0, inicio: (r.creado_at || '').slice(0, 10), ultimoAt: r.ultimo_at || '', ultimo: r.ultimo_mensaje || '' }));
+      const sig = list.map(c => c.id + '|' + c.ultimoAt + '|' + c.estado + '|' + c.asignadoA + '|' + c.noLeidos).join('~');
+      if (sig !== this._convSig) { this._convSig = sig; this.setState({ convs: list, convsAt: Date.now() }); const cur = this.state.convId; if (cur) { const c = list.find(x => x.id === cur); const cache = this._msgCache || {}; if (c && cache[cur] && cache[cur].ts !== c.ultimoAt) this.loadMsgs(cur); } }
+    } catch (e) { console.warn('conversaciones', e); if (!this.state.convs) this.toast('No se pudieron cargar las conversaciones'); }
+    this._convLoading = false;
+  }
+  async loadMsgs(id) {
+    const sb = this.sb(); if (!sb || !id) return; const c = (this.state.convs || []).find(x => x.id === id); const cache = this._msgCache = this._msgCache || {};
+    if (cache[id] && c && cache[id].ts === c.ultimoAt) { this.setState({ msgs: cache[id].msgs, msgsCargando: false }); return; }
+    this.setState({ msgsCargando: !cache[id], msgs: cache[id] ? cache[id].msgs : [] });
+    try { let all = []; for (let off = 0, page = 1000; ; off += page) { const { data, error } = await sb.from('mensajes').select('de,texto,meta,creado_at').eq('conversacion_id', id).order('creado_at', { ascending: true }).range(off, off + page - 1); if (error) throw error; all = all.concat(data || []); if (!data || data.length < page || off > 50000) break; }
+      const msgs = all.map(m => ({ de: m.de, texto: m.texto, at: m.creado_at, asesor: (m.meta && m.meta.asesor) || '', noEntregado: !!(m.meta && m.meta.noEntregado), manual: !!(m.meta && m.meta.manual), auto: (m.meta && (m.meta.plantilla || m.meta.carrito)) ? 'auto' : '' }));
+      cache[id] = { ts: c ? c.ultimoAt : '', msgs }; if (this.state.convId === id) this.setState({ msgs, msgsCargando: false }, () => this.scrollMsgs());
+    } catch (e) { console.warn('mensajes', e); this.setState({ msgsCargando: false }); this.toast('No se pudieron cargar los mensajes'); }
+  }
+  scrollMsgs() { const el = this._msgsEl; if (el) { try { el.scrollTop = el.scrollHeight; } catch (e) {} } }
+  subscribeConvs() {
+    const sb = this.sb(); if (!sb || this._convSub) return;
+    try { this._convSub = sb.channel('oda-app-convs').on('postgres_changes', { event: '*', schema: 'public', table: 'conversaciones' }, () => { clearTimeout(this._convT); this._convT = setTimeout(() => this.loadConvs(), 600); })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes' }, (p) => { const m = p && p.new; if (m && m.conversacion_id === this.state.convId) { const cache = this._msgCache || {}; delete cache[m.conversacion_id]; this.loadMsgs(m.conversacion_id); } }).subscribe(); } catch (e) {}
+    clearInterval(this._convPoll); this._convPoll = setInterval(() => { if (document.visibilityState === 'visible' && (this.state.screen === 'chats' || this.state.screen === 'chat')) this.loadConvs(); }, 15000);
+  }
+  openConv(id) { this.setState({ screen: 'chat', convId: id, showInfo: false, showProductos: false, msgDraft: '' }, () => this.loadMsgs(id)); const c = (this.state.convs || []).find(x => x.id === id); if (c && c.noLeidos && this.puedeVer(c)) this.patchConv(id, { no_leidos: 0 }, { noLeidos: 0 }); }
+  puedeVer() { return this._modLevel(this.access(), 'conversaciones') !== 'none'; }
+  puedeEscribir(c) { return this._modLevel(this.access(), 'conversaciones') === 'write' && c && c.estado === 'humano' && (this.isAdmin() || this.esMia(c)); }
+  async patchConv(id, dbPatch, localPatch) { this.setState(s => ({ convs: (s.convs || []).map(c => c.id === id ? Object.assign({}, c, localPatch || {}) : c) })); const sb = this.sb(); if (!sb) return; try { const { error } = await sb.from('conversaciones').update(dbPatch).eq('id', id); if (error) throw error; } catch (e) { console.warn('patch conv', e); this.toast('No se pudo guardar: ' + ((e && e.message) || 'sin conexión')); } }
+  tomarConv() { const id = this.state.convId, me = this.meUid(); if (!id || this._modLevel(this.access(), 'conversaciones') !== 'write') { this.toast('No tienes permiso de escritura en Conversaciones'); return; } this.patchConv(id, { asignado_a: me, estado: 'humano', no_leidos: 0 }, { asignadoA: me, estado: 'humano', noLeidos: 0 }); this.toast('Conversación tomada · el bot ya no responde aquí'); }
+  resolverConv() { const id = this.state.convId; if (!id) return; this.patchConv(id, { estado: 'resuelta', no_leidos: 0 }, { estado: 'resuelta', noLeidos: 0 }); this.setState({ showInfo: false, screen: 'chats' }); this.toast('Marcada como resuelta'); }
+  devolverBot() { const id = this.state.convId; if (!id) return; this.patchConv(id, { estado: 'bot' }, { estado: 'bot' }); this.setState({ showInfo: false }); this.toast('El agente IA retoma la conversación'); }
+  _pushLocalMsg(id, m) { const cache = this._msgCache || {}; if (cache[id]) cache[id].msgs = cache[id].msgs.concat([m]); if (this.state.convId === id) this.setState(s => ({ msgs: (s.msgs || []).concat([m]) }), () => this.scrollMsgs()); }
+  async avisoNoEntregado(id, canalL, motivo) {
+    const texto = '⚠ No se entregó en ' + canalL + ': ' + String(motivo || 'Meta rechazó el envío') + ' — el cliente NO recibió el último mensaje.'; const now = new Date().toISOString();
+    this._pushLocalMsg(id, { de: 'sistema', texto, at: now, noEntregado: true }); const sb = this.sb(); if (!sb) return;
+    try { await sb.from('mensajes').insert({ conversacion_id: id, de: 'sistema', texto, meta: { noEntregado: true } }); await sb.from('conversaciones').update({ estado: 'necesita', ultimo_mensaje: texto, ultimo_at: now }).eq('id', id); } catch (e) {}
+    this.setState(s => ({ convs: (s.convs || []).map(c => c.id === id ? Object.assign({}, c, { estado: 'necesita' }) : c) }));
+  }
+  async marcarManual() { const id = this.state.convId, me = this.meUid(); if (!id) return; const texto = 'Respondido a mano por ' + (this.state.user.name || 'asesor') + ' fuera de la app.'; const now = new Date().toISOString();
+    this._pushLocalMsg(id, { de: 'sistema', texto, at: now, manual: true }); const sb = this.sb(); if (!sb) return;
+    try { await sb.from('mensajes').insert({ conversacion_id: id, de: 'sistema', texto, meta: { manual: true, asesor: me } }); } catch (e) {}
+    this.patchConv(id, { estado: 'humano', asignado_a: me, no_leidos: 0, ultimo_mensaje: texto, ultimo_at: now }, { estado: 'humano', asignadoA: me, noLeidos: 0 }); }
+  async enviar(texto, imagenUrl) {
+    const id = this.state.convId, c = (this.state.convs || []).find(x => x.id === id); if (!c || !this.puedeEscribir(c)) { this.toast('Solo puede responder quien tiene asignada la conversación'); return; }
+    texto = String(texto || '').trim(); if (!texto && !imagenUrl) return; const me = this.meUid(), now = new Date().toISOString(), guardado = imagenUrl ? '[IMG:' + imagenUrl + ']' : texto;
+    this._pushLocalMsg(id, { de: 'asesor', texto: guardado, at: now, asesor: me }); if (imagenUrl && texto) this._pushLocalMsg(id, { de: 'asesor', texto, at: now, asesor: me });
+    this.setState({ msgDraft: '', showProductos: false });
+    const sb = this.sb(); if (!sb) { this.toast('Sin conexión: el mensaje no salió'); return; }
+    try { await sb.from('mensajes').insert({ conversacion_id: id, de: 'asesor', texto: guardado, meta: { asesor: me } }); if (imagenUrl && texto) await sb.from('mensajes').insert({ conversacion_id: id, de: 'asesor', texto, meta: { asesor: me } });
+      await sb.from('conversaciones').update({ estado: 'humano', asignado_a: c.asignadoA || me, no_leidos: 0, ultimo_mensaje: (texto || '📷 imagen'), ultimo_at: now }).eq('id', id); } catch (e) { console.warn('guardar msg', e); }
+    this.setState(s => ({ convs: (s.convs || []).map(x => x.id === id ? Object.assign({}, x, { ultimo: texto || '📷 imagen', ultimoAt: now, noLeidos: 0 }) : x) }));
+    const hdr = { 'content-type': 'application/json', apikey: this.CLOUD_KEY, authorization: 'Bearer ' + this.CLOUD_KEY };
+    if (c.canal === 'whatsapp') { if (!c.telefono) { this.toast('Esta conversación no tiene número: quedó guardado pero no se envió'); return; }
+      const body = imagenUrl ? { to: c.telefono, imageUrl: imagenUrl, text: texto, origen: 'app', conversacion: id } : { to: c.telefono, text: texto, origen: 'app', conversacion: id };
+      fetch(this.CLOUD_URL + '/functions/v1/whatsapp', { method: 'POST', headers: hdr, body: JSON.stringify(body) }).then(r => r.json()).then(d => { if (d && d.error) { this.toast('WhatsApp no envió: ' + d.error); this.avisoNoEntregado(id, 'WhatsApp', d.error); } else this.toast('Enviado por WhatsApp'); }).catch(() => { this.toast('Sin conexión: el mensaje no salió a WhatsApp'); this.avisoNoEntregado(id, 'WhatsApp', 'sin conexión con el servidor'); });
+    } else if (c.canal === 'instagram' || c.canal === 'messenger') { const cl = c.canal === 'instagram' ? 'Instagram' : 'Messenger';
+      fetch(this.CLOUD_URL + '/functions/v1/meta-send', { method: 'POST', headers: hdr, body: JSON.stringify({ conversacionId: id, canal: c.canal, texto, imagenUrl: imagenUrl || '' }) }).then(r => r.json()).then(d => { if (d && d.error) { this.toast(cl + ' no envió: ' + d.error); this.avisoNoEntregado(id, cl, d.error); } else this.toast('Enviado por ' + cl); }).catch(() => { this.toast('Sin conexión: el mensaje no salió a ' + cl); this.avisoNoEntregado(id, cl, 'sin conexión con el servidor'); });
+    } else { this.toast('Enviado al chat de la web'); }
+  }
+  pickFoto() { const c = (this.state.convs || []).find(x => x.id === this.state.convId); if (!this.puedeEscribir(c)) { this.toast('Solo puede responder quien tiene asignada la conversación'); return; } if (this.state.fotoSubiendo) return;
+    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.onchange = async () => { const f = inp.files && inp.files[0]; if (!f) return; this.setState({ fotoSubiendo: true });
+      try { const sb = this.sb(); const path = 'chat/' + Date.now() + '_' + Math.floor(Math.random() * 99999) + '_' + String(f.name || 'foto').replace(/[^a-zA-Z0-9._-]/g, '_'); const { error } = await sb.storage.from('adjuntos').upload(path, f, { cacheControl: '3600', upsert: false }); if (error) throw error; const { data } = sb.storage.from('adjuntos').getPublicUrl(path); await this.enviar(this.state.msgDraft, data.publicUrl); }
+      catch (e) { this.toast('No se pudo subir la foto: ' + ((e && e.message) || e)); } this.setState({ fotoSubiendo: false }); }; inp.click(); }
+  async loadProductos() { const sb = this.sb(); if (!sb || this.state.productos) return; try { const [p, k] = await Promise.all([sb.from('productos').select('codigo,data'), sb.from('kits').select('codigo,data')]); const rows = [].concat((p.data || []).map(r => r.data || {}), (k.data || []).map(r => r.data || {})).filter(x => x && x.nombre).map(x => ({ codigo: x.codigo, nombre: x.nombre, precio: Number(x.precio) || 0, handle: x.shopifyHandle || '' })); this.setState({ productos: rows }); } catch (e) { console.warn('productos', e); } }
+  urlProducto(p) { if (p.handle) return 'https://oasisdelalma.co/products/' + p.handle; return 'https://oasisdelalma.co/search?q=' + encodeURIComponent(p.nombre); }
+
+  async doLogin() {
+    const sb = this.sb(); if (!sb) { this.setState({ loginError: 'Conectando con la nube… intenta de nuevo en un momento.' }); return; }
+    const email = String(this.state.loginEmail || '').trim().toLowerCase(), pwd = String(this.state.loginPwd || '');
+    if (!email || !pwd) { this.setState({ loginError: 'Escribe tu correo y contraseña.' }); return; }
+    this.setState({ loginBusy: true, loginError: '' });
+    try { const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd }); if (error) throw error; await this.enter(data.user); }
+    catch (e) { const m = (e && e.message) || ''; let es = 'No se pudo iniciar sesión.'; if (/invalid login/i.test(m)) es = 'Correo o contraseña incorrectos.'; else if (/email not confirmed/i.test(m)) es = 'Tu correo aún no está confirmado.'; else if (/fetch|network/i.test(m)) es = 'Sin conexión con la nube. Revisa tu internet.'; this.setState({ loginBusy: false, loginError: es }); }
+  }
+  async doLogout() { try { await this.sb().auth.signOut(); } catch (e) {} try { localStorage.removeItem(this.SESSION_KEY); } catch (e) {} if (this._convSub) { try { this._convSub.unsubscribe(); } catch (e) {} this._convSub = null; } clearInterval(this._convPoll); this._convSig = null; this._msgCache = {}; this.setState({ view: 'login', user: null, screen: 'inicio', counts: {}, convs: null, msgs: [], convId: null }); }
+
+  renderVals() {
+    const s = this.state, a = this.access(), u = s.user || {}, c = s.counts || {};
+    const lvlTxt = { none: 'Sin acceso', read: 'Solo lectura', write: 'Lectura y escritura' };
+    const cop = n => '$' + Math.round(n).toLocaleString('es-CO');
+    const go = (screen, extra) => () => { if (screen === 'modulo' && extra && extra.modId === 'conversaciones') { this.setState({ screen: 'chats' }); this.loadConvs(); return; } this.setState(Object.assign({ screen }, extra || {})); };
+    // ---- conversaciones ----
+    const chip = on => on ? { bg: '#3A3326', fg: '#FBF8F2', border: '#3A3326' } : { bg: '#FFFFFF', fg: '#574E40', border: '#E4DBCC' };
+    const estConv = e => ({ bot: { label: 'Bot', bg: '#EFE6D6', fg: '#7A5E36' }, necesita: { label: 'Necesita asesor', bg: 'rgba(181,80,60,0.14)', fg: '#8F3A28' }, humano: { label: 'Con asesor', bg: 'rgba(101,150,166,0.18)', fg: '#2F5E6E' }, resuelta: { label: 'Resuelta', bg: 'rgba(98,123,96,0.16)', fg: '#3F5A3E' } }[e] || { label: e, bg: '#EFE9DD', fg: '#8A8073' });
+    // Mismos colores de canal que el Hub (_logoBg)
+    const canalInfo = k => ({ whatsapp: { l: 'WhatsApp', bg: '#25D366', url: 'https://business.facebook.com/latest/inbox/all' }, instagram: { l: 'Instagram', bg: 'linear-gradient(140deg,#F58529,#DD2A7B 55%,#8134AF)', url: 'https://business.facebook.com/latest/inbox/instagram' }, messenger: { l: 'Messenger', bg: '#0084FF', url: 'https://business.facebook.com/latest/inbox/messenger' }, web: { l: 'Web', bg: '#A78659', url: '' } }[k] || { l: k, bg: '#8A8073', url: '' });
+    const canalFlags = k => ({ esWa: k === 'whatsapp', esIg: k === 'instagram', esMs: k === 'messenger', esWeb: !(k === 'whatsapp' || k === 'instagram' || k === 'messenger') });
+    const avat = ['#DCCBAB', '#A8BEA4', '#C9B9A7', '#9C97A2', '#E8B56A', '#8AB38D']; const avatDe = id => { let h = 0; const t = String(id || ''); for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0; return avat[h % avat.length]; };
+    const horaDe = iso => { if (!iso) return ''; const d = new Date(iso); if (isNaN(d)) return ''; const hoy = new Date(); const mismo = d.toDateString() === hoy.toDateString(); const ayer = new Date(hoy); ayer.setDate(hoy.getDate() - 1); if (mismo) return d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }); if (d.toDateString() === ayer.toDateString()) return 'Ayer'; return d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' }); };
+    const fechaL = iso => { const d = new Date(iso); if (isNaN(d)) return ''; const hoy = new Date(); if (d.toDateString() === hoy.toDateString()) return 'Hoy'; const ayer = new Date(hoy); ayer.setDate(hoy.getDate() - 1); if (d.toDateString() === ayer.toDateString()) return 'Ayer'; return d.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' }); };
+    const convs = s.convs || []; const filtro = s.convFiltro || 'necesita'; const q = String(s.convQ || '').toLowerCase().trim();
+    const convsVis = convs.filter(x => filtro === 'todas' || (filtro === 'mias' ? this.esMia(x) : x.estado === filtro)).filter(x => !q || (String(x.cliente) + ' ' + String(x.telefono)).toLowerCase().includes(q)).map(x => { const e = estConv(x.estado), k = canalInfo(x.canal); const esp = x.estado === 'necesita'; return Object.assign(canalFlags(x.canal), { nombre: x.cliente, canalBg: k.bg, hora: horaDe(x.ultimoAt), horaFg: esp ? '#B5503C' : '#8A8073', horaW: esp ? 700 : 400, ultimo: String(x.ultimo || '').replace(/^\[IMG:.*\]$/, '📷 imagen'), noLeidos: x.noLeidos || 0, estLabel: e.label, estBg: e.bg, estFg: e.fg, asig: x.asignadoA ? (this.esMia(x) ? 'Tuya' : this.nombreDe(x.asignadoA)) : '', open: () => this.openConv(x.id) }); });
+    const cv = convs.find(x => x.id === s.convId) || {}; const cvE = estConv(cv.estado || 'bot'), cvK = canalInfo(cv.canal || 'web');
+    const puedeEscribir = this.puedeEscribir(cv); const canWrite = this._modLevel(a, 'conversaciones') === 'write';
+    const msgsUI = (s.msgs || []).map((m, i, arr) => { const im = /^\[IMG:(.+)\]$/.exec(String(m.texto || '').trim()); const prev = arr[i - 1]; const dia = m.at ? new Date(m.at).toDateString() : ''; const nuevoDia = !!(dia && (!prev || new Date(prev.at).toDateString() !== dia)); const hora = m.at ? new Date(m.at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) : ''; const base = { texto: im ? '' : m.texto, esImg: !!im, img: im ? im[1] : 'data:image/gif;base64,R0lGODlhAQABAAAAACw=', hora, nuevoDia, fechaL: fechaL(m.at), pad: im ? '4px' : '10px 13px', etPad: im ? '6px 9px 0' : '0', noEntregado: false, canalL: cvK.l, nativoUrl: cvK.url };
+      if (m.de === 'sistema') return Object.assign(base, { just: 'center', radius: '12px', bg: m.manual ? 'transparent' : 'rgba(181,80,60,0.06)', fg: m.manual ? '#8A8073' : '#8F3A28', border: m.manual ? '1px dashed #B8AE9C' : '1px dashed rgba(181,80,60,0.5)', align: 'center', etiqueta: m.noEntregado ? 'No entregado' : 'Aviso', noEntregado: !!m.noEntregado && !arr.slice(i + 1).some(x => x.manual) });
+      if (m.de === 'cliente') return Object.assign(base, { just: 'flex-start', radius: '16px 16px 16px 4px', bg: '#FFFFFF', fg: '#3A3326', border: '1px solid #E4DBCC', align: 'left', etiqueta: '' });
+      const bot = m.de === 'bot'; return Object.assign(base, { just: 'flex-end', radius: '16px 16px 4px 16px', bg: bot ? '#EFE6D6' : '#A78659', fg: bot ? '#3A3326' : '#FBF8F2', border: 'none', align: 'left', etiqueta: bot ? (m.auto ? 'Automático' : 'Agente IA') : (this.nombreDe(m.asesor) || 'Asesor') }); });
+    const yo = String(u.name || '').split(' ')[0];
+    const prodQ = String(s.prodQ || '').toLowerCase().trim(); const prodVis = (s.productos || []).filter(p => !prodQ || p.nombre.toLowerCase().includes(prodQ)).slice(0, 30);
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+    const mods = this.MODS.map(m => { const lvl = m.mod ? this._modLevel(a, m.mod) : 'write'; return Object.assign({}, m, { lvl }); }).filter(m => m.lvl !== 'none');
+    const modAct = mods.find(m => m.id === s.modId) || mods[0] || this.MODS[5];
+    const pend = [
+      { titulo: 'Chats que necesitan asesor', sub: 'El bot escaló y nadie ha respondido', n: (s.convs ? convs.filter(x => x.estado === 'necesita').length : c.convsNecesita), color: '#B5503C', go: () => { this.setState({ screen: 'chats', convFiltro: 'necesita' }); this.loadConvs(); } },
+      { titulo: 'Conteos por aprobar', sub: 'Solo el administrador los aprueba', n: c.conteosPend, color: '#C9962F', go: go('modulo', { modId: 'inventario' }) },
+      { titulo: 'Leads nuevos', sub: 'Sin contactar todavía', n: c.leadsNuevos, color: '#6596A6', go: go('modulo', { modId: 'leads' }) },
+    ].filter(p => typeof p.n === 'number' && p.n > 0);
+    const tabsDef = [{ id: 'inicio', label: 'Inicio', icono: '⌂' }].concat(mods.slice(0, 3).map(m => ({ id: 'modulo', modId: m.id, label: m.titulo.split(' ')[0], icono: m.icono, badge: m.id === 'conversaciones' ? (s.convs ? convs.filter(x => x.estado === 'necesita').length : c.convsNecesita) : m.id === 'inventario' ? c.conteosPend : 0 }))).concat([{ id: 'perfil', label: 'Cuenta', icono: '◯' }]);
+    const activeKey = s.screen === 'modulo' ? 'modulo:' + s.modId : (s.screen === 'chats' || s.screen === 'chat') ? 'modulo:conversaciones' : s.screen;
+    const per = s.periodo || 'hoy', esHoy = per === 'hoy';
+    const vAct = esHoy ? c.ventasHoy : c.ventasMes, vAnt = esHoy ? c.ventasAyer : c.ventasMesAnt, vN = esHoy ? c.ventasHoyN : c.ventasMesN;
+    const delta = (typeof vAct === 'number' && vAnt > 0) ? Math.round((vAct - vAnt) / vAnt * 100) : null;
+    const segOn = { bg: '#FBF8F2', fg: '#3A3326' }, segOff = { bg: 'transparent', fg: 'rgba(251,248,242,0.75)' };
+    return {
+      isLogin: s.view === 'login', isApp: s.view === 'app', toast: s.toast, offline: s.offline,
+      loginEmail: s.loginEmail, loginPwd: s.loginPwd, loginError: s.loginError, loginBusy: s.loginBusy,
+      setLoginEmail: e => this.setState({ loginEmail: e.target.value, loginError: '' }), setLoginPwd: e => this.setState({ loginPwd: e.target.value, loginError: '' }),
+      loginKey: e => { if (e.key === 'Enter') this.doLogin(); }, doLogin: () => this.doLogin(), doLogout: () => this.doLogout(),
+      loginBtnBg: s.loginBusy ? '#C1AA81' : '#A78659', loginBtnLabel: s.loginBusy ? 'Entrando…' : 'Entrar',
+      isInicio: s.screen === 'inicio', isModulo: s.screen === 'modulo', isPerfil: s.screen === 'perfil', goInicio: go('inicio'), goPerfil: go('perfil'),
+      isChats: s.screen === 'chats', isChat: s.screen === 'chat', showTabs: s.screen !== 'chat', goChats: () => this.setState({ screen: 'chats', convId: null }),
+      convsSubTxt: s.convs ? (convs.filter(x => x.estado === 'necesita').length + ' por atender · ' + this.CONV_DIAS + ' días') : 'Cargando…',
+      convQ: s.convQ || '', setConvQ: e => this.setState({ convQ: e.target.value }),
+      convFiltros: [['necesita', 'Necesita asesor'], ['mias', 'Mías'], ['humano', 'Con asesor'], ['bot', 'Bot'], ['resuelta', 'Resueltas'], ['todas', 'Todas']].map(([id, label]) => Object.assign({ label, set: () => this.setState({ convFiltro: id }) }, chip(filtro === id))),
+      convsVis, convsVacio: !!s.convs && convsVis.length === 0, convsVacioTxt: q ? 'Nada coincide con la búsqueda.' : filtro === 'necesita' ? 'Nadie está esperando un asesor. Todo al día.' : filtro === 'mias' ? 'No tienes conversaciones asignadas.' : 'No hay conversaciones en este filtro.',
+      conv: Object.assign(canalFlags(cv.canal), { nombre: cv.cliente || '', canalBg: cvK.bg, canalL: cvK.l, estLabel: cvE.label, asigTxt: cv.asignadoA ? ' · ' + (this.esMia(cv) ? 'tuya' : this.nombreDe(cv.asignadoA)) : '', tel: cv.telefono || '—', inicio: cv.inicio || '—', asigNombre: cv.asignadoA ? this.nombreDe(cv.asignadoA) || 'Asesor' : 'Sin asignar', intencion: cv.intencion || '—', msgs: msgsUI, puedeResolver: canWrite && cv.estado !== 'resuelta' && (this.isAdmin() || this.esMia(cv) || cv.estado !== 'humano'), puedeDevolver: canWrite && cv.estado === 'humano' && (this.isAdmin() || this.esMia(cv)) }),
+      showInfo: !!s.showInfo, toggleInfo: () => this.setState({ showInfo: !s.showInfo }), msgsCargando: !!s.msgsCargando, msgsRef: el => { this._msgsEl = el; },
+      convPuedeTomar: canWrite && (cv.estado === 'bot' || cv.estado === 'necesita' || cv.estado === 'resuelta'), convTomarHint: cv.estado === 'resuelta' ? 'La conversación se reabre contigo como asesor' : 'El bot deja de responder cuando la tomas',
+      convSoloLectura: !puedeEscribir && cv.estado === 'humano', convSoloLecturaTxt: !canWrite ? 'Tienes acceso de solo lectura en Conversaciones.' : 'Esta conversación la atiende ' + (this.nombreDe(cv.asignadoA) || 'otro asesor') + '. Solo la persona asignada (o un admin) puede responder.',
+      convPuedeEscribir: puedeEscribir, tomarConv: () => this.tomarConv(), resolverConv: () => this.resolverConv(), devolverBot: () => this.devolverBot(), marcarManual: () => this.marcarManual(),
+      respRapidas: this.RESP_RAPIDAS.map(t => t.replace('{yo}', yo)).map(t => ({ label: t.length > 36 ? t.slice(0, 34) + '…' : t, use: () => this.setState({ msgDraft: t }) })),
+      msgDraft: s.msgDraft || '', setMsgDraft: e => this.setState({ msgDraft: e.target.value }), enviarMsg: () => this.enviar(s.msgDraft), enviarBg: String(s.msgDraft || '').trim() ? '#A78659' : '#C1AA81',
+      pickFoto: () => this.pickFoto(), fotoIcono: s.fotoSubiendo ? '…' : '📷',
+      showProductos: !!s.showProductos, toggleProductos: () => { this.setState({ showProductos: !s.showProductos }); if (!s.productos) this.loadProductos(); }, prodBtnBg: s.showProductos ? '#EFE6D6' : '#FFFFFF', prodBtnBorder: s.showProductos ? '#A78659' : '#B8AE9C',
+      prodQ: s.prodQ || '', setProdQ: e => this.setState({ prodQ: e.target.value }), prodVis: prodVis.map(p => ({ nombre: p.nombre, precio: p.precio ? cop(p.precio) : '', use: () => this.setState({ msgDraft: (String(s.msgDraft || '').trim() ? s.msgDraft.trim() + '\n' : '') + p.nombre + ': ' + this.urlProducto(p), showProductos: false }) })),
+      prodVacio: !!s.productos && prodVis.length === 0, prodVacioTxt: s.productos ? 'Ningún producto coincide.' : 'Cargando catálogo…',
+      fechaHoy: new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' }),
+      userNombre: String(u.name || '').split(' ')[0], userNombreFull: u.name || '', userEmail: u.email || '', userRol: u.role || '', userColor: u.color || '#A78659',
+      userIni: String(u.name || 'U').trim().split(/\s+/).map(p => p[0]).slice(0, 2).join('').toUpperCase(),
+      showInstall: !s.standalone && !s.installDismissed && (s.canPrompt || isIOS), canPromptInstall: s.canPrompt,
+      installHint: s.canPrompt ? 'Queda en tu pantalla de inicio y abre como una app.' : 'En Safari toca Compartir → «Agregar a pantalla de inicio».',
+      doInstall: async () => { const e = this._installEvt; if (!e) return; e.prompt(); try { await e.userChoice; } catch (x) {} this._installEvt = null; this.setState({ canPrompt: false }); },
+      dismissInstall: () => { try { localStorage.setItem('oda_app_install_dismiss', '1'); } catch (e) {} this.setState({ installDismissed: true }); },
+      veVentas: this._modLevel(a, 'ventas') !== 'none' || this._modLevel(a, 'finanzas') !== 'none',
+      ventasTitulo: esHoy ? 'Ventas de hoy' : 'Ventas del mes', ventasValor: typeof vAct === 'number' ? cop(vAct) : '—', ventasN: typeof vN === 'number' ? vN + (vN === 1 ? ' pedido' : ' pedidos') : '',
+      setPerHoy: () => this.setState({ periodo: 'hoy' }), setPerMes: () => this.setState({ periodo: 'mes' }),
+      perHoyBg: (esHoy ? segOn : segOff).bg, perHoyFg: (esHoy ? segOn : segOff).fg, perMesBg: (esHoy ? segOff : segOn).bg, perMesFg: (esHoy ? segOff : segOn).fg,
+      deltaLabel: esHoy ? 'vs. ayer' : 'vs. mes pasado', deltaTxt: delta === null ? '—' : (delta >= 0 ? '+' : '') + delta + '%', deltaColor: delta === null ? '#FBF8F2' : delta >= 0 ? '#8AB38D' : '#E8B56A',
+      pendientes: pend, sinPendientes: pend.length === 0, pendientesVacioTxt: s.countsAt ? 'Todo al día. Nada pendiente por ahora.' : 'Cargando lo pendiente…',
+      modulos: mods.map(m => ({ titulo: m.titulo, icono: m.icono, nivel: lvlTxt[m.lvl], tag: 'Fase ' + m.fase, tagFg: m.fase === 1 ? '#3F5A3E' : '#8A8073', bg: '#FFFFFF', border: '#E4DBCC', go: go('modulo', { modId: m.id }) })),
+      modulo: { titulo: modAct.titulo, tag: 'Llega en la fase ' + modAct.fase, desc: modAct.desc, nivel: lvlTxt[modAct.lvl || 'write'] },
+      permisosRows: [['conversaciones', 'Conversaciones'], ['inventario', 'Inventario'], ['finanzas', 'Finanzas'], ['ventas', 'Ventas y leads'], ['informes', 'Informes'], ['compras', 'Compras'], ['produccion', 'Producción']].map(([k, label]) => { const l = this._modLevel(a, k); return { label, nivel: lvlTxt[l], fg: l === 'none' ? '#8A8073' : l === 'read' ? '#2F5E6E' : '#3F5A3E' }; }),
+      instaladaTxt: s.standalone ? 'Sí' : 'No · abre desde el navegador', nubeTxt: s.offline ? 'Sin conexión' : 'Conectada',
+      tabs: tabsDef.map(t => { const key = t.id === 'modulo' ? 'modulo:' + t.modId : t.id, on = key === activeKey; return { label: t.label, icono: t.icono, badge: t.badge || 0, bg: on ? '#EFE6D6' : 'transparent', fg: on ? '#5A4A33' : '#8A8073', go: go(t.id, t.modId ? { modId: t.modId } : {}) }; }),
+    };
+  }
+}
+</script>
+</body>
+</html>
