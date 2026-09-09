@@ -25,7 +25,8 @@
   <script src="_ds_bundle.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <style>
-    html,body{margin:0;height:100%;background:#EFE9DD;font-family:'Mulish',system-ui,sans-serif;color:#3A3326;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+    html,body{margin:0;height:100%;overflow:hidden;position:fixed;inset:0;width:100%;overscroll-behavior:none;touch-action:pan-y;background:#EFE9DD;font-family:'Mulish',system-ui,sans-serif;color:#3A3326;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+    #root,x-dc{height:100%;display:block}
     a{color:#8A6F49}a:hover{color:#5A4A33}
     input,textarea,button{font-family:inherit}
     ::-webkit-scrollbar{width:0;height:0}
@@ -33,12 +34,12 @@
     @keyframes oda-spin{to{transform:rotate(360deg)}}
   </style>
 </helmet>
-<div style="min-height:100dvh;display:flex;justify-content:center;background:#EFE9DD;">
-<div style="width:100%;max-width:480px;min-height:100dvh;background:#F7F2E9;display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 1px #E4DBCC;">
+<div style="position:fixed;inset:0;display:flex;justify-content:center;background:#EFE9DD;overflow:hidden;overscroll-behavior:none;">
+<div style="width:100%;max-width:480px;height:100%;background:#F7F2E9;display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 1px #E4DBCC;overflow:hidden;">
 
   <!-- ===== LOGIN ===== -->
   <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
-  <div data-screen-label="Ingreso" style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:calc(env(safe-area-inset-top) + 40px) 28px 40px;">
+  <div data-screen-label="Ingreso" style="flex:1;overflow:auto;display:flex;flex-direction:column;justify-content:center;padding:calc(env(safe-area-inset-top) + 40px) 28px 40px;">
     <img src="app-logo-wordmark-brown.png" alt="OdA" style="width:150px;height:auto;align-self:flex-start;">
     <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin-top:22px;">Oasis del Alma · Operación</div>
     <div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;line-height:1.1;margin-top:6px;text-wrap:balance;">Bienvenido a la app del equipo</div>
@@ -58,13 +59,13 @@
 
   <!-- ===== APP ===== -->
   <sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
-  <div style="flex:1;display:flex;flex-direction:column;min-height:0;">
+  <div style="flex:1;display:flex;flex-direction:column;min-height:0;position:relative;">
     <sc-if value="{{ offline }}" hint-placeholder-val="{{ false }}">
       <div style="background:#3A3326;color:#FBF8F2;font-size:12px;text-align:center;padding:8px 16px;padding-top:calc(env(safe-area-inset-top) + 8px);">Sin conexión · estás viendo lo último que se cargó</div>
     </sc-if>
 
     <sc-if value="{{ isInicio }}" hint-placeholder-val="{{ true }}">
-    <div data-screen-label="Inicio" style="flex:1;overflow:auto;padding:calc(env(safe-area-inset-top) + 16px) 20px 110px;">
+    <div data-screen-label="Inicio" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 16px) 20px 110px;">
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <div>
           <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;">{{ fechaHoy }}</div>
@@ -98,7 +99,7 @@
           <div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1;">{{ ventasValor }}</div>
           <div style="font-size:12px;color:#C1AA81;">{{ ventasN }}</div>
         </div>
-        <div style="margin-top:12px;font-size:12px;"><span style="opacity:0.6;">{{ deltaLabel }}</span> <span style="font-weight:700;color:{{ deltaColor }};">{{ deltaTxt }}</span></div>
+        <div style="margin-top:12px;font-size:12px;"><span style="opacity:0.6;">{{ deltaLabel }}</span> <span style="font-weight:700;color:{{ deltaColor }};">{{ deltaTxt }}</span> <span style="opacity:0.6;">{{ deltaRef }}</span></div>
       </div>
       </sc-if>
 
@@ -133,7 +134,7 @@
 
     <!-- ===== CONVERSACIONES · bandeja ===== -->
     <sc-if value="{{ isChats }}" hint-placeholder-val="{{ false }}">
-    <div data-screen-label="Conversaciones" style="flex:1;overflow:auto;padding:calc(env(safe-area-inset-top) + 12px) 0 110px;">
+    <div data-screen-label="Conversaciones" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 0 110px;">
       <div style="padding:6px 20px 0;display:flex;align-items:baseline;justify-content:space-between;">
         <div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;">Conversaciones</div>
         <div style="font-size:12px;color:#8A8073;">{{ convsSubTxt }}</div>
@@ -203,7 +204,7 @@
           <sc-if value="{{ conv.puedeDevolver }}" hint-placeholder-val="{{ false }}"><div onClick="{{ devolverBot }}" style="grid-column:1 / -1;height:40px;border-radius:999px;border:1px solid #B8AE9C;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#5A4A33;">Devolver al agente IA</div></sc-if>
         </div>
       </sc-if>
-      <div ref="{{ msgsRef }}" style="flex:1;overflow:auto;padding:14px 14px 8px;display:flex;flex-direction:column;gap:8px;">
+      <div ref="{{ msgsRef }}" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:14px 14px 8px;display:flex;flex-direction:column;gap:8px;">
         <sc-if value="{{ msgsCargando }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;font-size:12px;color:#8A8073;padding:20px;">Cargando mensajes…</div></sc-if>
         <sc-for list="{{ conv.msgs }}" as="m" hint-placeholder-count="0">
           <sc-if value="{{ m.nuevoDia }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#8A8073;padding:6px 0 2px;">{{ m.fechaL }}</div></sc-if>
@@ -258,7 +259,7 @@
     </sc-if>
 
     <sc-if value="{{ isModulo }}" hint-placeholder-val="{{ false }}">
-    <div data-screen-label="Módulo" style="flex:1;overflow:auto;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
+    <div data-screen-label="Módulo" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
       <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
         <div onClick="{{ goInicio }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
         <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;">{{ modulo.titulo }}</div>
@@ -272,7 +273,7 @@
     </sc-if>
 
     <sc-if value="{{ isPerfil }}" hint-placeholder-val="{{ false }}">
-    <div data-screen-label="Perfil" style="flex:1;overflow:auto;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
+    <div data-screen-label="Perfil" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
       <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
         <div onClick="{{ goInicio }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
         <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;">Tu cuenta</div>
@@ -287,9 +288,40 @@
           <div style="display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-bottom:1px solid #EFE9DD;font-size:13px;"><span style="font-weight:700;">{{ r.label }}</span><span style="color:{{ r.fg }};font-weight:700;font-size:12px;">{{ r.nivel }}</span></div>
         </sc-for>
       </div>
+      <sc-if value="{{ esAdmin }}" hint-placeholder-val="{{ false }}">
+      <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin:22px 0 4px;">Usuarios y permisos</div>
+      <div style="font-size:12px;color:#8A8073;margin-bottom:10px;line-height:1.4;">Solo el administrador ve esto. Toca un usuario para definir qué puede ver y editar; los cambios aplican también en el Hub.</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <sc-for list="{{ adminUsers }}" as="x" hint-placeholder-count="3">
+          <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;overflow:hidden;">
+            <div onClick="{{ x.toggle }}" style="display:flex;align-items:center;gap:12px;padding:12px 14px;">
+              <div style="width:38px;height:38px;border-radius:999px;background:{{ x.color }};color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;flex:0 0 auto;">{{ x.ini }}</div>
+              <div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ x.name }}</div><div style="font-size:12px;color:#8A8073;margin-top:1px;">{{ x.role }}{{ x.resumen }}</div></div>
+              <div style="font-size:16px;color:#8A6F49;transform:rotate({{ x.rot }});transition:transform 200ms;">›</div>
+            </div>
+            <sc-if value="{{ x.open }}" hint-placeholder-val="{{ false }}">
+              <div style="border-top:1px solid #EFE9DD;padding:4px 14px 12px;">
+                <sc-if value="{{ x.esAdminUser }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#574E40;padding:10px 0 6px;">Administrador: acceso total a todos los módulos.</div></sc-if>
+                <sc-for list="{{ x.mods }}" as="m" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #EFE9DD;">
+                    <div style="font-size:13px;font-weight:700;flex:1;min-width:0;">{{ m.label }}</div>
+                    <div style="display:flex;background:#EFE9DD;border-radius:999px;padding:2px;flex:0 0 auto;">
+                      <div onClick="{{ m.setNone }}" style="padding:6px 9px;border-radius:999px;font-size:11px;font-weight:700;background:{{ m.noneBg }};color:{{ m.noneFg }};">No</div>
+                      <div onClick="{{ m.setRead }}" style="padding:6px 9px;border-radius:999px;font-size:11px;font-weight:700;background:{{ m.readBg }};color:{{ m.readFg }};">Ver</div>
+                      <div onClick="{{ m.setWrite }}" style="padding:6px 9px;border-radius:999px;font-size:11px;font-weight:700;background:{{ m.writeBg }};color:{{ m.writeFg }};">Editar</div>
+                    </div>
+                  </div>
+                </sc-for>
+                <div style="font-size:11px;color:#8A8073;margin-top:10px;line-height:1.4;">{{ x.pie }}</div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+      </sc-if>
       <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin:22px 0 10px;">App</div>
       <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;overflow:hidden;font-size:13px;">
-        <div style="display:flex;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #EFE9DD;"><span>Versión</span><span style="color:#8A8073;">Fase 1 · cimientos</span></div>
+        <div style="display:flex;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #EFE9DD;"><span>Versión</span><span style="color:#8A8073;">Fase 2 · conversaciones</span></div>
         <div style="display:flex;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #EFE9DD;"><span>Instalada</span><span style="color:#8A8073;">{{ instaladaTxt }}</span></div>
         <div style="display:flex;justify-content:space-between;padding:13px 16px;"><span>Nube</span><span style="color:#8A8073;">{{ nubeTxt }}</span></div>
       </div>
@@ -298,14 +330,28 @@
     </sc-if>
 
     <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
-    <div style="position:absolute;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 12px);height:64px;border-radius:999px;background:rgba(251,248,242,0.92);backdrop-filter:blur(14px);border:1px solid #E4DBCC;box-shadow:0 8px 24px rgba(58,51,38,0.12);display:flex;align-items:center;justify-content:space-around;padding:0 6px;">
-      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
-        <div onClick="{{ t.go }}" style="flex:1;height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:999px;background:{{ t.bg }};position:relative;">
-          <div style="font-size:17px;color:{{ t.fg }};">{{ t.icono }}</div>
-          <div style="font-size:10px;font-weight:700;color:{{ t.fg }};">{{ t.label }}</div>
-          <sc-if value="{{ t.badge }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:6px;right:14px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#B5503C;color:#FFF;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;">{{ t.badge }}</div></sc-if>
-        </div>
-      </sc-for>
+    <div style="position:absolute;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 12px);height:66px;border-radius:999px;background:rgba(251,248,242,0.94);backdrop-filter:blur(14px);border:1px solid #E4DBCC;box-shadow:0 8px 24px rgba(58,51,38,0.12);display:flex;align-items:center;justify-content:space-around;padding:0 6px;z-index:5;">
+      <div onClick="{{ tabInicio.go }}" style="flex:1;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-radius:999px;background:{{ tabInicio.bg }};position:relative;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ tabInicio.fg }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"></path></svg>
+        <div style="font-size:10px;font-weight:700;color:{{ tabInicio.fg }};">Inicio</div>
+      </div>
+      <sc-if value="{{ tabInforme.visible }}" hint-placeholder-val="{{ true }}">
+      <div onClick="{{ tabInforme.go }}" style="flex:1;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-radius:999px;background:{{ tabInforme.bg }};position:relative;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ tabInforme.fg }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M8 16v-4"></path><path d="M13 16V7"></path><path d="M18 16v-6"></path></svg>
+        <div style="font-size:10px;font-weight:700;color:{{ tabInforme.fg }};">Informe</div>
+      </div>
+      </sc-if>
+      <sc-if value="{{ tabChats.visible }}" hint-placeholder-val="{{ true }}">
+      <div onClick="{{ tabChats.go }}" style="flex:1;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-radius:999px;background:{{ tabChats.bg }};position:relative;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ tabChats.fg }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.1A8.5 8.5 0 1 1 21 12z"></path></svg>
+        <div style="font-size:10px;font-weight:700;color:{{ tabChats.fg }};">Chats</div>
+        <sc-if value="{{ tabChats.badge }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:5px;right:calc(50% - 22px);min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:#B5503C;color:#FFF;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #FBF8F2;">{{ tabChats.badge }}</div></sc-if>
+      </div>
+      </sc-if>
+      <div onClick="{{ tabCuenta.go }}" style="flex:1;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-radius:999px;background:{{ tabCuenta.bg }};position:relative;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ tabCuenta.fg }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path></svg>
+        <div style="font-size:10px;font-weight:700;color:{{ tabCuenta.fg }};">Cuenta</div>
+      </div>
     </div>
     </sc-if>
   </div>
@@ -348,7 +394,7 @@ class Component extends DCLogic {
     { id: 'inventario', titulo: 'Inventario', icono: '▤', mod: 'inventario', fase: 3, desc: 'Existencias por categoría, registro de conteos físicos desde bodega y aprobación del administrador.' },
     { id: 'finanzas', titulo: 'Finanzas', icono: '◇', mod: 'finanzas', fase: 4, desc: 'Caja y bancos, pagos Bold por cruzar y ventas por cobrar.' },
     { id: 'leads', titulo: 'Leads', icono: '✦', mod: 'ventas', fase: 4, desc: 'Prospectos por etapa, asignación y seguimiento.' },
-    { id: 'reportes', titulo: 'Resumen del negocio', icono: '▥', mod: 'informes', fase: 4, desc: 'Ventas del mes, canales y tendencia semanal.' },
+    { id: 'reportes', titulo: 'Informe gerencial', icono: '▥', mod: 'informes', fase: 4, desc: 'Ventas del mes, canales, margen y tendencia semanal para la gerencia.' },
     { id: 'soporte', titulo: 'Soporte', icono: '?', mod: null, fase: 4, desc: 'Reportar un problema de la app o del Hub y confirmar cuando quede resuelto.' },
   ];
   state = { view: 'boot', screen: 'inicio', modId: null, loginEmail: '', loginPwd: '', loginError: '', loginBusy: false, user: null, perms: {}, usersCfg: { overrides: {}, custom: [], _ts: 0 }, counts: {}, offline: typeof navigator !== 'undefined' && navigator.onLine === false, installDismissed: false, canPrompt: false, standalone: false, toast: '' };
@@ -359,6 +405,21 @@ class Component extends DCLogic {
   _subAlias(p, k) { if (k !== 'inventario__items' || !p) return undefined; const rank = { none: 0, read: 1, write: 2 }; let best; ['inventario__mp', 'inventario__insumos', 'inventario__pt'].forEach(x => { if (x in p && (best === undefined || (rank[p[x]] || 0) > (rank[best] || 0))) best = p[x]; }); return best; }
   _modLevel(p, mod) { if (!p) return 'none'; if (p.admin) return 'write'; const subs = this.subModDef[mod] || []; const ml = p[mod] || 'none'; if (!subs.length) return ml; const rank = { none: 0, read: 1, write: 2 }; let best = 'none'; subs.forEach(s => { const k = mod + '__' + s; const al = this._subAlias(p, k); const eff = (k in p) ? p[k] : (al !== undefined ? al : ml); if ((rank[eff] || 0) > (rank[best] || 0)) best = eff; }); return best; }
   isAdmin() { const a = this.access(); return !!(a && a.admin); }
+  // Permisos de otro usuario (misma regla que access(): explícito en la nube o el del rol).
+  accessDe(u) { return this.state.perms[u.id] || this.roles[u.role] || {}; }
+  // Fija el nivel de un módulo entero: la clave del módulo y TODAS sus subclaves reales de subModDef
+  // (invariante 5 del Hub: el nivel efectivo se deriva de los submódulos). Sube a `permisos` y verifica.
+  async setPermiso(uid, mod, lvl) {
+    if (!this.isAdmin()) return; const u = this.users.find(x => x.id === uid); if (!u) return;
+    const base = Object.assign({}, this.accessDe(u)); if (base.admin) { this.toast('Un administrador tiene acceso total.'); return; }
+    base[mod] = lvl; (this.subModDef[mod] || []).forEach(s => { base[mod + '__' + s] = lvl; });
+    if (mod === 'inventario') ['inventario__mp', 'inventario__insumos', 'inventario__pt'].forEach(k => { base[k] = lvl; });
+    const prev = this.state.perms[uid]; this.setState(s => ({ perms: Object.assign({}, s.perms, { [uid]: base }) }));
+    const sb = this.sb(); if (!sb) { this.toast('Sin conexión: el permiso no se guardó.'); this.setState(s => { const p = Object.assign({}, s.perms); if (prev) p[uid] = prev; else delete p[uid]; return { perms: p }; }); return; }
+    const { data, error } = await sb.from('permisos').upsert({ user_key: uid, perms: base }, { onConflict: 'user_key' }).select('user_key');
+    if (error || !data || !data.length) { console.warn('permiso', error); this.toast('No se pudo guardar: ' + (error ? error.message : 'sin permiso para escribir')); this.setState(s => { const p = Object.assign({}, s.perms); if (prev) p[uid] = prev; else delete p[uid]; return { perms: p }; }); return; }
+    this.persistSession(); this.toast(u.name.split(' ')[0] + ' · ' + ({ conversaciones: 'Conversaciones', inventario: 'Inventario', finanzas: 'Finanzas', ventas: 'Ventas y leads', informes: 'Informes', compras: 'Compras', produccion: 'Producción' }[mod] || mod) + ': ' + ({ none: 'sin acceso', read: 'solo lectura', write: 'lectura y escritura' }[lvl]));
+  }
 
   componentDidMount() {
     this._onl = () => this.setState({ offline: false }, () => this.loadCounts()); this._off = () => this.setState({ offline: true });
@@ -416,13 +477,16 @@ class Component extends DCLogic {
       const parseF = f => { const s = String(f || '').trim(); let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/); if (m) return m[1] + '-' + m[2] + '-' + m[3]; m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); if (m) return m[3] + '-' + pad(m[1] * 0 + Number(m[2])) + '-' + pad(Number(m[1])); return ''; };
       const total = v => (v.items || []).reduce((a, it) => a + (Number(it.unidades) || 0) * (Number(it.valorUnit) || 0), 0) + (Number(v.envio) || 0);
       const ayer = new Date(hoy); ayer.setDate(hoy.getDate() - 1); const ayerS = ymd(ayer);
-      let hoyT = 0, hoyN = 0, ayerT = 0, mesT = 0, mesN = 0, antT = 0, cobrar = 0, from = 0; const page = 500;
+      // Mes pasado A LA MISMA FECHA: solo los días 1..hoy del mes anterior (comparar contra el mes
+      // completo hacía ver el mes en curso siempre por debajo).
+      const diaHoy = hoy.getDate();
+      let hoyT = 0, hoyN = 0, ayerT = 0, mesT = 0, mesN = 0, antT = 0, antTot = 0, cobrar = 0, from = 0; const page = 500;
       for (let g = 0; g < 200; g++) { const { data, error } = await sb.from('ventas').select('id,data').order('id', { ascending: true }).range(from, from + page - 1); if (error) throw error; if (!data || !data.length) break;
         data.forEach(r => { const v = r.data || {}; if (v.origen === 'historico') return; const f = parseF(v.fecha); if (!f || f < '2026-06-01') return; const t = total(v);
-          if (f === hoyS) { hoyT += t; hoyN++; } if (f === ayerS) ayerT += t; if (f.slice(0, 7) === mesS) { mesT += t; mesN++; } if (f.slice(0, 7) === antS) antT += t;
+          if (f === hoyS) { hoyT += t; hoyN++; } if (f === ayerS) ayerT += t; if (f.slice(0, 7) === mesS) { mesT += t; mesN++; } if (f.slice(0, 7) === antS) { antTot += t; if (Number(f.slice(8, 10)) <= diaHoy) antT += t; }
           const pg = Number(v.pagado) || 0; if (t > pg) cobrar += (t - pg); });
         if (data.length < page) break; from += page; }
-      out.ventasHoy = hoyT; out.ventasHoyN = hoyN; out.ventasAyer = ayerT; out.ventasMes = mesT; out.ventasMesN = mesN; out.ventasMesAnt = antT; out.porCobrar = cobrar;
+      out.ventasHoy = hoyT; out.ventasHoyN = hoyN; out.ventasAyer = ayerT; out.ventasMes = mesT; out.ventasMesN = mesN; out.ventasMesAnt = antT; out.ventasMesAntTotal = antTot; out.porCobrar = cobrar;
     } catch (e) { console.warn('ventas resumen', e); }
     return out;
   }
@@ -547,10 +611,19 @@ class Component extends DCLogic {
       { titulo: 'Conteos por aprobar', sub: 'Solo el administrador los aprueba', n: c.conteosPend, color: '#C9962F', go: go('modulo', { modId: 'inventario' }) },
       { titulo: 'Leads nuevos', sub: 'Sin contactar todavía', n: c.leadsNuevos, color: '#6596A6', go: go('modulo', { modId: 'leads' }) },
     ].filter(p => typeof p.n === 'number' && p.n > 0);
-    const tabsDef = [{ id: 'inicio', label: 'Inicio', icono: '⌂' }].concat(mods.slice(0, 3).map(m => ({ id: 'modulo', modId: m.id, label: m.titulo.split(' ')[0], icono: m.icono, badge: m.id === 'conversaciones' ? (s.convs ? convs.filter(x => x.estado === 'necesita').length : c.convsNecesita) : m.id === 'inventario' ? c.conteosPend : 0 }))).concat([{ id: 'perfil', label: 'Cuenta', icono: '◯' }]);
     const activeKey = s.screen === 'modulo' ? 'modulo:' + s.modId : (s.screen === 'chats' || s.screen === 'chat') ? 'modulo:conversaciones' : s.screen;
+    const tab = (key, goFn, extra) => { const on = key === activeKey; return Object.assign({ bg: on ? '#EFE6D6' : 'transparent', fg: on ? '#5A4A33' : '#8A8073', go: goFn, visible: true, badge: 0 }, extra || {}); };
+    const necesitaN = s.convs ? convs.filter(x => x.estado === 'necesita').length : (c.convsNecesita || 0);
+    // ---- administración de usuarios (solo admin) ----
+    const MODS_PERM = [['conversaciones', 'Conversaciones'], ['inventario', 'Inventario'], ['finanzas', 'Finanzas'], ['ventas', 'Ventas y leads'], ['informes', 'Informes'], ['compras', 'Compras'], ['produccion', 'Producción']];
+    const segSel = { bg: '#3A3326', fg: '#FBF8F2' }, segNo = { bg: 'transparent', fg: '#8A8073' };
+    const adminUsers = this.isAdmin() ? this.users.filter(x => x.id !== u.id).map(x => { const p = this.accessDe(x); const open = s.permOpen === x.id; const esAdm = !!p.admin; const explicit = !!s.perms[x.id];
+      const mods = MODS_PERM.map(([k, label]) => { const l = this._modLevel(p, k); const st = lv => (l === lv ? segSel : segNo); return { label, noneBg: st('none').bg, noneFg: st('none').fg, readBg: st('read').bg, readFg: st('read').fg, writeBg: st('write').bg, writeFg: st('write').fg, setNone: () => this.setPermiso(x.id, k, 'none'), setRead: () => this.setPermiso(x.id, k, 'read'), setWrite: () => this.setPermiso(x.id, k, 'write') }; });
+      const nVe = esAdm ? MODS_PERM.length : mods.filter(m => m.noneBg === 'transparent').length;
+      return { name: x.name, role: x.role || '', color: x.color || '#A78659', ini: String(x.name || 'U').trim().split(/\s+/).map(q => q[0]).slice(0, 2).join('').toUpperCase(), open, rot: open ? '90deg' : '0deg', esAdminUser: esAdm, mods: esAdm ? [] : mods, resumen: ' · ve ' + nVe + ' de ' + MODS_PERM.length, pie: esAdm ? '' : explicit ? 'Permisos propios (distintos del rol). Ver = solo lectura · Editar = lectura y escritura.' : 'Usa los permisos de su rol «' + (x.role || '') + '». Al cambiar uno se guardan permisos propios.', toggle: () => this.setState({ permOpen: open ? null : x.id }) }; }) : [];
     const per = s.periodo || 'hoy', esHoy = per === 'hoy';
     const vAct = esHoy ? c.ventasHoy : c.ventasMes, vAnt = esHoy ? c.ventasAyer : c.ventasMesAnt, vN = esHoy ? c.ventasHoyN : c.ventasMesN;
+    const mesAntNombre = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).toLocaleDateString('es-CO', { month: 'long' });
     const delta = (typeof vAct === 'number' && vAnt > 0) ? Math.round((vAct - vAnt) / vAnt * 100) : null;
     const segOn = { bg: '#FBF8F2', fg: '#3A3326' }, segOff = { bg: 'transparent', fg: 'rgba(251,248,242,0.75)' };
     return {
@@ -587,13 +660,16 @@ class Component extends DCLogic {
       ventasTitulo: esHoy ? 'Ventas de hoy' : 'Ventas del mes', ventasValor: typeof vAct === 'number' ? cop(vAct) : '—', ventasN: typeof vN === 'number' ? vN + (vN === 1 ? ' pedido' : ' pedidos') : '',
       setPerHoy: () => this.setState({ periodo: 'hoy' }), setPerMes: () => this.setState({ periodo: 'mes' }),
       perHoyBg: (esHoy ? segOn : segOff).bg, perHoyFg: (esHoy ? segOn : segOff).fg, perMesBg: (esHoy ? segOff : segOn).bg, perMesFg: (esHoy ? segOff : segOn).fg,
-      deltaLabel: esHoy ? 'vs. ayer' : 'vs. mes pasado', deltaTxt: delta === null ? '—' : (delta >= 0 ? '+' : '') + delta + '%', deltaColor: delta === null ? '#FBF8F2' : delta >= 0 ? '#8AB38D' : '#E8B56A',
+      deltaLabel: esHoy ? 'vs. ayer' : 'vs. ' + mesAntNombre + ' al día ' + new Date().getDate(), deltaRef: esHoy ? '' : (typeof c.ventasMesAnt === 'number' ? '· ' + cop(c.ventasMesAnt) + (typeof c.ventasMesAntTotal === 'number' ? ' (cerró en ' + cop(c.ventasMesAntTotal) + ')' : '') : ''), deltaTxt: delta === null ? '—' : (delta >= 0 ? '+' : '') + delta + '%', deltaColor: delta === null ? '#FBF8F2' : delta >= 0 ? '#8AB38D' : '#E8B56A',
       pendientes: pend, sinPendientes: pend.length === 0, pendientesVacioTxt: s.countsAt ? 'Todo al día. Nada pendiente por ahora.' : 'Cargando lo pendiente…',
       modulos: mods.map(m => ({ titulo: m.titulo, icono: m.icono, nivel: lvlTxt[m.lvl], tag: 'Fase ' + m.fase, tagFg: m.fase === 1 ? '#3F5A3E' : '#8A8073', bg: '#FFFFFF', border: '#E4DBCC', go: go('modulo', { modId: m.id }) })),
       modulo: { titulo: modAct.titulo, tag: 'Llega en la fase ' + modAct.fase, desc: modAct.desc, nivel: lvlTxt[modAct.lvl || 'write'] },
       permisosRows: [['conversaciones', 'Conversaciones'], ['inventario', 'Inventario'], ['finanzas', 'Finanzas'], ['ventas', 'Ventas y leads'], ['informes', 'Informes'], ['compras', 'Compras'], ['produccion', 'Producción']].map(([k, label]) => { const l = this._modLevel(a, k); return { label, nivel: lvlTxt[l], fg: l === 'none' ? '#8A8073' : l === 'read' ? '#2F5E6E' : '#3F5A3E' }; }),
       instaladaTxt: s.standalone ? 'Sí' : 'No · abre desde el navegador', nubeTxt: s.offline ? 'Sin conexión' : 'Conectada',
-      tabs: tabsDef.map(t => { const key = t.id === 'modulo' ? 'modulo:' + t.modId : t.id, on = key === activeKey; return { label: t.label, icono: t.icono, badge: t.badge || 0, bg: on ? '#EFE6D6' : 'transparent', fg: on ? '#5A4A33' : '#8A8073', go: go(t.id, t.modId ? { modId: t.modId } : {}) }; }),
+      esAdmin: this.isAdmin(), adminUsers,
+      tabInicio: tab('inicio', go('inicio')), tabCuenta: tab('perfil', go('perfil')),
+      tabInforme: tab('modulo:reportes', go('modulo', { modId: 'reportes' }), { visible: this._modLevel(a, 'informes') !== 'none' }),
+      tabChats: tab('modulo:conversaciones', go('modulo', { modId: 'conversaciones' }), { visible: this._modLevel(a, 'conversaciones') !== 'none', badge: necesitaN }),
     };
   }
 }

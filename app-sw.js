@@ -1,7 +1,7 @@
 // OdA App · service worker (fase 1)
 // Cachea la "cáscara" (HTML, estilos, fuentes, librerías) para que la app abra sin red.
 // Los datos de Supabase NUNCA se cachean aquí: siempre van a la red.
-const VERSION = 'oda-app-v1';
+const VERSION = 'oda-app-v3';
 const SHELL = ['./', './index.html', './app-manifest.json', './app-icon-192.png', './app-icon-512.png'];
 
 self.addEventListener('install', (e) => {
