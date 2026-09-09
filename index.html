@@ -258,6 +258,126 @@
     </div>
     </sc-if>
 
+    <!-- ===== INVENTARIO · existencias ===== -->
+    <sc-if value="{{ isInv }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Inventario" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 0 110px;">
+      <div style="padding:6px 20px 0;display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInicio }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;line-height:1.1;">Existencias</div>
+          <div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ invSubTxt }}</div>
+        </div>
+        <div onClick="{{ goConteos }}" style="flex:0 0 auto;height:34px;padding:0 12px;border-radius:999px;border:1px solid #B8AE9C;background:#FFFFFF;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#5A4A33;">Conteos<sc-if value="{{ conteosPendN }}" hint-placeholder-val="{{ false }}"><span style="min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#B5503C;color:#FFF;font-size:10px;display:flex;align-items:center;justify-content:center;">{{ conteosPendN }}</span></sc-if></div>
+      </div>
+      <div style="padding:12px 20px 0;">
+        <input value="{{ invQ }}" onChange="{{ setInvQ }}" placeholder="Buscar por nombre o código" style="width:100%;box-sizing:border-box;height:42px;border-radius:999px;border:1px solid #B8AE9C;background:#FFFFFF;padding:0 16px;font-family:inherit;font-size:14px;color:#3A3326;outline:none;">
+      </div>
+      <div style="display:flex;gap:6px;padding:10px 20px 6px;overflow-x:auto;scrollbar-width:none;">
+        <sc-for list="{{ invCats }}" as="f" hint-placeholder-count="5">
+          <div onClick="{{ f.set }}" style="flex:0 0 auto;padding:8px 14px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.fg }};">{{ f.label }}</div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ invVacio }}" hint-placeholder-val="{{ false }}"><div style="margin:10px 20px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;line-height:1.5;">{{ invVacioTxt }}</div></sc-if>
+      <div style="display:flex;flex-direction:column;">
+        <sc-for list="{{ invVis }}" as="i" hint-placeholder-count="6">
+          <div onClick="{{ i.open }}" style="display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid #EFE9DD;">
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ i.nombre }}</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-top:3px;"><span style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:{{ i.catBg }};color:{{ i.catFg }};font-weight:700;">{{ i.catLabel }}</span><span style="font-size:11px;color:#8A8073;">{{ i.codigo }}</span></div>
+            </div>
+            <div style="text-align:right;flex:0 0 auto;">
+              <div style="font-weight:800;font-size:14px;color:{{ i.stockColor }};white-space:nowrap;">{{ i.stockTxt }}</div>
+              <div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ i.subTxt }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ===== INVENTARIO · ítem + conteo físico ===== -->
+    <sc-if value="{{ isInvItem }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Conteo físico" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 40px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInv }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;">{{ item.codigo }} · {{ item.catLabel }}</div>
+      </div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;line-height:1.15;margin-top:6px;">{{ item.nombre }}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;">
+        <div style="background:#3A3326;color:#FBF8F2;border-radius:18px;padding:14px 16px;"><div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;opacity:0.65;">Stock del sistema</div><div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;line-height:1.1;margin-top:4px;">{{ item.stockTxt }}</div></div>
+        <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;"><div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#8A8073;">{{ item.ladoLabel }}</div><div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;line-height:1.1;margin-top:4px;color:#5A4A33;">{{ item.ladoTxt }}</div></div>
+      </div>
+      <div style="font-size:11px;color:#8A8073;margin-top:8px;line-height:1.4;">{{ item.snapTxt }}</div>
+      <sc-if value="{{ item.pendTxt }}" hint-placeholder-val="{{ false }}"><div style="margin-top:10px;background:rgba(201,150,47,0.12);border:1px solid rgba(201,150,47,0.4);border-radius:14px;padding:10px 14px;font-size:12px;color:#7A5E36;">{{ item.pendTxt }}</div></sc-if>
+
+      <sc-if value="{{ invPuedeContar }}" hint-placeholder-val="{{ true }}">
+      <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin:24px 0 10px;">Registrar conteo físico</div>
+      <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
+        <div style="font-size:12px;color:#574E40;font-weight:700;">Cantidad contada ({{ item.unidad }})</div>
+        <input type="number" inputmode="decimal" min="0" value="{{ ctContado }}" onChange="{{ setCtContado }}" placeholder="0" style="width:100%;box-sizing:border-box;margin-top:8px;height:56px;border-radius:14px;border:1px solid #B8AE9C;background:#FBF8F2;padding:0 16px;font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;color:#3A3326;outline:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:13px;"><span style="color:#8A8073;">Diferencia</span><span style="font-weight:800;color:{{ ctDifColor }};">{{ ctDifTxt }}</span></div>
+        <div style="font-size:12px;color:#574E40;font-weight:700;margin-top:16px;">Motivo</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
+          <sc-for list="{{ ctMotivos }}" as="m" hint-placeholder-count="4">
+            <div onClick="{{ m.set }}" style="padding:8px 12px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid {{ m.border }};background:{{ m.bg }};color:{{ m.fg }};">{{ m.label }}</div>
+          </sc-for>
+        </div>
+        <input value="{{ ctNota }}" onChange="{{ setCtNota }}" placeholder="{{ ctNotaPh }}" style="width:100%;box-sizing:border-box;margin-top:12px;height:42px;border-radius:999px;border:1px solid #E4DBCC;background:#FBF8F2;padding:0 14px;font-family:inherit;font-size:13px;color:#3A3326;outline:none;">
+        <div onClick="{{ guardarConteo }}" style="margin-top:16px;height:48px;border-radius:999px;background:{{ ctBtnBg }};color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">{{ ctBtnLabel }}</div>
+        <div style="text-align:center;font-size:11px;color:#8A8073;margin-top:8px;line-height:1.4;">{{ ctPie }}</div>
+      </div>
+      </sc-if>
+      <sc-if value="{{ invSoloLectura }}" hint-placeholder-val="{{ false }}"><div style="margin-top:20px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;font-size:12px;color:#8A8073;">Tienes acceso de solo lectura en Inventario: puedes consultar, no registrar conteos.</div></sc-if>
+
+      <sc-if value="{{ item.tieneHist }}" hint-placeholder-val="{{ false }}">
+      <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin:24px 0 10px;">Conteos de este ítem</div>
+      <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;overflow:hidden;">
+        <sc-for list="{{ item.hist }}" as="c" hint-placeholder-count="2">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #EFE9DD;font-size:12px;"><div><div style="font-weight:700;">{{ c.fechaL }} · {{ c.motivo }}</div><div style="color:#8A8073;margin-top:2px;">{{ c.quien }}</div></div><div style="text-align:right;"><div style="font-weight:800;color:{{ c.difColor }};">{{ c.difTxt }}</div><div style="color:{{ c.estFg }};margin-top:2px;font-weight:700;">{{ c.estLabel }}</div></div></div>
+        </sc-for>
+      </div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- ===== INVENTARIO · conteos ===== -->
+    <sc-if value="{{ isConteos }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Conteos físicos" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInv }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="flex:1;"><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;line-height:1.1;">Conteos físicos</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ conteosSubTxt }}</div></div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:12px;">
+        <sc-for list="{{ ctFiltros }}" as="f" hint-placeholder-count="3">
+          <div onClick="{{ f.set }}" style="padding:8px 14px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.fg }};">{{ f.label }}</div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ conteosVacio }}" hint-placeholder-val="{{ false }}"><div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;">{{ conteosVacioTxt }}</div></sc-if>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+        <sc-for list="{{ conteosVis }}" as="c" hint-placeholder-count="3">
+          <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;">
+            <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">
+              <div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:14px;">{{ c.nombre }}</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ c.codigo }} · {{ c.quien }} · {{ c.fechaL }}</div></div>
+              <div style="flex:0 0 auto;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:{{ c.estBg }};color:{{ c.estFg }};font-weight:700;">{{ c.estLabel }}</div>
+            </div>
+            <div style="display:flex;gap:14px;margin-top:10px;font-size:12px;">
+              <div><div style="color:#8A8073;">Sistema</div><div style="font-weight:700;">{{ c.sistemaTxt }}</div></div>
+              <div><div style="color:#8A8073;">Contado</div><div style="font-weight:700;">{{ c.contadoTxt }}</div></div>
+              <div><div style="color:#8A8073;">Diferencia</div><div style="font-weight:800;color:{{ c.difColor }};">{{ c.difTxt }}</div></div>
+            </div>
+            <div style="font-size:12px;color:#574E40;margin-top:8px;">{{ c.motivo }}{{ c.notaTxt }}</div>
+            <sc-if value="{{ c.puedeResolver }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:8px;margin-top:12px;">
+                <div onClick="{{ c.rechazar }}" style="flex:1;height:42px;border-radius:999px;border:1px solid #B8AE9C;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#8F3A28;">Rechazar</div>
+                <div onClick="{{ c.aprobar }}" style="flex:1;height:42px;border-radius:999px;background:#A78659;color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">Aprobar</div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
     <sc-if value="{{ isModulo }}" hint-placeholder-val="{{ false }}">
     <div data-screen-label="Módulo" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
       <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
@@ -391,7 +511,7 @@ class Component extends DCLogic {
   // Módulos de la app móvil y qué permiso del Hub los abre.
   MODS = [
     { id: 'conversaciones', titulo: 'Conversaciones', icono: '◌', mod: 'conversaciones', fase: 2, listo: true, desc: 'Bandeja de chats de WhatsApp, Instagram, Messenger y web. Tomar conversaciones escaladas por el bot, responder y resolver.' },
-    { id: 'inventario', titulo: 'Inventario', icono: '▤', mod: 'inventario', fase: 3, desc: 'Existencias por categoría, registro de conteos físicos desde bodega y aprobación del administrador.' },
+    { id: 'inventario', titulo: 'Inventario', icono: '▤', mod: 'inventario', fase: 3, listo: true, desc: 'Existencias por categoría, registro de conteos físicos desde bodega y aprobación del administrador.' },
     { id: 'finanzas', titulo: 'Finanzas', icono: '◇', mod: 'finanzas', fase: 4, desc: 'Caja y bancos, pagos Bold por cruzar y ventas por cobrar.' },
     { id: 'leads', titulo: 'Leads', icono: '✦', mod: 'ventas', fase: 4, desc: 'Prospectos por etapa, asignación y seguimiento.' },
     { id: 'reportes', titulo: 'Informe gerencial', icono: '▥', mod: 'informes', fase: 4, desc: 'Ventas del mes, canales, margen y tendencia semanal para la gerencia.' },
@@ -405,6 +525,53 @@ class Component extends DCLogic {
   _subAlias(p, k) { if (k !== 'inventario__items' || !p) return undefined; const rank = { none: 0, read: 1, write: 2 }; let best; ['inventario__mp', 'inventario__insumos', 'inventario__pt'].forEach(x => { if (x in p && (best === undefined || (rank[p[x]] || 0) > (rank[best] || 0))) best = p[x]; }); return best; }
   _modLevel(p, mod) { if (!p) return 'none'; if (p.admin) return 'write'; const subs = this.subModDef[mod] || []; const ml = p[mod] || 'none'; if (!subs.length) return ml; const rank = { none: 0, read: 1, write: 2 }; let best = 'none'; subs.forEach(s => { const k = mod + '__' + s; const al = this._subAlias(p, k); const eff = (k in p) ? p[k] : (al !== undefined ? al : ml); if ((rank[eff] || 0) > (rank[best] || 0)) best = eff; }); return best; }
   isAdmin() { const a = this.access(); return !!(a && a.admin); }
+  // ---- inventario: foto publicada por el Hub (inventario_snapshot) + conteos compartidos ----
+  MOTIVOS_CONTEO = ['Conteo periódico', 'Merma o derrame', 'Producto vencido', 'Error de registro anterior', 'Devolución a proveedor', 'Muestra o consumo interno', 'Otro'];
+  CONTEO_SIN_GASTO = ['Error de registro anterior'];
+  CAT_META = { mp: { label: 'Materia prima', bg: 'rgba(98,123,96,0.14)', fg: '#4C6149' }, ins: { label: 'Insumo', bg: 'rgba(101,150,166,0.14)', fg: '#3F6B7A' }, emp: { label: 'Empaque', bg: 'rgba(193,170,129,0.20)', fg: '#7A6537' }, env: { label: 'Envase', bg: 'rgba(156,151,162,0.18)', fg: '#5E5A66' }, mez: { label: 'Mezcla', bg: 'rgba(122,94,54,0.14)', fg: '#7A5E36' }, pt: { label: 'Producto terminado', bg: 'rgba(167,134,89,0.16)', fg: '#8A6A3E' } };
+  async loadInventario() {
+    const sb = this.sb(); if (!sb || this._invLoading) return; if (this._modLevel(this.access(), 'inventario') === 'none') return; this._invLoading = true;
+    try { const rows = []; for (let from = 0; from < 20000; from += 1000) { const { data, error } = await sb.from('inventario_snapshot').select('*').order('codigo').range(from, from + 999); if (error) throw error; rows.push(...(data || [])); if (!data || data.length < 1000) break; }
+      const snapAt = rows.reduce((a, r) => (r.actualizado && r.actualizado > a) ? r.actualizado : a, '');
+      this.setState({ inv: rows.map(r => ({ codigo: r.codigo, nombre: r.nombre || '', clase: r.clase || 'materia', cat: r.cat || 'ins', unidad: r.unidad || 'und', stock: Number(r.stock) || 0, minimo: Number(r.minimo) || 0, costo: Number(r.costo) || 0 })), invSnapAt: snapAt, invError: '' });
+    } catch (e) { console.warn('inventario', e); this.setState({ inv: this.state.inv || [], invError: /inventario_snapshot|relation|does not exist/i.test(String(e.message || e)) ? 'Falta la tabla inventario_snapshot en la nube (correr supabase-inventario-snapshot.sql y abrir el Hub para que publique el inventario).' : 'No se pudo cargar el inventario: ' + (e.message || e) }); }
+    finally { this._invLoading = false; }
+    this.loadConteos();
+  }
+  _conteoFromDb(r) { return { id: r.id, codigo: r.codigo, nombre: r.nombre || '', unidad: r.unidad || 'und', clase: r.clase || 'materia', fecha: r.fecha || '', sistema: Number(r.sistema) || 0, contado: Number(r.contado) || 0, diferencia: Number(r.diferencia) || 0, motivo: r.motivo || '', nota: r.nota || '', solicitadoPor: r.solicitado_por || '', solicitadoAt: r.solicitado_at || '', estado: r.estado || 'pendiente', aprobadoPor: r.aprobado_por || '', aprobadoAt: r.aprobado_at || '', costoUnit: r.costo_unit, valor: r.valor }; }
+  async loadConteos() { const sb = this.sb(); if (!sb) return; try { const { data, error } = await sb.from('conteos').select('*').order('solicitado_at', { ascending: false }).limit(500); if (error) throw error; const list = (data || []).map(r => this._conteoFromDb(r)); this.setState(s => ({ conteos: list, counts: Object.assign({}, s.counts, { conteosPend: list.filter(c => c.estado === 'pendiente').length }) })); } catch (e) { console.warn('conteos', e); } }
+  invItem(codigo) { return (this.state.inv || []).find(x => x.codigo === codigo) || null; }
+  fmtCant(n) { const v = Math.round((Number(n) || 0) * 1000) / 1000; return Number.isInteger(v) ? v.toLocaleString('es-CO') : v.toLocaleString('es-CO', { maximumFractionDigits: 3 }); }
+  async guardarConteo() {
+    if (this._ctSaving) return; const s = this.state; const it = this.invItem(s.invCodigo); if (!it) return;
+    if (this._modLevel(this.access(), 'inventario') !== 'write') { this.toast('No tienes permiso de escritura en Inventario'); return; }
+    if (s.ctContado === '' || s.ctContado == null) { this.toast('Escribe cuántas unidades contaste'); return; }
+    const contado = Number(s.ctContado); if (!isFinite(contado) || contado < 0) { this.toast('El conteo debe ser un número mayor o igual a cero'); return; }
+    const motivo = s.ctMotivo || ''; if (!motivo) { this.toast('Elige el motivo del ajuste'); return; }
+    if (motivo === 'Otro' && !String(s.ctNota || '').trim()) { this.toast('Con motivo «Otro» hay que escribir la explicación'); return; }
+    const dif = Math.round((contado - it.stock) * 1000) / 1000; if (dif === 0) { this.toast('El conteo coincide con el sistema · no hay nada que ajustar'); return; }
+    const admin = this.isAdmin(), yo = (s.user && s.user.name) || '', ahora = new Date().toISOString();
+    const row = { id: 'CF-' + Date.now(), codigo: it.codigo, nombre: it.nombre, unidad: it.unidad, clase: it.clase, fecha: ahora.slice(0, 10), sistema: it.stock, contado, diferencia: dif, motivo, nota: String(s.ctNota || '').trim(), solicitado_por: yo, solicitado_at: ahora, estado: admin ? 'aprobado' : 'pendiente', costo_unit: admin ? it.costo : null, valor: admin ? (this.CONTEO_SIN_GASTO.includes(motivo) ? 0 : -dif * it.costo) : null, aprobado_por: admin ? yo : '', aprobado_at: admin ? ahora : null };
+    this._ctSaving = true; setTimeout(() => { this._ctSaving = false; }, 1500);
+    const sb = this.sb(); const { error } = await sb.from('conteos').insert(row).select('id'); if (error) { this.toast('No se pudo guardar: ' + error.message); return; }
+    this.setState(s2 => ({ conteos: [this._conteoFromDb(row)].concat(s2.conteos || []), ctContado: '', ctNota: '', ctMotivo: 'Conteo periódico', screen: 'inv' }));
+    const sg = (dif > 0 ? '+' : '') + this.fmtCant(dif) + ' ' + it.unidad;
+    this.toast(admin ? 'Conteo aplicado · ' + sg + ' en ' + it.codigo + ' (el Hub actualiza el stock)' : 'Conteo enviado a aprobación · ' + sg + ' en ' + it.codigo);
+    this.loadConteos();
+  }
+  async resolverConteo(id, aprobar) {
+    if (!this.isAdmin()) { this.toast('Solo el Administrador puede aprobar un conteo'); return; }
+    const c = (this.state.conteos || []).find(x => x.id === id); if (!c || c.estado !== 'pendiente') return;
+    if (!aprobar && !window.confirm('¿Rechazar el conteo de ' + c.codigo + '? No se ajusta el inventario.')) return;
+    const yo = (this.state.user && this.state.user.name) || '', ahora = new Date().toISOString(); let patch;
+    if (aprobar) { const it = this.invItem(c.codigo); const sistema = it ? it.stock : c.sistema; const dif = Math.round((c.contado - sistema) * 1000) / 1000; const cu = it ? it.costo : 0;
+      patch = { estado: 'aprobado', sistema, diferencia: dif, costo_unit: cu, valor: this.CONTEO_SIN_GASTO.includes(c.motivo) ? 0 : -dif * cu, aprobado_por: yo, aprobado_at: ahora }; }
+    else patch = { estado: 'rechazado', aprobado_por: yo, aprobado_at: ahora };
+    const prev = this.state.conteos; this.setState(s => ({ conteos: (s.conteos || []).map(x => x.id === id ? Object.assign({}, x, { estado: patch.estado, diferencia: patch.diferencia != null ? patch.diferencia : x.diferencia, sistema: patch.sistema != null ? patch.sistema : x.sistema, aprobadoPor: yo, aprobadoAt: ahora }) : x) }));
+    const { data, error } = await this.sb().from('conteos').update(patch).eq('id', id).select('id');
+    if (error || !data || !data.length) { this.setState({ conteos: prev }); this.toast('No se pudo guardar: ' + (error ? error.message : 'sin permiso')); return; }
+    this.toast(aprobar ? 'Conteo aprobado · el Hub recalcula el stock de ' + c.codigo : 'Conteo rechazado'); this.loadConteos();
+  }
   // Permisos de otro usuario (misma regla que access(): explícito en la nube o el del rol).
   accessDe(u) { return this.state.perms[u.id] || this.roles[u.role] || {}; }
   // Fija el nivel de un módulo entero: la clave del módulo y TODAS sus subclaves reales de subModDef
@@ -583,7 +750,7 @@ class Component extends DCLogic {
     const s = this.state, a = this.access(), u = s.user || {}, c = s.counts || {};
     const lvlTxt = { none: 'Sin acceso', read: 'Solo lectura', write: 'Lectura y escritura' };
     const cop = n => '$' + Math.round(n).toLocaleString('es-CO');
-    const go = (screen, extra) => () => { if (screen === 'modulo' && extra && extra.modId === 'conversaciones') { this.setState({ screen: 'chats' }); this.loadConvs(); return; } this.setState(Object.assign({ screen }, extra || {})); };
+    const go = (screen, extra) => () => { if (screen === 'modulo' && extra && extra.modId === 'conversaciones') { this.setState({ screen: 'chats' }); this.loadConvs(); return; } if (screen === 'modulo' && extra && extra.modId === 'inventario') { this.setState({ screen: 'inv' }); this.loadInventario(); return; } this.setState(Object.assign({ screen }, extra || {})); };
     // ---- conversaciones ----
     const chip = on => on ? { bg: '#3A3326', fg: '#FBF8F2', border: '#3A3326' } : { bg: '#FFFFFF', fg: '#574E40', border: '#E4DBCC' };
     const estConv = e => ({ bot: { label: 'Bot', bg: '#EFE6D6', fg: '#7A5E36' }, necesita: { label: 'Necesita asesor', bg: 'rgba(181,80,60,0.14)', fg: '#8F3A28' }, humano: { label: 'Con asesor', bg: 'rgba(101,150,166,0.18)', fg: '#2F5E6E' }, resuelta: { label: 'Resuelta', bg: 'rgba(98,123,96,0.16)', fg: '#3F5A3E' } }[e] || { label: e, bg: '#EFE9DD', fg: '#8A8073' });
@@ -608,10 +775,26 @@ class Component extends DCLogic {
     const modAct = mods.find(m => m.id === s.modId) || mods[0] || this.MODS[5];
     const pend = [
       { titulo: 'Chats que necesitan asesor', sub: 'El bot escaló y nadie ha respondido', n: (s.convs ? convs.filter(x => x.estado === 'necesita').length : c.convsNecesita), color: '#B5503C', go: () => { this.setState({ screen: 'chats', convFiltro: 'necesita' }); this.loadConvs(); } },
-      { titulo: 'Conteos por aprobar', sub: 'Solo el administrador los aprueba', n: c.conteosPend, color: '#C9962F', go: go('modulo', { modId: 'inventario' }) },
+      { titulo: 'Conteos por aprobar', sub: 'Solo el administrador los aprueba', n: c.conteosPend, color: '#C9962F', go: () => { this.setState({ screen: 'conteos', ctFiltro: 'pendiente' }); this.loadInventario(); } },
       { titulo: 'Leads nuevos', sub: 'Sin contactar todavía', n: c.leadsNuevos, color: '#6596A6', go: go('modulo', { modId: 'leads' }) },
     ].filter(p => typeof p.n === 'number' && p.n > 0);
-    const activeKey = s.screen === 'modulo' ? 'modulo:' + s.modId : (s.screen === 'chats' || s.screen === 'chat') ? 'modulo:conversaciones' : s.screen;
+    const activeKey = s.screen === 'modulo' ? 'modulo:' + s.modId : (s.screen === 'chats' || s.screen === 'chat') ? 'modulo:conversaciones' : (s.screen === 'inv' || s.screen === 'invItem' || s.screen === 'conteos') ? 'modulo:inventario' : s.screen;
+    // ---- inventario ----
+    const invLvl = this._modLevel(a, 'inventario'); const inv = s.inv || []; const invQ = String(s.invQ || '').toLowerCase().trim(); const invCat = s.invCat || 'todos';
+    const enCat = (r, k) => k === 'todos' ? true : k === 'empenv' ? (r.cat === 'emp' || r.cat === 'env') : r.cat === k;
+    const invRow = r => { const meta = this.CAT_META[r.cat] || this.CAT_META.ins; const bajo = r.cat === 'pt' || r.cat === 'mez' ? r.stock <= 0 : r.stock < r.minimo; return { codigo: r.codigo, nombre: r.nombre, catLabel: meta.label, catBg: meta.bg, catFg: meta.fg, stockTxt: this.fmtCant(r.stock) + ' ' + r.unidad, stockColor: bajo ? '#B5503C' : '#3A3326', subTxt: r.cat === 'pt' || r.cat === 'mez' ? (bajo ? 'Sin stock' : 'OK') : 'mín. ' + this.fmtCant(r.minimo), open: () => this.setState({ screen: 'invItem', invCodigo: r.codigo, ctContado: '', ctNota: '', ctMotivo: 'Conteo periódico' }) }; };
+    const invVis = inv.filter(r => enCat(r, invCat)).filter(r => !invQ || r.nombre.toLowerCase().includes(invQ) || r.codigo.toLowerCase().includes(invQ)).slice(0, 400).map(invRow);
+    const snapL = s.invSnapAt ? new Date(s.invSnapAt).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+    const itRaw = this.invItem(s.invCodigo) || { codigo: '', nombre: '', cat: 'ins', unidad: 'und', stock: 0, minimo: 0, costo: 0 }; const itUI = invRow(itRaw);
+    const conteos = s.conteos || []; const ctHistItem = conteos.filter(c => c.codigo === itRaw.codigo).slice(0, 8);
+    const estCt = e => ({ pendiente: { label: 'Pendiente', bg: 'rgba(201,150,47,0.16)', fg: '#7A5E36' }, aprobado: { label: 'Aprobado', bg: 'rgba(98,123,96,0.16)', fg: '#3F5A3E' }, rechazado: { label: 'Rechazado', bg: 'rgba(181,80,60,0.14)', fg: '#8F3A28' }, anulado: { label: 'Anulado', bg: '#EFE9DD', fg: '#8A8073' } }[e] || { label: e, bg: '#EFE9DD', fg: '#8A8073' });
+    const difFmt = (d, un) => ({ txt: (d > 0 ? '+' : '') + this.fmtCant(d) + (un ? ' ' + un : ''), color: d < 0 ? '#B5503C' : d > 0 ? '#2F5E6E' : '#3F5A3E' });
+    const ctRow = c => { const e = estCt(c.estado), d = difFmt(c.diferencia, c.unidad); return { id: c.id, codigo: c.codigo, nombre: c.nombre, motivo: c.motivo, notaTxt: c.nota ? ' · ' + c.nota : '', quien: c.solicitadoPor || 'Sin autor', fechaL: fechaL(c.solicitadoAt || c.fecha), sistemaTxt: this.fmtCant(c.sistema), contadoTxt: this.fmtCant(c.contado), difTxt: d.txt, difColor: d.color, estLabel: e.label, estBg: e.bg, estFg: e.fg, puedeResolver: this.isAdmin() && c.estado === 'pendiente', aprobar: () => this.resolverConteo(c.id, true), rechazar: () => this.resolverConteo(c.id, false) }; };
+    const ctFiltro = s.ctFiltro || 'pendiente'; const conteosVis = conteos.filter(c => ctFiltro === 'todos' ? true : ctFiltro === 'pendiente' ? c.estado === 'pendiente' : c.estado !== 'pendiente').slice(0, 100).map(ctRow);
+    const ctPendN = conteos.length ? conteos.filter(c => c.estado === 'pendiente').length : (c.conteosPend || 0);
+    const ctCont = s.ctContado === '' || s.ctContado == null ? null : Number(s.ctContado); const ctDif = ctCont === null || !isFinite(ctCont) ? null : Math.round((ctCont - itRaw.stock) * 1000) / 1000; const ctD = ctDif === null ? null : difFmt(ctDif, itRaw.unidad);
+    const ctListo = ctDif !== null && ctDif !== 0 && !!s.ctMotivo && (s.ctMotivo !== 'Otro' || String(s.ctNota || '').trim());
+    const ctPendItem = conteos.filter(c => c.codigo === itRaw.codigo && c.estado === 'pendiente');
     const tab = (key, goFn, extra) => { const on = key === activeKey; return Object.assign({ bg: on ? '#EFE6D6' : 'transparent', fg: on ? '#5A4A33' : '#8A8073', go: goFn, visible: true, badge: 0 }, extra || {}); };
     const necesitaN = s.convs ? convs.filter(x => x.estado === 'necesita').length : (c.convsNecesita || 0);
     // ---- administración de usuarios (solo admin) ----
@@ -633,7 +816,22 @@ class Component extends DCLogic {
       loginKey: e => { if (e.key === 'Enter') this.doLogin(); }, doLogin: () => this.doLogin(), doLogout: () => this.doLogout(),
       loginBtnBg: s.loginBusy ? '#C1AA81' : '#A78659', loginBtnLabel: s.loginBusy ? 'Entrando…' : 'Entrar',
       isInicio: s.screen === 'inicio', isModulo: s.screen === 'modulo', isPerfil: s.screen === 'perfil', goInicio: go('inicio'), goPerfil: go('perfil'),
-      isChats: s.screen === 'chats', isChat: s.screen === 'chat', showTabs: s.screen !== 'chat', goChats: () => this.setState({ screen: 'chats', convId: null }),
+      isChats: s.screen === 'chats', isChat: s.screen === 'chat', showTabs: s.screen !== 'chat' && s.screen !== 'invItem', goChats: () => this.setState({ screen: 'chats', convId: null }),
+      isInv: s.screen === 'inv', isInvItem: s.screen === 'invItem', isConteos: s.screen === 'conteos', goInv: () => this.setState({ screen: 'inv' }), goConteos: () => { this.setState({ screen: 'conteos' }); this.loadConteos(); },
+      invSubTxt: s.invError ? 'Sin datos' : s.inv ? inv.length + ' ítems · foto del ' + snapL : 'Cargando…', conteosPendN: ctPendN,
+      invQ: s.invQ || '', setInvQ: e => this.setState({ invQ: e.target.value }),
+      invCats: [['todos', 'Todos'], ['mp', 'Materia prima'], ['ins', 'Insumos'], ['empenv', 'Empaques y envases'], ['mez', 'Mezclas'], ['pt', 'Producto terminado']].map(([id, label]) => Object.assign({ label: label + (inv.length ? ' · ' + inv.filter(r => enCat(r, id)).length : ''), set: () => this.setState({ invCat: id }) }, chip(invCat === id))),
+      invVis, invVacio: !!s.inv && invVis.length === 0, invVacioTxt: s.invError ? s.invError : invQ ? 'Nada coincide con la búsqueda.' : inv.length ? 'No hay ítems en esta categoría.' : 'El Hub todavía no ha publicado el inventario. Abre el Hub con un usuario con escritura en Inventario y espera medio minuto.',
+      item: Object.assign(itUI, { unidad: itRaw.unidad, ladoLabel: itRaw.cat === 'pt' || itRaw.cat === 'mez' ? 'Costo unitario' : 'Stock mínimo', ladoTxt: itRaw.cat === 'pt' || itRaw.cat === 'mez' ? cop(itRaw.costo) : this.fmtCant(itRaw.minimo) + ' ' + itRaw.unidad, snapTxt: snapL ? 'Stock del sistema según la foto del Hub del ' + snapL + '. La diferencia se recalcula al aprobar.' : '', pendTxt: ctPendItem.length ? ctPendItem.length + ' conteo' + (ctPendItem.length === 1 ? '' : 's') + ' de este ítem esperando aprobación.' : '', hist: ctHistItem.map(c => { const e = estCt(c.estado), d = difFmt(c.diferencia, c.unidad); return { fechaL: fechaL(c.solicitadoAt || c.fecha), motivo: c.motivo, quien: c.solicitadoPor || 'Sin autor', difTxt: d.txt, difColor: d.color, estLabel: e.label, estFg: e.fg }; }), tieneHist: ctHistItem.length > 0 }),
+      invPuedeContar: invLvl === 'write', invSoloLectura: invLvl === 'read',
+      ctContado: s.ctContado == null ? '' : s.ctContado, setCtContado: e => this.setState({ ctContado: e.target.value }), ctNota: s.ctNota || '', setCtNota: e => this.setState({ ctNota: e.target.value }), ctNotaPh: s.ctMotivo === 'Otro' ? 'Explica qué pasó (obligatorio)' : 'Nota (opcional)',
+      ctDifTxt: ctD ? ctD.txt : '—', ctDifColor: ctD ? ctD.color : '#8A8073',
+      ctMotivos: this.MOTIVOS_CONTEO.map(m => Object.assign({ label: m, set: () => this.setState({ ctMotivo: m }) }, chip((s.ctMotivo || 'Conteo periódico') === m))),
+      ctBtnBg: ctListo ? '#A78659' : '#C1AA81', ctBtnLabel: this.isAdmin() ? 'Aplicar conteo' : 'Enviar a aprobación', guardarConteo: () => this.guardarConteo(),
+      ctPie: this.isAdmin() ? 'Como administrador el conteo queda aprobado de inmediato y el Hub ajusta el stock.' : 'El inventario solo se mueve cuando un administrador lo aprueba.',
+      conteosSubTxt: conteos.length ? ctPendN + ' pendiente' + (ctPendN === 1 ? '' : 's') + ' · ' + conteos.length + ' en total' : 'Cargando…',
+      ctFiltros: [['pendiente', 'Pendientes'], ['resueltos', 'Resueltos'], ['todos', 'Todos']].map(([id, label]) => Object.assign({ label, set: () => this.setState({ ctFiltro: id }) }, chip(ctFiltro === id))),
+      conteosVis, conteosVacio: !!s.conteos && conteosVis.length === 0, conteosVacioTxt: ctFiltro === 'pendiente' ? 'No hay conteos esperando aprobación.' : 'No hay conteos en este filtro.',
       convsSubTxt: s.convs ? (convs.filter(x => x.estado === 'necesita').length + ' por atender · ' + this.CONV_DIAS + ' días') : 'Cargando…',
       convQ: s.convQ || '', setConvQ: e => this.setState({ convQ: e.target.value }),
       convFiltros: [['necesita', 'Necesita asesor'], ['mias', 'Mías'], ['humano', 'Con asesor'], ['bot', 'Bot'], ['resuelta', 'Resueltas'], ['todas', 'Todas']].map(([id, label]) => Object.assign({ label, set: () => this.setState({ convFiltro: id }) }, chip(filtro === id))),
