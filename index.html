@@ -439,7 +439,7 @@
           <sc-for list="{{ sopPrioridades }}" as="p" hint-placeholder-count="3"><div onClick="{{ p.set }}" style="flex:1;padding:9px 0;text-align:center;border-radius:999px;font-size:12px;font-weight:700;border:1px solid {{ p.border }};background:{{ p.bg }};color:{{ p.fg }};">{{ p.label }}</div></sc-for>
         </div>
         <div style="display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap;">
-          <sc-for list="{{ sopFotos }}" as="f" hint-placeholder-count="0"><div style="position:relative;"><img src="{{ f.src }}" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:12px;border:1px solid #E4DBCC;display:block;"><div onClick="{{ f.quitar }}" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:999px;background:#3A3326;color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-size:13px;">×</div></div></sc-for>
+          <sc-for list="{{ sopFotos }}" as="f" hint-placeholder-count="0"><div style="position:relative;"><div style="width:64px;height:64px;border-radius:12px;border:1px solid #E4DBCC;background-image:url({{ f.src }});background-size:cover;background-position:center;"></div><div onClick="{{ f.quitar }}" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:999px;background:#3A3326;color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-size:13px;">×</div></div></sc-for>
           <sc-if value="{{ sopPuedeFoto }}" hint-placeholder-val="{{ true }}"><div onClick="{{ sopPickFoto }}" style="height:40px;padding:0 14px;border-radius:999px;border:1px solid #B8AE9C;background:#FFFFFF;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#5A4A33;">+ Foto</div></sc-if>
         </div>
         <div onClick="{{ sopEnviar }}" style="margin-top:14px;height:48px;border-radius:999px;background:{{ sopBtnBg }};color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">{{ sopBtnLabel }}</div>
@@ -895,7 +895,7 @@ class Component extends DCLogic {
   }
   componentWillUnmount() { window.removeEventListener('online', this._onl); window.removeEventListener('offline', this._off); window.removeEventListener('beforeinstallprompt', this._bip); document.removeEventListener('visibilitychange', this._vis); }
   // Recarga los números del Inicio. `forzar` = botón manual; si no, solo cuando llevan más de 60 s.
-  refrescarInicio(forzar) { if (this.state.view !== 'app' || this._countsLoading) return; if (!forzar && this.state.countsAt && Date.now() - this.state.countsAt < 60000) return; this._countsLoading = true; this.setState({ countsCargando: true }); this.loadCounts().finally(() => { this._countsLoading = false; this.setState({ countsCargando: false }); }); }
+  refrescarInicio(forzar) { if (this.state.view !== 'app' || this._countsLoading || !this._authUid) return; if (!forzar && this.state.countsAt && Date.now() - this.state.countsAt < 60000) return; this._countsLoading = true; this.setState({ countsCargando: true }); this.loadCounts().finally(() => { this._countsLoading = false; this.setState({ countsCargando: false }); }); }
   // ---- notificaciones push (Web Push; la Edge Function `push` envía, el SW muestra) ----
   VAPID_PUBLIC = 'PEGAR_AQUI_LA_CLAVE_PUBLICA_VAPID';
   _abrirDesdeUrl(url) { try { const cid = new URL(url, location.href).searchParams.get('conv'); if (cid) { if (this.state.view === 'app') { this.setState({ screen: 'chats' }); this.loadConvs(); this.openConv(cid); } else this._convPendiente = cid; } } catch (e) {} }
@@ -940,7 +940,7 @@ class Component extends DCLogic {
   }
   persistSession() { const s = this.state; try { localStorage.setItem(this.SESSION_KEY, JSON.stringify({ user: s.user, perms: s.perms, usersCfg: s.usersCfg, counts: s.counts })); } catch (e) {} }
   async loadCounts() {
-    const sb = this.sb(); if (!sb || !this.state.user || this.state.offline) return; const a = this.access(); const c = {};
+    const sb = this.sb(); if (!sb || !this.state.user || this.state.offline || !this._authUid) return; const a = this.access(); const c = {};
     const cnt = async (tabla, col, val) => { try { const { count, error } = await sb.from(tabla).select('*', { count: 'exact', head: true }).eq(col, val); if (error) throw error; return count || 0; } catch (e) { console.warn('conteo ' + tabla, e); return null; } };
     if (this._modLevel(a, 'conversaciones') !== 'none') c.convsNecesita = await cnt('conversaciones', 'estado', 'necesita');
     if (this.isAdmin()) c.conteosPend = await cnt('conteos', 'estado', 'pendiente');
