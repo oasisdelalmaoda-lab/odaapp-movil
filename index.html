@@ -70,6 +70,7 @@
         <div>
           <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;">{{ fechaHoy }}</div>
           <div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;line-height:1.1;margin-top:2px;">Hola, {{ userNombre }}</div>
+          <div onClick="{{ refrescar }}" style="display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:11px;color:#8A6F49;font-weight:700;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8A6F49" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"></path><path d="M21 3v6h-6"></path></svg>{{ actualizadoTxt }}</div>
         </div>
         <div onClick="{{ goPerfil }}" style="width:42px;height:42px;border-radius:999px;background:{{ userColor }};color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;">{{ userIni }}</div>
       </div>
@@ -147,6 +148,13 @@
           <div onClick="{{ f.set }}" style="flex:0 0 auto;padding:8px 14px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.fg }};">{{ f.label }}</div>
         </sc-for>
       </div>
+      <sc-if value="{{ convAutoHay }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:6px;padding:2px 20px 8px;overflow-x:auto;scrollbar-width:none;">
+        <sc-for list="{{ convAutoChips }}" as="f" hint-placeholder-count="3">
+          <div onClick="{{ f.set }}" style="flex:0 0 auto;padding:5px 11px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.fg }};">{{ f.label }}</div>
+        </sc-for>
+      </div>
+      </sc-if>
       <sc-if value="{{ convsVacio }}" hint-placeholder-val="{{ false }}"><div style="margin:14px 20px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;">{{ convsVacioTxt }}</div></sc-if>
       <div style="display:flex;flex-direction:column;">
         <sc-for list="{{ convsVis }}" as="c" hint-placeholder-count="6">
@@ -166,6 +174,7 @@
                 <div style="font-size:12px;color:#574E40;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ c.ultimo }}</div>
                 <sc-if value="{{ c.noLeidos }}" hint-placeholder-val="{{ false }}"><div style="flex:0 0 auto;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#B5503C;color:#FFF;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;">{{ c.noLeidos }}</div></sc-if>
               </div>
+              <sc-if value="{{ c.autoL }}" hint-placeholder-val="{{ false }}"><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#7A5E36;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">⚡ {{ c.autoL }}</div></sc-if>
               <div style="display:flex;gap:6px;margin-top:6px;align-items:center;">
                 <div style="display:inline-flex;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:{{ c.estBg }};color:{{ c.estFg }};">{{ c.estLabel }}</div>
                 <sc-if value="{{ c.asig }}" hint-placeholder-val="{{ false }}"><div style="font-size:10px;color:#8A8073;">{{ c.asig }}</div></sc-if>
@@ -704,7 +713,8 @@
       </sc-if>
       <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin:22px 0 10px;">App</div>
       <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;overflow:hidden;font-size:13px;">
-        <div style="display:flex;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #EFE9DD;"><span>Versión</span><span style="color:#8A8073;">Fase 2 · conversaciones</span></div>
+        <div style="display:flex;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #EFE9DD;"><span>Versión</span><span style="color:#8A8073;">Fase 5 · notificaciones</span></div>
+        <div onClick="{{ pushToggle }}" style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #EFE9DD;"><div style="min-width:0;"><div>Notificaciones</div><div style="font-size:11px;color:#8A8073;margin-top:2px;line-height:1.35;">{{ pushTxt }}</div></div><div style="flex:0 0 auto;width:46px;height:28px;border-radius:999px;background:{{ pushBg }};position:relative;transition:background 200ms;"><div style="position:absolute;top:3px;left:{{ pushKnob }};width:22px;height:22px;border-radius:999px;background:#FFFFFF;box-shadow:0 1px 3px rgba(58,51,38,0.3);transition:left 200ms;"></div></div></div>
         <div style="display:flex;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #EFE9DD;"><span>Instalada</span><span style="color:#8A8073;">{{ instaladaTxt }}</span></div>
         <div style="display:flex;justify-content:space-between;padding:13px 16px;"><span>Nube</span><span style="color:#8A8073;">{{ nubeTxt }}</span></div>
       </div>
@@ -870,19 +880,44 @@ class Component extends DCLogic {
   componentDidMount() {
     this._onl = () => this.setState({ offline: false }, () => this.loadCounts()); this._off = () => this.setState({ offline: true });
     window.addEventListener('online', this._onl); window.addEventListener('offline', this._off);
+    // Al volver a la app (estaba en segundo plano) se refresca el Inicio si los números tienen más de 60 s.
+    this._vis = () => { if (document.visibilityState === 'visible') this.refrescarInicio(false); }; document.addEventListener('visibilitychange', this._vis);
     this._bip = (e) => { e.preventDefault(); this._installEvt = e; this.setState({ canPrompt: true }); }; window.addEventListener('beforeinstallprompt', this._bip);
     window.addEventListener('appinstalled', () => { this.setState({ standalone: true }); this.toast('OdA App instalada'); });
     const standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
     let dismissed = false; try { dismissed = localStorage.getItem('oda_app_install_dismiss') === '1'; } catch (e) {}
     this.setState({ standalone, installDismissed: dismissed });
-    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) { navigator.serviceWorker.register('./app-sw.js').catch(() => {}); }
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) { navigator.serviceWorker.register('./app-sw.js').then(reg => { this._swReg = reg; this.pushRefrescarEstado(); }).catch(() => {});
+      navigator.serviceWorker.addEventListener('message', ev => { const d = ev.data || {}; if (d.tipo === 'abrir' && d.url) this._abrirDesdeUrl(d.url); }); }
+    // Si la app se abrió desde una notificación (?conv=id), abrir esa conversación cuando haya sesión.
+    try { const cid = new URLSearchParams(location.search).get('conv'); if (cid) { this._convPendiente = cid; history.replaceState(null, '', location.pathname); } } catch (e) {}
     this.boot();
   }
-  componentWillUnmount() { window.removeEventListener('online', this._onl); window.removeEventListener('offline', this._off); window.removeEventListener('beforeinstallprompt', this._bip); }
+  componentWillUnmount() { window.removeEventListener('online', this._onl); window.removeEventListener('offline', this._off); window.removeEventListener('beforeinstallprompt', this._bip); document.removeEventListener('visibilitychange', this._vis); }
+  // Recarga los números del Inicio. `forzar` = botón manual; si no, solo cuando llevan más de 60 s.
+  refrescarInicio(forzar) { if (this.state.view !== 'app' || this._countsLoading) return; if (!forzar && this.state.countsAt && Date.now() - this.state.countsAt < 60000) return; this._countsLoading = true; this.setState({ countsCargando: true }); this.loadCounts().finally(() => { this._countsLoading = false; this.setState({ countsCargando: false }); }); }
+  // ---- notificaciones push (Web Push; la Edge Function `push` envía, el SW muestra) ----
+  VAPID_PUBLIC = 'PEGAR_AQUI_LA_CLAVE_PUBLICA_VAPID';
+  _abrirDesdeUrl(url) { try { const cid = new URL(url, location.href).searchParams.get('conv'); if (cid) { if (this.state.view === 'app') { this.setState({ screen: 'chats' }); this.loadConvs(); this.openConv(cid); } else this._convPendiente = cid; } } catch (e) {} }
+  pushSoportado() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+  async pushRefrescarEstado() { if (!this.pushSoportado() || !this._swReg) { this.setState({ pushEstado: 'nosoporta' }); return; } try { const sub = await this._swReg.pushManager.getSubscription(); this.setState({ pushEstado: sub ? 'on' : (Notification.permission === 'denied' ? 'denegado' : 'off') }); } catch (e) { this.setState({ pushEstado: 'off' }); } }
+  _b64ToU8(b64) { const p = '='.repeat((4 - b64.length % 4) % 4); const raw = atob((b64 + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from([...raw].map(c => c.charCodeAt(0))); }
+  async pushToggle() { const s = this.state; if (s.pushBusy) return; if (!this.pushSoportado()) { this.toast('Este navegador no soporta notificaciones'); return; }
+    if (!s.standalone && /iPhone|iPad/.test(navigator.userAgent)) { this.toast('En iPhone primero agrega la app a la pantalla de inicio (Compartir → Agregar a inicio)'); return; }
+    if (!/^[A-Za-z0-9_-]{80,}$/.test(this.VAPID_PUBLIC)) { this.toast('Falta configurar la clave VAPID en la app'); return; }
+    this.setState({ pushBusy: true });
+    try { const reg = this._swReg || await navigator.serviceWorker.ready; const cur = await reg.pushManager.getSubscription(); const sb = this.sb();
+      if (cur) { try { if (sb) await sb.from('push_suscripciones').delete().eq('endpoint', cur.endpoint); } catch (e) {} await cur.unsubscribe(); this.setState({ pushEstado: 'off', pushBusy: false }); this.toast('Notificaciones apagadas en este teléfono'); return; }
+      const perm = await Notification.requestPermission(); if (perm !== 'granted') { this.setState({ pushEstado: perm === 'denied' ? 'denegado' : 'off', pushBusy: false }); this.toast(perm === 'denied' ? 'El teléfono bloqueó las notificaciones: actívalas en Ajustes' : 'No se activaron'); return; }
+      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: this._b64ToU8(this.VAPID_PUBLIC) });
+      const u = s.user || {}; const { error } = await sb.from('push_suscripciones').upsert({ endpoint: sub.endpoint, user_key: String(u.email || '').toLowerCase(), nombre: u.name || '', sub: sub.toJSON(), ua: navigator.userAgent.slice(0, 180), actualizado: new Date().toISOString() }, { onConflict: 'endpoint' });
+      if (error) { await sub.unsubscribe(); throw error; }
+      this.setState({ pushEstado: 'on', pushBusy: false }); this.toast('Listo: te avisamos cuando escriba un cliente'); }
+    catch (e) { console.warn('push', e); this.setState({ pushBusy: false }); this.toast(/push_suscripciones|relation/i.test(String(e.message || e)) ? 'Falta la tabla push_suscripciones en la nube (supabase-push.sql)' : 'No se pudieron activar: ' + (e.message || e)); } }
   async boot() {
     // Sesión guardada → entra de una (aun sin red); luego la nube confirma o corrige.
     let cached = null; try { cached = JSON.parse(localStorage.getItem(this.SESSION_KEY)); } catch (e) {}
-    if (cached && cached.user) this.setState({ view: 'app', user: cached.user, perms: cached.perms || {}, usersCfg: cached.usersCfg || this.state.usersCfg, counts: cached.counts || {} });
+    if (cached && cached.user) this.setState({ view: 'app', user: cached.user, perms: cached.perms || {}, usersCfg: cached.usersCfg || this.state.usersCfg, counts: cached.counts || {} }, () => { if (this._convPendiente) { const cid = this._convPendiente; this._convPendiente = null; this.setState({ screen: 'chats' }); this.loadConvs(); this.openConv(cid); } });
     let tries = 0; while (!this.sb() && tries++ < 40) await new Promise(r => setTimeout(r, 250));
     const sb = this.sb(); if (!sb) { if (!cached) this.setState({ view: 'login', loginError: 'No se pudo conectar con la nube. Revisa tu conexión.' }); return; }
     try { const { data } = await sb.auth.getSession(); const su = data && data.session && data.session.user; if (su) { await this.enter(su); return; } } catch (e) {}
@@ -901,7 +936,7 @@ class Component extends DCLogic {
     if (!lu) { try { await this.sb().auth.signOut(); } catch (e) {} this.setState({ view: 'login', loginBusy: false, loginError: 'Tu cuenta (' + email + ') no está vinculada a un usuario del sistema. Pídele al administrador que te cree en Usuarios y permisos.' }); return; }
     const user = { id: lu.id, name: lu.name, email: lu.email, role: lu.role, color: lu.color || '#A78659' };
     this._authUid = su.id || '';
-    this.setState({ view: 'app', user, loginBusy: false, loginError: '', loginPwd: '' }, () => { this.persistSession(); this.loadCounts(); this.loadProfiles(); this.loadConvs(); this.subscribeConvs(); });
+    this.setState({ view: 'app', user, loginBusy: false, loginError: '', loginPwd: '' }, () => { this.persistSession(); this.loadCounts(); this.loadProfiles(); this.loadConvs(); this.subscribeConvs(); if (this._convPendiente) { const cid = this._convPendiente; this._convPendiente = null; this.setState({ screen: 'chats' }); this.openConv(cid); } });
   }
   persistSession() { const s = this.state; try { localStorage.setItem(this.SESSION_KEY, JSON.stringify({ user: s.user, perms: s.perms, usersCfg: s.usersCfg, counts: s.counts })); } catch (e) {} }
   async loadCounts() {
@@ -947,13 +982,25 @@ class Component extends DCLogic {
   esMia(c) { return !!(c && c.asignadoA && (this._mismoUid(c.asignadoA, this.meUid()) || this._mismoUid(c.asignadoA, this.state.user && this.state.user.id))); }
   nombreDe(uid) { if (!uid) return ''; const p = (this.state.profiles || []).find(q => q.id === uid); if (p) return p.nombre || (p.email || '').split('@')[0] || 'Usuario'; const u = this.users.find(q => q.id === uid); return u ? u.name : ''; }
   async loadProfiles() { const sb = this.sb(); if (!sb) return; try { let r = await sb.from('profiles').select('id,nombre,rol,email'); if (r.error) r = await sb.from('profiles').select('id,nombre,rol'); if (!r.error && r.data) this.setState({ profiles: r.data }); } catch (e) {} }
+  // Clave interna de la automatización que tocó un mensaje — ESPEJO de _autoKey del Hub (regla 35).
+  AUTOL = { pedido_despachado: 'Despachado', recordatorio_pago: 'Recordatorio de pago', pedido_contraentrega: 'Contraentrega', postventa: 'Postventa', carrito_abandonado: 'Carrito abandonado' };
+  _autoKey(meta) { const m = meta || {}; const p = String(m.plantilla || '').trim(); if (this.AUTOL[p]) return p; if (m.carrito) return 'carrito_abandonado'; if (/carrito/i.test(p)) return 'carrito_abandonado'; if (/postventa/i.test(p)) return 'postventa'; if (/contraentrega/i.test(p)) return 'pedido_contraentrega'; if (/despach/i.test(p)) return 'pedido_despachado'; if (/recordatorio|pago/i.test(p)) return 'recordatorio_pago'; return p; }
+  // Qué automatizaciones tocaron cada conversación de la bandeja: UNA consulta ligera (solo id+meta de
+  // los mensajes con plantilla o carrito, paginada), solo cuando cambió la bandeja. La app no baja los
+  // mensajes de todas las conversaciones (velocidad), por eso va aparte.
+  async loadConvAutos(ids) { const sb = this.sb(); if (!sb || this._autosLoading) return; this._autosLoading = true;
+    try { const desde = new Date(Date.now() - this.CONV_DIAS * 86400000).toISOString(); let all = [];
+      for (let off = 0, page = 1000; ; off += page) { const { data, error } = await sb.from('mensajes').select('conversacion_id,meta').eq('de', 'bot').gte('creado_at', desde).or('meta->>plantilla.neq.,meta->>carrito.not.is.null').range(off, off + page - 1); if (error) throw error; all = all.concat(data || []); if (!data || data.length < page || off > 20000) break; }
+      const by = {}; all.forEach(m => { const k = this._autoKey(m.meta); if (!k) return; (by[m.conversacion_id] = by[m.conversacion_id] || []); if (by[m.conversacion_id].indexOf(k) < 0) by[m.conversacion_id].push(k); });
+      this.setState({ convAutos: by }); }
+    catch (e) { console.warn('autos', e); } finally { this._autosLoading = false; } }
   async loadConvs() {
     const sb = this.sb(); if (!sb || this._convLoading) return; if (this._modLevel(this.access(), 'conversaciones') === 'none') return; this._convLoading = true;
     try { const desde = new Date(Date.now() - this.CONV_DIAS * 86400000).toISOString();
       const { data, error } = await sb.from('conversaciones').select('*').gte('ultimo_at', desde).order('ultimo_at', { ascending: false }).limit(1000); if (error) throw error;
       const list = (data || []).map(r => ({ id: r.id, canal: r.canal || 'web', cliente: r.cliente || r.id, telefono: r.telefono || '', estado: r.estado || 'bot', intencion: r.intencion || '', asignadoA: r.asignado_a || '', noLeidos: r.no_leidos || 0, inicio: (r.creado_at || '').slice(0, 10), ultimoAt: r.ultimo_at || '', ultimo: r.ultimo_mensaje || '' }));
       const sig = list.map(c => c.id + '|' + c.ultimoAt + '|' + c.estado + '|' + c.asignadoA + '|' + c.noLeidos).join('~');
-      if (sig !== this._convSig) { this._convSig = sig; this.setState({ convs: list, convsAt: Date.now() }); const cur = this.state.convId; if (cur) { const c = list.find(x => x.id === cur); const cache = this._msgCache || {}; if (c && cache[cur] && cache[cur].ts !== c.ultimoAt) this.loadMsgs(cur); } }
+      if (sig !== this._convSig) { this._convSig = sig; this.loadConvAutos(); this.setState({ convs: list, convsAt: Date.now() }); const cur = this.state.convId; if (cur) { const c = list.find(x => x.id === cur); const cache = this._msgCache || {}; if (c && cache[cur] && cache[cur].ts !== c.ultimoAt) this.loadMsgs(cur); } }
     } catch (e) { console.warn('conversaciones', e); if (!this.state.convs) this.toast('No se pudieron cargar las conversaciones'); }
     this._convLoading = false;
   }
@@ -962,7 +1009,7 @@ class Component extends DCLogic {
     if (cache[id] && c && cache[id].ts === c.ultimoAt) { this.setState({ msgs: cache[id].msgs, msgsCargando: false }); return; }
     this.setState({ msgsCargando: !cache[id], msgs: cache[id] ? cache[id].msgs : [] });
     try { let all = []; for (let off = 0, page = 1000; ; off += page) { const { data, error } = await sb.from('mensajes').select('de,texto,meta,creado_at').eq('conversacion_id', id).order('creado_at', { ascending: true }).range(off, off + page - 1); if (error) throw error; all = all.concat(data || []); if (!data || data.length < page || off > 50000) break; }
-      const msgs = all.map(m => ({ de: m.de, texto: m.texto, at: m.creado_at, asesor: (m.meta && m.meta.asesor) || '', noEntregado: !!(m.meta && m.meta.noEntregado), manual: !!(m.meta && m.meta.manual), auto: (m.meta && (m.meta.plantilla || m.meta.carrito)) ? 'auto' : '' }));
+      const msgs = all.map(m => ({ de: m.de, texto: m.texto, at: m.creado_at, asesor: (m.meta && m.meta.asesor) || '', noEntregado: !!(m.meta && m.meta.noEntregado), manual: !!(m.meta && m.meta.manual), auto: this._autoKey(m.meta) }));
       cache[id] = { ts: c ? c.ultimoAt : '', msgs }; if (this.state.convId === id) this.setState({ msgs, msgsCargando: false }, () => this.scrollMsgs());
     } catch (e) { console.warn('mensajes', e); this.setState({ msgsCargando: false }); this.toast('No se pudieron cargar los mensajes'); }
   }
@@ -1111,7 +1158,7 @@ class Component extends DCLogic {
     const s = this.state, a = this.access(), u = s.user || {}, c = s.counts || {};
     const lvlTxt = { none: 'Sin acceso', read: 'Solo lectura', write: 'Lectura y escritura' };
     const cop = n => '$' + Math.round(n).toLocaleString('es-CO');
-    const go = (screen, extra) => () => { if (screen === 'modulo' && extra && extra.modId === 'conversaciones') { this.setState({ screen: 'chats' }); this.loadConvs(); return; } if (screen === 'modulo' && extra && extra.modId === 'inventario') { this.setState({ screen: 'inv' }); this.loadInventario(); return; } if (screen === 'modulo' && extra && extra.modId === 'produccion') { this.setState({ screen: 'prod' }); this.loadProduccion(); return; } if (screen === 'modulo' && extra && extra.modId === 'reportes') { this.setState({ screen: 'informe' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'finanzas') { this.setState({ screen: 'fin' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'leads') { this.setState({ screen: 'leads' }); this.loadLeads(); return; } if (screen === 'modulo' && extra && extra.modId === 'soporte') { this.setState({ screen: 'soporte' }); this.loadTickets(); return; } this.setState(Object.assign({ screen }, extra || {})); };
+    const go = (screen, extra) => () => { if (screen === 'inicio') this.refrescarInicio(false); if (screen === 'modulo' && extra && extra.modId === 'conversaciones') { this.setState({ screen: 'chats' }); this.loadConvs(); return; } if (screen === 'modulo' && extra && extra.modId === 'inventario') { this.setState({ screen: 'inv' }); this.loadInventario(); return; } if (screen === 'modulo' && extra && extra.modId === 'produccion') { this.setState({ screen: 'prod' }); this.loadProduccion(); return; } if (screen === 'modulo' && extra && extra.modId === 'reportes') { this.setState({ screen: 'informe' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'finanzas') { this.setState({ screen: 'fin' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'leads') { this.setState({ screen: 'leads' }); this.loadLeads(); return; } if (screen === 'modulo' && extra && extra.modId === 'soporte') { this.setState({ screen: 'soporte' }); this.loadTickets(); return; } this.setState(Object.assign({ screen }, extra || {})); };
     // ---- conversaciones ----
     const chip = on => on ? { bg: '#3A3326', fg: '#FBF8F2', border: '#3A3326' } : { bg: '#FFFFFF', fg: '#574E40', border: '#E4DBCC' };
     const estConv = e => ({ bot: { label: 'Bot', bg: '#EFE6D6', fg: '#7A5E36' }, necesita: { label: 'Necesita asesor', bg: 'rgba(181,80,60,0.14)', fg: '#8F3A28' }, humano: { label: 'Con asesor', bg: 'rgba(101,150,166,0.18)', fg: '#2F5E6E' }, resuelta: { label: 'Resuelta', bg: 'rgba(98,123,96,0.16)', fg: '#3F5A3E' } }[e] || { label: e, bg: '#EFE9DD', fg: '#8A8073' });
@@ -1121,14 +1168,16 @@ class Component extends DCLogic {
     const avat = ['#DCCBAB', '#A8BEA4', '#C9B9A7', '#9C97A2', '#E8B56A', '#8AB38D']; const avatDe = id => { let h = 0; const t = String(id || ''); for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0; return avat[h % avat.length]; };
     const horaDe = iso => { if (!iso) return ''; const d = new Date(iso); if (isNaN(d)) return ''; const hoy = new Date(); const mismo = d.toDateString() === hoy.toDateString(); const ayer = new Date(hoy); ayer.setDate(hoy.getDate() - 1); if (mismo) return d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }); if (d.toDateString() === ayer.toDateString()) return 'Ayer'; return d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' }); };
     const fechaL = iso => { const d = new Date(iso); if (isNaN(d)) return ''; const hoy = new Date(); if (d.toDateString() === hoy.toDateString()) return 'Hoy'; const ayer = new Date(hoy); ayer.setDate(hoy.getDate() - 1); if (d.toDateString() === ayer.toDateString()) return 'Ayer'; return d.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' }); };
-    const convs = s.convs || []; const filtro = s.convFiltro || 'necesita'; const q = String(s.convQ || '').toLowerCase().trim();
-    const convsVis = convs.filter(x => filtro === 'todas' || (filtro === 'mias' ? this.esMia(x) : x.estado === filtro)).filter(x => !q || (String(x.cliente) + ' ' + String(x.telefono)).toLowerCase().includes(q)).map(x => { const e = estConv(x.estado), k = canalInfo(x.canal); const esp = x.estado === 'necesita'; return Object.assign(canalFlags(x.canal), { nombre: x.cliente, canalBg: k.bg, hora: horaDe(x.ultimoAt), horaFg: esp ? '#B5503C' : '#8A8073', horaW: esp ? 700 : 400, ultimo: String(x.ultimo || '').replace(/^\[IMG:.*\]$/, '📷 imagen'), noLeidos: x.noLeidos || 0, estLabel: e.label, estBg: e.bg, estFg: e.fg, asig: x.asignadoA ? (this.esMia(x) ? 'Tuya' : this.nombreDe(x.asignadoA)) : '', open: () => this.openConv(x.id) }); });
+    const convs = s.convs || []; const filtro = s.convFiltro || 'necesita'; const q = String(s.convQ || '').toLowerCase().trim(); const autoSel = s.convAutoSel || 'todos'; const autosDe = c => (s.convAutos && s.convAutos[c.id]) || [];
+    const convsBase = convs.filter(x => filtro === 'todas' || (filtro === 'mias' ? this.esMia(x) : x.estado === filtro));
+    const convsVis = convsBase.filter(x => autoSel === 'todos' ? true : autoSel === 'ninguna' ? autosDe(x).length === 0 : autosDe(x).indexOf(autoSel) >= 0).filter(x => !q || (String(x.cliente) + ' ' + String(x.telefono)).toLowerCase().includes(q)).map(x => { const e = estConv(x.estado), k = canalInfo(x.canal); const esp = x.estado === 'necesita'; return Object.assign(canalFlags(x.canal), { nombre: x.cliente, canalBg: k.bg, hora: horaDe(x.ultimoAt), horaFg: esp ? '#B5503C' : '#8A8073', horaW: esp ? 700 : 400, ultimo: String(x.ultimo || '').replace(/^\[IMG:.*\]$/, '📷 imagen'), noLeidos: x.noLeidos || 0, estLabel: e.label, estBg: e.bg, estFg: e.fg, asig: x.asignadoA ? (this.esMia(x) ? 'Tuya' : this.nombreDe(x.asignadoA)) : '', autoL: autosDe(x).map(k2 => this.AUTOL[k2] || k2).join(' · '), open: () => this.openConv(x.id) }); });
+    const autoChips = (() => { const cuenta = {}; convsBase.forEach(c => autosDe(c).forEach(k => { cuenta[k] = (cuenta[k] || 0) + 1; })); const sin = convsBase.filter(c => autosDe(c).length === 0).length; const chips = [{ k: 'todos', l: 'Todas', n: convsBase.length }]; Object.keys(this.AUTOL).forEach(k => { if (cuenta[k]) chips.push({ k, l: this.AUTOL[k], n: cuenta[k] }); }); if (sin && chips.length > 1) chips.push({ k: 'ninguna', l: 'Sin automatización', n: sin }); return chips.length > 1 ? chips : []; })();
     const cv = convs.find(x => x.id === s.convId) || {}; const cvE = estConv(cv.estado || 'bot'), cvK = canalInfo(cv.canal || 'web');
     const puedeEscribir = this.puedeEscribir(cv); const canWrite = this._modLevel(a, 'conversaciones') === 'write';
     const msgsUI = (s.msgs || []).map((m, i, arr) => { const im = /^\[IMG:(.+)\]$/.exec(String(m.texto || '').trim()); const prev = arr[i - 1]; const dia = m.at ? new Date(m.at).toDateString() : ''; const nuevoDia = !!(dia && (!prev || new Date(prev.at).toDateString() !== dia)); const hora = m.at ? new Date(m.at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) : ''; const base = { texto: im ? '' : m.texto, esImg: !!im, img: im ? im[1] : 'data:image/gif;base64,R0lGODlhAQABAAAAACw=', hora, nuevoDia, fechaL: fechaL(m.at), pad: im ? '4px' : '10px 13px', etPad: im ? '6px 9px 0' : '0', noEntregado: false, canalL: cvK.l, nativoUrl: cvK.url };
       if (m.de === 'sistema') return Object.assign(base, { just: 'center', radius: '12px', bg: m.manual ? 'transparent' : 'rgba(181,80,60,0.06)', fg: m.manual ? '#8A8073' : '#8F3A28', border: m.manual ? '1px dashed #B8AE9C' : '1px dashed rgba(181,80,60,0.5)', align: 'center', etiqueta: m.noEntregado ? 'No entregado' : 'Aviso', noEntregado: !!m.noEntregado && !arr.slice(i + 1).some(x => x.manual) });
       if (m.de === 'cliente') return Object.assign(base, { just: 'flex-start', radius: '16px 16px 16px 4px', bg: '#FFFFFF', fg: '#3A3326', border: '1px solid #E4DBCC', align: 'left', etiqueta: '' });
-      const bot = m.de === 'bot'; return Object.assign(base, { just: 'flex-end', radius: '16px 16px 4px 16px', bg: bot ? '#EFE6D6' : '#A78659', fg: bot ? '#3A3326' : '#FBF8F2', border: 'none', align: 'left', etiqueta: bot ? (m.auto ? 'Automático' : 'Agente IA') : (this.nombreDe(m.asesor) || 'Asesor') }); });
+      const bot = m.de === 'bot'; return Object.assign(base, { just: 'flex-end', radius: '16px 16px 4px 16px', bg: bot ? '#EFE6D6' : '#A78659', fg: bot ? '#3A3326' : '#FBF8F2', border: 'none', align: 'left', etiqueta: bot ? (m.auto ? ('Automático · ' + (this.AUTOL[m.auto] || m.auto)) : 'Agente IA') : (this.nombreDe(m.asesor) || 'Asesor') }); });
     const yo = String(u.name || '').split(' ')[0];
     const prodQ = String(s.prodQ || '').toLowerCase().trim(); const prodVis = (s.productos || []).filter(p => !prodQ || p.nombre.toLowerCase().includes(prodQ)).slice(0, 30);
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
@@ -1199,7 +1248,7 @@ class Component extends DCLogic {
       setLoginEmail: e => this.setState({ loginEmail: e.target.value, loginError: '' }), setLoginPwd: e => this.setState({ loginPwd: e.target.value, loginError: '' }),
       loginKey: e => { if (e.key === 'Enter') this.doLogin(); }, doLogin: () => this.doLogin(), doLogout: () => this.doLogout(),
       loginBtnBg: s.loginBusy ? '#C1AA81' : '#A78659', loginBtnLabel: s.loginBusy ? 'Entrando…' : 'Entrar',
-      isInicio: s.screen === 'inicio', isModulo: s.screen === 'modulo', isPerfil: s.screen === 'perfil', goInicio: go('inicio'), goPerfil: go('perfil'),
+      isInicio: s.screen === 'inicio', refrescar: () => this.refrescarInicio(true), actualizadoTxt: s.countsCargando ? 'Actualizando…' : s.countsAt ? 'Actualizado ' + new Date(s.countsAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) + ' · toca para refrescar' : 'Cargando…', isModulo: s.screen === 'modulo', isPerfil: s.screen === 'perfil', goInicio: go('inicio'), goPerfil: go('perfil'),
       isChats: s.screen === 'chats', isChat: s.screen === 'chat', showTabs: s.screen !== 'chat' && s.screen !== 'invItem' && s.screen !== 'prodNueva', goChats: () => this.setState({ screen: 'chats', convId: null }),
       isFin: s.screen === 'fin', finSubTxt: finRow ? 'Publicado por el Hub el ' + new Date(finRow.actualizado).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' · solo consulta' : (s.informes ? 'Sin datos' : 'Cargando…'),
       finTabs: [['caja', 'Caja y bancos'], ['cobrar', 'Por cobrar']].map(([id, label]) => Object.assign({ label, set: () => this.setState({ finTab: id }) }, chip(finTab === id))), finEsCaja: finTab === 'caja', finEsCobrar: finTab === 'cobrar',
@@ -1248,6 +1297,7 @@ class Component extends DCLogic {
       convsSubTxt: s.convs ? (convs.filter(x => x.estado === 'necesita').length + ' por atender · ' + this.CONV_DIAS + ' días') : 'Cargando…',
       convQ: s.convQ || '', setConvQ: e => this.setState({ convQ: e.target.value }),
       convFiltros: [['necesita', 'Necesita asesor'], ['mias', 'Mías'], ['humano', 'Con asesor'], ['bot', 'Bot'], ['resuelta', 'Resueltas'], ['todas', 'Todas']].map(([id, label]) => Object.assign({ label, set: () => this.setState({ convFiltro: id }) }, chip(filtro === id))),
+      convAutoChips: autoChips.map(x => Object.assign({ label: x.l + ' ' + x.n, set: () => this.setState({ convAutoSel: x.k }) }, x.k === autoSel ? { bg: '#A78659', fg: '#FBF8F2', border: '#A78659' } : { bg: 'transparent', fg: '#574E40', border: '#E4DBCC' })), convAutoHay: autoChips.length > 0,
       convsVis, convsVacio: !!s.convs && convsVis.length === 0, convsVacioTxt: q ? 'Nada coincide con la búsqueda.' : filtro === 'necesita' ? 'Nadie está esperando un asesor. Todo al día.' : filtro === 'mias' ? 'No tienes conversaciones asignadas.' : 'No hay conversaciones en este filtro.',
       conv: Object.assign(canalFlags(cv.canal), { nombre: cv.cliente || '', canalBg: cvK.bg, canalL: cvK.l, estLabel: cvE.label, asigTxt: cv.asignadoA ? ' · ' + (this.esMia(cv) ? 'tuya' : this.nombreDe(cv.asignadoA)) : '', tel: cv.telefono || '—', inicio: cv.inicio || '—', asigNombre: cv.asignadoA ? this.nombreDe(cv.asignadoA) || 'Asesor' : 'Sin asignar', intencion: cv.intencion || '—', msgs: msgsUI, puedeResolver: canWrite && cv.estado !== 'resuelta' && (this.isAdmin() || this.esMia(cv) || cv.estado !== 'humano'), puedeDevolver: canWrite && cv.estado === 'humano' && (this.isAdmin() || this.esMia(cv)) }),
       showInfo: !!s.showInfo, toggleInfo: () => this.setState({ showInfo: !s.showInfo }), msgsCargando: !!s.msgsCargando, msgsRef: el => { this._msgsEl = el; },
@@ -1278,6 +1328,8 @@ class Component extends DCLogic {
       permisosRows: [['conversaciones', 'Conversaciones'], ['inventario', 'Inventario'], ['finanzas', 'Finanzas'], ['ventas', 'Ventas y leads'], ['informes', 'Informes'], ['compras', 'Compras'], ['produccion', 'Producción']].map(([k, label]) => { const l = this._modLevel(a, k); return { label, nivel: lvlTxt[l], fg: l === 'none' ? '#8A8073' : l === 'read' ? '#2F5E6E' : '#3F5A3E' }; }),
       instaladaTxt: s.standalone ? 'Sí' : 'No · abre desde el navegador', nubeTxt: s.offline ? 'Sin conexión' : 'Conectada',
       esAdmin: this.isAdmin(), adminUsers,
+      pushToggle: () => this.pushToggle(), pushBg: s.pushEstado === 'on' ? '#627B60' : '#D9CFBF', pushKnob: s.pushEstado === 'on' ? '21px' : '3px',
+      pushTxt: s.pushBusy ? 'Un momento…' : s.pushEstado === 'on' ? 'Te avisamos en este teléfono cuando escriba un cliente' : s.pushEstado === 'denegado' ? 'Bloqueadas por el teléfono: actívalas en Ajustes del navegador' : s.pushEstado === 'nosoporta' ? 'Este navegador no las soporta' : (!s.standalone && /iPhone|iPad/.test(navigator.userAgent)) ? 'En iPhone: agrega la app a la pantalla de inicio y actívalas desde ahí' : 'Apagadas · recibe un aviso por cada mensaje de cliente',
       tabInicio: tab('inicio', go('inicio')), tabCuenta: tab('perfil', go('perfil')),
       tabProd: tab('modulo:produccion', go('modulo', { modId: 'produccion' }), { visible: prodLvl !== 'none' && (this._modLevel(a, 'informes') === 'none' || this._modLevel(a, 'conversaciones') === 'none') }),
       tabInv: tab('modulo:inventario', go('modulo', { modId: 'inventario' }), { visible: invLvl !== 'none' && (this._modLevel(a, 'informes') === 'none' || this._modLevel(a, 'conversaciones') === 'none'), badge: this.isAdmin() ? ctPendN : 0 }),
