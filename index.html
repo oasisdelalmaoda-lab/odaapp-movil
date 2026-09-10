@@ -258,6 +258,269 @@
     </div>
     </sc-if>
 
+    <!-- ===== INFORME GERENCIAL (publicado por el Hub) ===== -->
+    <sc-if value="{{ isInforme }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Informe gerencial" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInicio }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:#8A8073;">Informe gerencial</div><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;line-height:1.1;">{{ inf.infMesLabel }}</div></div>
+        <div style="display:flex;align-items:center;gap:2px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:999px;padding:3px;">
+          <div onClick="{{ infPrev }}" style="width:36px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:999px;font-weight:800;color:{{ infPrevFg }};">←</div>
+          <div onClick="{{ infNext }}" style="width:36px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:999px;font-weight:800;color:{{ infNextFg }};">→</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#8A8073;margin-top:6px;">{{ infGenerado }}</div>
+      <sc-if value="{{ infVacio }}" hint-placeholder-val="{{ false }}"><div style="margin-top:14px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;line-height:1.5;">{{ infVacioTxt }}</div></sc-if>
+      <sc-if value="{{ infHay }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ inf.infCompParcial }}" hint-placeholder-val="{{ false }}"><div style="margin-top:12px;font-size:11px;color:#8A6F49;background:rgba(167,134,89,0.12);border:1px solid rgba(167,134,89,0.32);border-radius:14px;padding:8px 12px;line-height:1.45;"><b style="letter-spacing:0.1em;text-transform:uppercase;font-size:10px;">Mes en curso</b> · {{ inf.infCompNota }}</div></sc-if>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;">
+        <sc-for list="{{ inf.infKpis }}" as="k" hint-placeholder-count="4">
+          <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px;">
+            <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#8A8073;">{{ k.label }}</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;line-height:1.1;margin-top:6px;color:{{ k.valorFg }};">{{ k.valor }}</div>
+            <div style="font-size:10.5px;color:#8A8073;margin-top:4px;min-height:14px;line-height:1.35;">{{ k.nota }}</div>
+            <div style="display:flex;flex-direction:column;gap:2px;margin-top:9px;padding-top:8px;border-top:1px solid #EFE9DD;font-size:10.5px;"><div><span style="color:#8A8073;">{{ k.prevLab }}</span><span style="font-weight:800;color:{{ k.dPrevFg }};">{{ k.dPrev }}</span></div><div><span style="color:#8A8073;">{{ k.yoyLab }}</span><span style="font-weight:800;color:{{ k.dYoYFg }};">{{ k.dYoY }}</span></div></div>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ inf.infAlertasHay }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:12px;">
+          <sc-for list="{{ inf.infAlertas }}" as="a" hint-placeholder-count="1"><div style="background:{{ a.bg }};border:1px solid {{ a.bd }};border-radius:14px;padding:10px 14px;font-size:12px;font-weight:600;color:{{ a.fg }};line-height:1.4;">{{ a.txt }}</div></sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ inf.infIaHay }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;"><div style="font-size:13px;font-weight:800;margin-bottom:8px;">Lectura del mes</div><div style="font-size:13px;line-height:1.6;color:#574E40;white-space:pre-wrap;text-wrap:pretty;">{{ inf.infIaTxt }}</div></div>
+      </sc-if>
+      <div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
+        <div style="font-size:13px;font-weight:800;">Evolución del ingreso</div><div style="font-size:11px;color:#8A8073;margin-top:2px;margin-bottom:14px;">Últimos 12 meses, ingreso neto</div>
+        <div style="display:flex;align-items:flex-end;gap:4px;height:110px;">
+          <sc-for list="{{ inf.infSerie }}" as="s" hint-placeholder-count="12"><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end;"><div style="width:100%;height:{{ s.h }};background:{{ s.bg }};border-radius:3px 3px 0 0;"></div><div style="font-size:8.5px;color:#8A8073;text-transform:uppercase;">{{ s.label }}</div></div></sc-for>
+        </div>
+      </div>
+      <div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
+        <div style="font-size:13px;font-weight:800;margin-bottom:12px;">Ventas por método de pago</div>
+        <sc-if value="{{ inf.infMetodosVacio }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#8A8073;">Sin ventas en el mes.</div></sc-if>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <sc-for list="{{ inf.infMetodos }}" as="c" hint-placeholder-count="3"><div><div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:5px;"><div style="font-size:12.5px;font-weight:700;">{{ c.metodo }}</div><div style="display:flex;align-items:baseline;gap:6px;white-space:nowrap;"><span style="font-size:12.5px;font-weight:800;">{{ c.ing }}</span><span style="font-size:10.5px;font-weight:800;color:{{ c.deltaFg }};">{{ c.delta }}</span></div></div><div style="height:6px;background:rgba(167,134,89,0.14);border-radius:99px;overflow:hidden;margin-bottom:4px;"><div style="height:100%;width:{{ c.barra }};background:#A78659;border-radius:99px;"></div></div><div style="font-size:11px;color:#8A8073;">{{ c.ped }} · {{ c.part }} del ingreso</div></div></sc-for>
+        </div>
+      </div>
+      <div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
+        <div style="font-size:13px;font-weight:800;margin-bottom:12px;">Ventas por canal</div>
+        <sc-if value="{{ inf.infCanalesVacio }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#8A8073;">Sin ventas en el mes.</div></sc-if>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <sc-for list="{{ inf.infCanales }}" as="c" hint-placeholder-count="3"><div><div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:5px;"><div style="font-size:12.5px;font-weight:700;">{{ c.canal }}</div><div style="display:flex;align-items:baseline;gap:6px;white-space:nowrap;"><span style="font-size:12.5px;font-weight:800;">{{ c.ing }}</span><span style="font-size:10.5px;font-weight:800;color:{{ c.deltaFg }};">{{ c.delta }}</span></div></div><div style="height:6px;background:rgba(167,134,89,0.14);border-radius:99px;overflow:hidden;margin-bottom:4px;"><div style="height:100%;width:{{ c.barra }};background:#A78659;border-radius:99px;"></div></div><div style="font-size:11px;color:#8A8073;">{{ c.ped }} · {{ c.part }} del ingreso</div></div></sc-for>
+        </div>
+      </div>
+      <div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
+        <div style="font-size:13px;font-weight:800;margin-bottom:12px;">Ventas por ciudad</div>
+        <sc-if value="{{ inf.infCiudadesVacio }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#8A8073;">Sin ventas en el mes.</div></sc-if>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <sc-for list="{{ inf.infCiudades }}" as="c" hint-placeholder-count="4"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding-bottom:8px;border-bottom:1px solid #EFE9DD;"><div style="font-size:12.5px;font-weight:700;min-width:0;">{{ c.ciudad }}</div><div style="display:flex;align-items:baseline;gap:8px;white-space:nowrap;font-size:11px;color:#8A8073;"><span>{{ c.ped }}</span><span>{{ c.part }}</span><span style="font-size:12.5px;font-weight:800;color:#3A3326;">{{ c.ing }}</span></div></div></sc-for>
+        </div>
+      </div>
+      <div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
+        <div style="font-size:13px;font-weight:800;margin-bottom:12px;">Clientes</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <sc-for list="{{ inf.infCli }}" as="c" hint-placeholder-count="6"><div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#8A8073;margin-bottom:3px;">{{ c.label }}</div><div style="font-size:17px;font-weight:800;">{{ c.valor }}</div></div></sc-for>
+        </div>
+        <sc-if value="{{ inf.infTopCliVacio }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#8A8073;margin-top:12px;">Sin clientes en el mes.</div></sc-if>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #EFE9DD;display:flex;flex-direction:column;gap:8px;">
+          <sc-for list="{{ inf.infTopCli }}" as="c" hint-placeholder-count="3"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;"><div style="min-width:0;"><div style="font-size:12.5px;font-weight:700;">{{ c.nombre }}</div><div style="font-size:10.5px;color:#8A8073;">{{ c.ciudad }} · {{ c.ped }}</div></div><div style="font-size:12.5px;font-weight:800;white-space:nowrap;">{{ c.total }}</div></div></sc-for>
+        </div>
+      </div>
+      <div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
+        <div style="font-size:13px;font-weight:800;margin-bottom:12px;">Inventario</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <sc-for list="{{ inf.infInv }}" as="i" hint-placeholder-count="6"><div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#8A8073;margin-bottom:3px;">{{ i.label }}</div><div style="font-size:15px;font-weight:800;">{{ i.valor }}</div></div></sc-for>
+        </div>
+        <sc-if value="{{ inf.infInmHay }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid #EFE9DD;"><div style="font-size:11.5px;font-weight:700;">Capital sin rotar · {{ inf.infInmTotal }}</div><div style="font-size:11px;color:#8A8073;margin-bottom:8px;">{{ inf.infInmN }} productos con stock sin ventas en 90 días</div>
+            <div style="display:flex;flex-direction:column;gap:6px;"><sc-for list="{{ inf.infInmRows }}" as="x" hint-placeholder-count="3"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;"><div style="font-size:12px;color:#574E40;min-width:0;">{{ x.nombre }}</div><div style="display:flex;gap:8px;white-space:nowrap;font-size:11px;color:#8A8073;"><span>{{ x.stock }} und</span><span style="font-size:12px;font-weight:800;color:#3A3326;">{{ x.valor }}</span></div></div></sc-for></div></div>
+        </sc-if>
+      </div>
+      <div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
+        <div style="font-size:13px;font-weight:800;margin-bottom:12px;">Caja y cartera</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <sc-for list="{{ inf.infCaja }}" as="k" hint-placeholder-count="8"><div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#8A8073;margin-bottom:3px;">{{ k.label }}</div><div style="font-size:15px;font-weight:800;">{{ k.valor }}</div></div></sc-for>
+        </div>
+      </div>
+      <div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
+        <div style="font-size:13px;font-weight:800;margin-bottom:12px;">Marketing</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <sc-for list="{{ inf.infMkt }}" as="m" hint-placeholder-count="4"><div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#8A8073;margin-bottom:3px;">{{ m.label }}</div><div style="font-size:17px;font-weight:800;">{{ m.valor }}</div></div></sc-for>
+        </div>
+        <div style="font-size:11px;color:#8A8073;margin-top:12px;line-height:1.5;text-wrap:pretty;">{{ inf.infMktNota }}</div>
+      </div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- ===== FINANZAS (solo consulta, publicado por el Hub) ===== -->
+    <sc-if value="{{ isFin }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Finanzas" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInicio }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="flex:1;min-width:0;"><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;line-height:1.1;">Finanzas</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ finSubTxt }}</div></div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:12px;">
+        <sc-for list="{{ finTabs }}" as="f" hint-placeholder-count="2"><div onClick="{{ f.set }}" style="padding:8px 14px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.fg }};">{{ f.label }}</div></sc-for>
+      </div>
+      <sc-if value="{{ finVacio }}" hint-placeholder-val="{{ false }}"><div style="margin-top:14px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;line-height:1.5;">{{ finVacioTxt }}</div></sc-if>
+      <sc-if value="{{ finEsCaja }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-top:14px;background:#3A3326;color:#FBF8F2;border-radius:18px;padding:18px 20px;"><div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;opacity:0.7;">Saldo total en cuentas</div><div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1;margin-top:6px;">{{ finSaldoTotal }}</div></div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+          <sc-for list="{{ finCuentas }}" as="c" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;"><div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:14px;">{{ c.nombre }}</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ c.tipo }}</div></div><div style="font-weight:800;font-size:15px;color:{{ c.fg }};white-space:nowrap;">{{ c.saldoTxt }}</div></div></sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ finEsCobrar }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:14px;background:#3A3326;color:#FBF8F2;border-radius:18px;padding:18px 20px;"><div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;opacity:0.7;">Por cobrar</div><div style="display:flex;align-items:baseline;gap:10px;margin-top:6px;"><div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1;">{{ finCobrarTotal }}</div><div style="font-size:12px;color:#C1AA81;">{{ finCobrarN }}</div></div></div>
+        <input value="{{ finQ }}" onChange="{{ setFinQ }}" placeholder="Buscar cliente o pedido" style="width:100%;box-sizing:border-box;margin-top:12px;height:42px;border-radius:999px;border:1px solid #B8AE9C;background:#FFFFFF;padding:0 16px;font-family:inherit;font-size:14px;color:#3A3326;outline:none;">
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+          <sc-for list="{{ finCobrar }}" as="r" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;"><div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.cliente }}</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ r.ov }} · {{ r.metodo }}</div></div><div style="text-align:right;flex:0 0 auto;"><div style="font-weight:800;font-size:14px;">{{ r.saldoTxt }}</div><div style="font-size:11px;font-weight:700;margin-top:2px;color:{{ r.diasFg }};">{{ r.diasTxt }}</div></div></div></sc-for>
+        </div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- ===== LEADS ===== -->
+    <sc-if value="{{ isLeads }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Leads" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInicio }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="flex:1;min-width:0;"><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;line-height:1.1;">Leads</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ leadsSubTxt }}</div></div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:12px;overflow-x:auto;scrollbar-width:none;">
+        <sc-for list="{{ leadFiltros }}" as="f" hint-placeholder-count="5"><div onClick="{{ f.set }}" style="flex:0 0 auto;padding:8px 12px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.fg }};">{{ f.label }}</div></sc-for>
+      </div>
+      <sc-if value="{{ leadsVacio }}" hint-placeholder-val="{{ false }}"><div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;">{{ leadsVacioTxt }}</div></sc-if>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+        <sc-for list="{{ leadsVis }}" as="l" hint-placeholder-count="4">
+          <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;">
+            <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;"><div style="font-weight:700;font-size:14px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ l.nombre }}</div><div style="flex:0 0 auto;display:inline-flex;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;background:{{ l.etBg }};color:{{ l.etFg }};">{{ l.estado }}</div></div>
+            <sc-if value="{{ l.interes }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#574E40;margin-top:4px;line-height:1.4;">{{ l.interes }}</div></sc-if>
+            <div style="font-size:11px;color:#8A8073;margin-top:6px;">{{ l.meta }}</div>
+            <div style="display:flex;gap:8px;margin-top:12px;align-items:center;">
+              <sc-if value="{{ l.tieneCel }}" hint-placeholder-val="{{ true }}">
+                <a href="{{ l.waUrl }}" target="_blank" rel="noopener" style="height:38px;padding:0 14px;border-radius:999px;background:#25D366;color:#FFF;display:flex;align-items:center;gap:6px;font-weight:700;font-size:12px;text-decoration:none;">WhatsApp</a>
+                <a href="{{ l.telUrl }}" style="height:38px;padding:0 14px;border-radius:999px;border:1px solid #B8AE9C;color:#5A4A33;display:flex;align-items:center;font-weight:700;font-size:12px;text-decoration:none;">Llamar</a>
+              </sc-if>
+              <div style="flex:1;"></div>
+              <sc-if value="{{ l.puedeAvanzar }}" hint-placeholder-val="{{ false }}"><div onClick="{{ l.avanzar }}" style="height:38px;padding:0 14px;border-radius:999px;background:#A78659;color:#FBF8F2;display:flex;align-items:center;font-weight:700;font-size:12px;white-space:nowrap;">{{ l.accion }}</div></sc-if>
+            </div>
+            <sc-if value="{{ l.puedePerder }}" hint-placeholder-val="{{ false }}"><div onClick="{{ l.perder }}" style="font-size:11px;color:#8F3A28;font-weight:700;margin-top:10px;text-align:right;">Marcar perdido</div></sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ===== SOPORTE ===== -->
+    <sc-if value="{{ isSoporte }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Soporte" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInicio }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="flex:1;min-width:0;"><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;line-height:1.1;">Soporte ODA</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">Reporta un problema de la app o del Hub</div></div>
+      </div>
+      <div style="margin-top:14px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
+        <div style="font-size:12px;color:#574E40;font-weight:700;">Asunto</div>
+        <input value="{{ sopAsunto }}" onChange="{{ setSopAsunto }}" placeholder="En pocas palabras, ¿qué pasa?" style="width:100%;box-sizing:border-box;margin-top:8px;height:44px;border-radius:14px;border:1px solid {{ sopAsuntoBorder }};background:#FBF8F2;padding:0 14px;font-family:inherit;font-size:14px;font-weight:600;color:#3A3326;outline:none;">
+        <div style="font-size:12px;color:#574E40;font-weight:700;margin-top:14px;">Detalle</div>
+        <textarea value="{{ sopDetalle }}" onChange="{{ setSopDetalle }}" placeholder="Qué hiciste, qué esperabas y qué pasó" style="width:100%;box-sizing:border-box;margin-top:8px;min-height:96px;border-radius:14px;border:1px solid #B8AE9C;background:#FBF8F2;padding:12px 14px;font-family:inherit;font-size:13px;outline:none;color:#3A3326;resize:none;"></textarea>
+        <div style="display:flex;gap:6px;margin-top:12px;">
+          <sc-for list="{{ sopPrioridades }}" as="p" hint-placeholder-count="3"><div onClick="{{ p.set }}" style="flex:1;padding:9px 0;text-align:center;border-radius:999px;font-size:12px;font-weight:700;border:1px solid {{ p.border }};background:{{ p.bg }};color:{{ p.fg }};">{{ p.label }}</div></sc-for>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap;">
+          <sc-for list="{{ sopFotos }}" as="f" hint-placeholder-count="0"><div style="position:relative;"><img src="{{ f.src }}" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:12px;border:1px solid #E4DBCC;display:block;"><div onClick="{{ f.quitar }}" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:999px;background:#3A3326;color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-size:13px;">×</div></div></sc-for>
+          <sc-if value="{{ sopPuedeFoto }}" hint-placeholder-val="{{ true }}"><div onClick="{{ sopPickFoto }}" style="height:40px;padding:0 14px;border-radius:999px;border:1px solid #B8AE9C;background:#FFFFFF;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#5A4A33;">+ Foto</div></sc-if>
+        </div>
+        <div onClick="{{ sopEnviar }}" style="margin-top:14px;height:48px;border-radius:999px;background:{{ sopBtnBg }};color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">{{ sopBtnLabel }}</div>
+        <sc-if value="{{ sopError }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#8F3A28;margin-top:8px;">{{ sopError }}</div></sc-if>
+      </div>
+      <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin:22px 0 10px;">{{ sopListaTitulo }}</div>
+      <sc-if value="{{ sopVacio }}" hint-placeholder-val="{{ false }}"><div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;">{{ sopVacioTxt }}</div></sc-if>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <sc-for list="{{ sopTickets }}" as="t" hint-placeholder-count="3">
+          <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;">
+            <div style="display:flex;justify-content:space-between;gap:8px;"><div style="font-weight:700;font-size:13px;line-height:1.35;min-width:0;">{{ t.asunto }}</div><div style="flex:0 0 auto;display:inline-flex;align-self:flex-start;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;background:{{ t.estBg }};color:{{ t.estFg }};">{{ t.estado }}</div></div>
+            <div style="font-size:11px;color:#8A8073;margin-top:4px;">{{ t.meta }}</div>
+            <sc-if value="{{ t.respuesta }}" hint-placeholder-val="{{ false }}"><div style="margin-top:8px;font-size:12px;color:#574E40;line-height:1.45;background:#F7F2E9;border-radius:12px;padding:10px 12px;">{{ t.respuesta }}</div></sc-if>
+            <sc-if value="{{ t.pideConfirmacion }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:10px;padding-top:10px;border-top:1px solid #EFE9DD;display:flex;align-items:center;justify-content:space-between;gap:8px;"><div style="font-size:12px;font-weight:700;">¿Quedó resuelto?</div><div style="display:flex;gap:6px;"><div onClick="{{ t.no }}" style="height:36px;padding:0 14px;border-radius:999px;border:1px solid #B8AE9C;display:flex;align-items:center;font-size:12px;font-weight:700;color:#5A4A33;">No</div><div onClick="{{ t.si }}" style="height:36px;padding:0 14px;border-radius:999px;background:#627B60;color:#FBF8F2;display:flex;align-items:center;font-size:12px;font-weight:700;">Sí</div></div></div>
+            </sc-if>
+            <sc-if value="{{ t.pideMotivo }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:10px;padding-top:10px;border-top:1px solid #EFE9DD;"><div style="font-size:12px;font-weight:700;">¿Qué sigue pasando?</div><textarea value="{{ sopRechazoTxt }}" onChange="{{ setSopRechazoTxt }}" placeholder="Cuéntanos qué sigue fallando (obligatorio)" style="width:100%;box-sizing:border-box;margin-top:8px;min-height:64px;border-radius:12px;border:1px solid #B8AE9C;background:#FBF8F2;padding:10px 12px;font-family:inherit;font-size:13px;outline:none;color:#3A3326;resize:none;"></textarea><div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end;"><div onClick="{{ t.cancelarNo }}" style="height:36px;padding:0 14px;border-radius:999px;border:1px solid #B8AE9C;display:flex;align-items:center;font-size:12px;font-weight:700;color:#5A4A33;">Cancelar</div><div onClick="{{ t.confirmarNo }}" style="height:36px;padding:0 14px;border-radius:999px;background:#B5503C;color:#FBF8F2;display:flex;align-items:center;font-size:12px;font-weight:700;">Reabrir</div></div></div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ===== PRODUCCIÓN · historial ===== -->
+    <sc-if value="{{ isProd }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Producción" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInicio }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="flex:1;min-width:0;"><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;line-height:1.1;">Producción</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ prodSubTxt }}</div></div>
+      </div>
+      <sc-if value="{{ prodPuede }}" hint-placeholder-val="{{ true }}">
+        <div onClick="{{ nuevaOP }}" style="margin-top:14px;height:56px;border-radius:18px;background:#A78659;color:#FBF8F2;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:700;font-size:15px;"><span style="font-size:22px;line-height:1;">+</span>Registrar producción</div>
+      </sc-if>
+      <input value="{{ opQ }}" onChange="{{ setOpQ }}" placeholder="Buscar orden o producto" style="width:100%;box-sizing:border-box;margin-top:12px;height:42px;border-radius:999px;border:1px solid #B8AE9C;background:#FFFFFF;padding:0 16px;font-family:inherit;font-size:14px;color:#3A3326;outline:none;">
+      <sc-if value="{{ opsVacio }}" hint-placeholder-val="{{ false }}"><div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;line-height:1.5;">{{ opsVacioTxt }}</div></sc-if>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+        <sc-for list="{{ opsVis }}" as="g" hint-placeholder-count="4">
+          <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;"><div style="font-weight:700;font-size:14px;">{{ g.numero }}</div><div style="font-size:11px;color:#8A8073;">{{ g.fechaL }}</div></div>
+            <div style="display:flex;flex-direction:column;gap:4px;margin-top:8px;">
+              <sc-for list="{{ g.lineas }}" as="l" hint-placeholder-count="1">
+                <div style="display:flex;justify-content:space-between;gap:10px;font-size:13px;"><span style="color:#574E40;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ l.nombre }}</span><span style="font-weight:700;flex:0 0 auto;">{{ l.cant }}</span></div>
+              </sc-for>
+            </div>
+            <div style="margin-top:8px;padding-top:8px;border-top:1px solid #EFE9DD;font-size:12px;color:#8A8073;text-align:right;">Total <b style="color:#3A3326;">{{ g.undTxt }}</b></div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ===== PRODUCCIÓN · nueva orden ===== -->
+    <sc-if value="{{ isProdNueva }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Nueva producción" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 40px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goProd }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="flex:1;"><div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;">Orden {{ opNum }} · hoy</div><div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;line-height:1.1;margin-top:2px;">Registrar producción</div></div>
+      </div>
+      <div style="margin-top:14px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
+        <div style="font-size:12px;color:#574E40;font-weight:700;">Producto</div>
+        <input value="{{ opProdQ }}" onChange="{{ setOpProdQ }}" placeholder="Escribe el nombre o código" style="width:100%;box-sizing:border-box;margin-top:8px;height:46px;border-radius:14px;border:1px solid {{ opSelBorder }};background:#FBF8F2;padding:0 14px;font-family:inherit;font-size:15px;font-weight:600;color:#3A3326;outline:none;">
+        <sc-if value="{{ opProdSinMatch }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#8A8073;margin-top:8px;">Ningún producto coincide.</div></sc-if>
+        <div style="display:flex;flex-direction:column;">
+          <sc-for list="{{ opProdVis }}" as="p" hint-placeholder-count="0">
+            <div onClick="{{ p.pick }}" style="display:flex;justify-content:space-between;gap:10px;padding:11px 4px;border-bottom:1px solid #EFE9DD;font-size:13px;"><span style="font-weight:600;flex:1;min-width:0;">{{ p.nombre }}</span><span style="color:#8A8073;flex:0 0 auto;">{{ p.codigo }}</span></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px;align-items:flex-end;">
+          <div style="flex:1;"><div style="font-size:12px;color:#574E40;font-weight:700;">Cantidad (und)</div><input type="number" inputmode="numeric" min="1" value="{{ opCant }}" onChange="{{ setOpCant }}" placeholder="0" style="width:100%;box-sizing:border-box;margin-top:8px;height:56px;border-radius:14px;border:1px solid #B8AE9C;background:#FBF8F2;padding:0 14px;font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;color:#3A3326;outline:none;"></div>
+          <div onClick="{{ toggleRecarga }}" style="flex:0 0 auto;height:56px;padding:0 14px;border-radius:14px;border:1px solid {{ recBorder }};background:{{ recBg }};color:{{ recFg }};display:flex;align-items:center;font-size:12px;font-weight:700;">Recarga</div>
+        </div>
+        <div style="font-size:11px;color:#8A8073;margin-top:8px;line-height:1.4;">Recarga = envase del cliente: solo se descuentan los componentes líquidos.</div>
+        <div onClick="{{ addOPLinea }}" style="margin-top:14px;height:46px;border-radius:999px;background:{{ addBg }};color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">Agregar a la orden</div>
+      </div>
+      <sc-if value="{{ opHayLineas }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin:22px 0 10px;">En esta orden</div>
+        <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;overflow:hidden;">
+          <sc-for list="{{ opLineas }}" as="l" hint-placeholder-count="1">
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #EFE9DD;"><div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:14px;">{{ l.nombre }}</div><sc-if value="{{ l.recargaTxt }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;color:#7A5E36;margin-top:2px;">{{ l.recargaTxt }}</div></sc-if></div><div style="font-weight:800;font-size:14px;">{{ l.cantTxt }}</div><div onClick="{{ l.quitar }}" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:#8F3A28;font-size:18px;">×</div></div>
+          </sc-for>
+          <div style="padding:12px 16px;font-size:12px;color:#8A8073;text-align:right;">{{ opTotalTxt }}</div>
+        </div>
+      </sc-if>
+      <div onClick="{{ guardarOP }}" style="margin-top:18px;height:52px;border-radius:999px;background:{{ opBtnBg }};color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;">Guardar producción</div>
+      <div style="text-align:center;font-size:11px;color:#8A8073;margin-top:8px;line-height:1.4;">Se aplica de inmediato: suma el producto terminado y descuenta las materias según su estructura.</div>
+    </div>
+    </sc-if>
+
     <!-- ===== INVENTARIO · existencias ===== -->
     <sc-if value="{{ isInv }}" hint-placeholder-val="{{ false }}">
     <div data-screen-label="Inventario" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 0 110px;">
@@ -455,6 +718,19 @@
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ tabInicio.fg }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"></path></svg>
         <div style="font-size:10px;font-weight:700;color:{{ tabInicio.fg }};">Inicio</div>
       </div>
+      <sc-if value="{{ tabProd.visible }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ tabProd.go }}" style="flex:1;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-radius:999px;background:{{ tabProd.bg }};position:relative;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ tabProd.fg }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l1 4H8z"></path><path d="M7 7h10l1.5 12a2 2 0 0 1-2 2H7.5a2 2 0 0 1-2-2z"></path><path d="M6.2 14h11.6"></path></svg>
+        <div style="font-size:10px;font-weight:700;color:{{ tabProd.fg }};">Producción</div>
+      </div>
+      </sc-if>
+      <sc-if value="{{ tabInv.visible }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ tabInv.go }}" style="flex:1;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-radius:999px;background:{{ tabInv.bg }};position:relative;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ tabInv.fg }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 12 4l9 4.5v8L12 21l-9-4.5z"></path><path d="M3 8.5 12 13l9-4.5"></path><path d="M12 13v8"></path></svg>
+        <div style="font-size:10px;font-weight:700;color:{{ tabInv.fg }};">Inventario</div>
+        <sc-if value="{{ tabInv.badge }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:5px;right:calc(50% - 22px);min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:#C9962F;color:#FFF;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #FBF8F2;">{{ tabInv.badge }}</div></sc-if>
+      </div>
+      </sc-if>
       <sc-if value="{{ tabInforme.visible }}" hint-placeholder-val="{{ true }}">
       <div onClick="{{ tabInforme.go }}" style="flex:1;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-radius:999px;background:{{ tabInforme.bg }};position:relative;">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ tabInforme.fg }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M8 16v-4"></path><path d="M13 16V7"></path><path d="M18 16v-6"></path></svg>
@@ -495,6 +771,7 @@ class Component extends DCLogic {
     { id: 'u2', name: 'Oscar Pérez', email: 'oscar.perez@oasisdelalma.co', role: 'Administración y Finanzas', color: '#6596A6' },
     { id: 'u3', name: 'Carolina Fandiño', email: 'carolina.fandino@oasisdelalma.co', role: 'Mercadeo y Publicidad', color: '#9C97A2' },
     { id: 'u4', name: 'Pedro Cabrales', email: 'pedro.cabrales@oasisdelalma.co', role: 'Comercial', color: '#627B60' },
+    { id: 'u5', name: 'Alejandra Cobo', email: 'alejandra.cobo@oasisdelalma.co', role: 'Producción y bodega', color: '#C9962F' },
   ];
   roles = {
     'Administrador': { compras: 'write', desarrollo: 'write', ventas: 'write', finanzas: 'write', produccion: 'write', inventario: 'write', marketing: 'write', conversaciones: 'write', informes: 'read', admin: true },
@@ -502,6 +779,7 @@ class Component extends DCLogic {
     'Mercadeo y Publicidad': { compras: 'none', desarrollo: 'read', ventas: 'read', finanzas: 'none', produccion: 'none', inventario: 'none', marketing: 'write', conversaciones: 'write', informes: 'none', admin: false },
     'Personalizado': { compras: 'none', desarrollo: 'none', ventas: 'none', finanzas: 'none', produccion: 'none', inventario: 'none', marketing: 'none', conversaciones: 'none', informes: 'none', admin: false },
     'Comercial': { compras: 'none', desarrollo: 'none', ventas: 'write', finanzas: 'none', produccion: 'none', inventario: 'none', marketing: 'none', conversaciones: 'write', informes: 'none', admin: false },
+    'Producción y bodega': { compras: 'none', desarrollo: 'read', ventas: 'none', finanzas: 'none', produccion: 'write', inventario: 'write', marketing: 'none', conversaciones: 'none', informes: 'none', admin: false },
   };
   subModDef = {
     compras: ['resumen', 'proveedores', 'materias', 'servicios', 'reorden', 'ordenes'], desarrollo: ['mezclas', 'productos', 'kits'], produccion: ['prodmez', 'prodpt'],
@@ -512,10 +790,11 @@ class Component extends DCLogic {
   MODS = [
     { id: 'conversaciones', titulo: 'Conversaciones', icono: '◌', mod: 'conversaciones', fase: 2, listo: true, desc: 'Bandeja de chats de WhatsApp, Instagram, Messenger y web. Tomar conversaciones escaladas por el bot, responder y resolver.' },
     { id: 'inventario', titulo: 'Inventario', icono: '▤', mod: 'inventario', fase: 3, listo: true, desc: 'Existencias por categoría, registro de conteos físicos desde bodega y aprobación del administrador.' },
-    { id: 'finanzas', titulo: 'Finanzas', icono: '◇', mod: 'finanzas', fase: 4, desc: 'Caja y bancos, pagos Bold por cruzar y ventas por cobrar.' },
-    { id: 'leads', titulo: 'Leads', icono: '✦', mod: 'ventas', fase: 4, desc: 'Prospectos por etapa, asignación y seguimiento.' },
-    { id: 'reportes', titulo: 'Informe gerencial', icono: '▥', mod: 'informes', fase: 4, desc: 'Ventas del mes, canales, margen y tendencia semanal para la gerencia.' },
-    { id: 'soporte', titulo: 'Soporte', icono: '?', mod: null, fase: 4, desc: 'Reportar un problema de la app o del Hub y confirmar cuando quede resuelto.' },
+    { id: 'produccion', titulo: 'Producción', icono: '◈', mod: 'produccion', fase: 3, listo: true, desc: 'Registrar órdenes de producción de producto terminado: suma el producto y descuenta las materias, igual que en el Hub.' },
+    { id: 'finanzas', titulo: 'Finanzas', icono: '◇', mod: 'finanzas', fase: 4, listo: true, desc: 'Saldos por cuenta y ventas por cobrar, publicados por el Hub. Solo consulta.' },
+    { id: 'leads', titulo: 'Leads', icono: '✦', mod: 'ventas', fase: 4, listo: true, desc: 'Prospectos por etapa: avanzar, llamar o escribir por WhatsApp con un toque.' },
+    { id: 'reportes', titulo: 'Informe gerencial', icono: '▥', mod: 'informes', fase: 4, listo: true, desc: 'El mismo informe gerencial del Hub: ingreso, margen, canales, clientes, inventario, caja y marketing.' },
+    { id: 'soporte', titulo: 'Soporte', icono: '?', mod: null, fase: 4, listo: true, desc: 'Reportar un problema de la app o del Hub y confirmar cuando quede resuelto.' },
   ];
   state = { view: 'boot', screen: 'inicio', modId: null, loginEmail: '', loginPwd: '', loginError: '', loginBusy: false, user: null, perms: {}, usersCfg: { overrides: {}, custom: [], _ts: 0 }, counts: {}, offline: typeof navigator !== 'undefined' && navigator.onLine === false, installDismissed: false, canPrompt: false, standalone: false, toast: '' };
   _t; toast(t) { clearTimeout(this._t); this.setState({ toast: t }); this._t = setTimeout(() => this.setState({ toast: '' }), 2600); }
@@ -734,6 +1013,88 @@ class Component extends DCLogic {
       try { const sb = this.sb(); const path = 'chat/' + Date.now() + '_' + Math.floor(Math.random() * 99999) + '_' + String(f.name || 'foto').replace(/[^a-zA-Z0-9._-]/g, '_'); const { error } = await sb.storage.from('adjuntos').upload(path, f, { cacheControl: '3600', upsert: false }); if (error) throw error; const { data } = sb.storage.from('adjuntos').getPublicUrl(path); await this.enviar(this.state.msgDraft, data.publicUrl); }
       catch (e) { this.toast('No se pudo subir la foto: ' + ((e && e.message) || e)); } this.setState({ fotoSubiendo: false }); }; inp.click(); }
   async loadProductos() { const sb = this.sb(); if (!sb || this.state.productos) return; try { const [p, k] = await Promise.all([sb.from('productos').select('codigo,data'), sb.from('kits').select('codigo,data')]); const rows = [].concat((p.data || []).map(r => r.data || {}), (k.data || []).map(r => r.data || {})).filter(x => x && x.nombre).map(x => ({ codigo: x.codigo, nombre: x.nombre, precio: Number(x.precio) || 0, handle: x.shopifyHandle || '' })); this.setState({ productos: rows }); } catch (e) { console.warn('productos', e); } }
+  // ---- informe gerencial: lo publica el Hub ya calculado (informe_snapshot, un mes por fila) ----
+  async loadInforme() {
+    const sb = this.sb(); if (!sb || this._infLoading) return; if (this._modLevel(this.access(), 'informes') === 'none') return; this._infLoading = true;
+    try { const { data, error } = await sb.from('informe_snapshot').select('ym,data,actualizado,por').order('ym', { ascending: false }).limit(12); if (error) throw error;
+      const list = (data || []).map(r => ({ ym: r.ym, data: r.data || {}, actualizado: r.actualizado || '', por: r.por || '' }));
+      this.setState(s => ({ informes: list, infYm: s.infYm && list.some(x => x.ym === s.infYm) ? s.infYm : (list[0] ? list[0].ym : null), infError: '' })); }
+    catch (e) { console.warn('informe', e); this.setState({ informes: this.state.informes || [], infError: /informe_snapshot|relation|does not exist/i.test(String(e.message || e)) ? 'Falta la tabla informe_snapshot en la nube (correr supabase-informe-snapshot.sql y abrir el Hub para que publique el informe).' : 'No se pudo cargar el informe: ' + (e.message || e) }); }
+    finally { this._infLoading = false; }
+  }
+  // ---- leads (tabla leads, mismas columnas que el Hub) ----
+  LEAD_ESTADOS = ['Nuevo', 'Contactado', 'En negociación', 'Ganado', 'Perdido'];
+  leadEstadoStyle(e) { const m = { 'Nuevo': { bg: 'rgba(167,134,89,0.16)', fg: '#7A5E36' }, 'Contactado': { bg: 'rgba(101,150,166,0.16)', fg: '#3F6A7A' }, 'En negociación': { bg: 'rgba(156,151,162,0.22)', fg: '#615C6B' }, 'Ganado': { bg: 'rgba(76,97,73,0.16)', fg: '#4C6149' }, 'Perdido': { bg: 'rgba(181,80,60,0.14)', fg: '#B5503C' } }; return m[e] || m['Nuevo']; }
+  async loadLeads() { const sb = this.sb(); if (!sb || this._leadsLoading) return; if (this._modLevel(this.access(), 'ventas') === 'none') return; this._leadsLoading = true;
+    try { const { data, error } = await sb.from('leads').select('id,nombre,celular,correo,ciudad,origen,interes,estado,valor,asignado_a,creado,actualizado').order('creado', { ascending: false }).limit(400); if (error) throw error; this.setState({ leads: data || [], leadsError: '' }); }
+    catch (e) { console.warn('leads', e); this.setState({ leads: this.state.leads || [], leadsError: 'No se pudieron cargar los leads: ' + (e.message || e) }); } finally { this._leadsLoading = false; } }
+  async setLeadEstado(id, estado) { if (this._modLevel(this.access(), 'ventas') !== 'write') { this.toast('Tienes acceso de solo lectura en Ventas'); return; }
+    const prev = this.state.leads; this.setState(s => ({ leads: (s.leads || []).map(l => l.id === id ? Object.assign({}, l, { estado }) : l) }));
+    // Igual que el Hub (invariante 33): update verificado con .select y reintento sin `actualizado` si la columna no existe.
+    let r = await this.sb().from('leads').update({ estado, actualizado: new Date().toISOString() }).eq('id', id).select('id');
+    if (r.error && /actualizado/i.test(String(r.error.message || ''))) r = await this.sb().from('leads').update({ estado }).eq('id', id).select('id');
+    if (r.error || !r.data || !r.data.length) { this.setState({ leads: prev }); this.toast('No se pudo guardar: ' + (r.error ? r.error.message : 'tu usuario no tiene permiso para cambiar este lead')); return; }
+    this.toast('Lead → ' + estado); }
+  // ---- soporte ODA Labs (misma base y mismas columnas que el Hub, invariantes 17 y 36) ----
+  SOP_URL = 'https://jcvhrideueyscgfogdip.supabase.co'; SOP_KEY = 'sb_publishable_Ycko0bMOdKahQqGVJuDrQg_gHoTTWdk'; SOP_CLIENTE = 'Oasis del Alma'; SOP_PLAN = 'Soporte ODA Labs';
+  sopHeaders(json) { const h = { apikey: this.SOP_KEY, Authorization: 'Bearer ' + this.SOP_KEY }; if (json) { h['Content-Type'] = 'application/json'; h['Prefer'] = 'return=representation'; } return h; }
+  _sopYo() { return (this.state.user && this.state.user.name) || ''; }
+  _sopCreadorDe(t) { if (t.usuario) return String(t.usuario); const m = /^\[Creado por: ([^\]]+)\]/.exec(String(t.descripcion || '')); return m ? m[1] : ''; }
+  async loadTickets() { if (this._sopLoading) return; this._sopLoading = true; try { const r = await fetch(this.SOP_URL + '/rest/v1/tickets?select=*&cliente=eq.' + encodeURIComponent(this.SOP_CLIENTE) + '&order=creado.desc', { headers: this.sopHeaders() }); if (!r.ok) throw new Error('load ' + r.status); const rows = await r.json(); this.setState({ tickets: Array.isArray(rows) ? rows : [] }); } catch (e) { console.warn('soporte', e); this.setState({ tickets: this.state.tickets || [] }); } finally { this._sopLoading = false; } }
+  _sopEvento(id, evento, detalle) { return fetch(this.SOP_URL + '/rest/v1/ticket_eventos', { method: 'POST', headers: this.sopHeaders(true), body: JSON.stringify({ ticket_id: id, evento, actor: this._sopYo() || this.SOP_CLIENTE, rol: 'cliente', detalle: detalle || '' }) }).catch(() => {}); }
+  sopPickFoto() { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.onchange = () => { const f = inp.files && inp.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => this.setState(s => ({ sopFotos: ((s.sopFotos || []).concat([String(r.result)])).slice(0, 4) })); r.readAsDataURL(f); }; inp.click(); }
+  async _sopSubirFoto(dataUrl, i) { const blob = await (await fetch(dataUrl)).blob(); const ext = String(blob.type.split('/')[1] || 'png').replace('jpeg', 'jpg'); const name = Date.now() + '-' + i + '.' + ext; const r = await fetch(this.SOP_URL + '/storage/v1/object/ticket-fotos/' + name, { method: 'POST', headers: { apikey: this.SOP_KEY, Authorization: 'Bearer ' + this.SOP_KEY, 'Content-Type': blob.type || 'application/octet-stream' }, body: blob }); if (!r.ok) throw new Error('foto'); return this.SOP_URL + '/storage/v1/object/public/ticket-fotos/' + name; }
+  async sopEnviar() { const s = this.state; const asunto = String(s.sopAsunto || '').trim(); if (!asunto) { this.setState({ sopAsuntoError: true }); this.toast('Escribe el asunto'); return; } if (s.sopEnviando) return;
+    this.setState({ sopEnviando: true, sopError: '' }); const yo = this._sopYo(); const detalle = String(s.sopDetalle || '').trim();
+    try { const fotos = []; for (let i = 0; i < (s.sopFotos || []).length; i++) fotos.push(await this._sopSubirFoto(s.sopFotos[i], i));
+      let body = { cliente: this.SOP_CLIENTE, plan: this.SOP_PLAN, origen: 'Desde su app móvil', asunto, descripcion: detalle, prioridad: s.sopPrioridad || 'Media', fotos, usuario: yo, creado_por: yo || this.SOP_CLIENTE };
+      let r = await fetch(this.SOP_URL + '/rest/v1/tickets', { method: 'POST', headers: this.sopHeaders(true), body: JSON.stringify(body) });
+      if (!r.ok) { body = { cliente: this.SOP_CLIENTE, plan: this.SOP_PLAN, origen: 'Desde su app móvil', asunto, descripcion: (yo ? '[Creado por: ' + yo + ']\n' : '') + detalle, prioridad: s.sopPrioridad || 'Media', fotos }; r = await fetch(this.SOP_URL + '/rest/v1/tickets', { method: 'POST', headers: this.sopHeaders(true), body: JSON.stringify(body) }); }
+      if (!r.ok) throw new Error('insert ' + r.status);
+      try { const rows = await r.json(); const id = Array.isArray(rows) && rows[0] && rows[0].id; if (id) this._sopEvento(id, 'creado', ''); } catch (e) {}
+      this.setState({ sopEnviando: false, sopAsunto: '', sopDetalle: '', sopFotos: [], sopPrioridad: 'Media' }); this.toast('Ticket enviado a ODA Labs'); this.loadTickets(); }
+    catch (e) { console.warn('ticket', e); this.setState({ sopEnviando: false, sopError: 'No se pudo enviar el ticket. Revisa la conexión e intenta de nuevo.' }); } }
+  async sopConfirmar(id) { const actor = this._sopYo() || this.SOP_CLIENTE, ahora = new Date().toISOString(); const prev = this.state.tickets;
+    this.setState(s => ({ tickets: (s.tickets || []).map(t => String(t.id) === String(id) ? Object.assign({}, t, { confirmado: true }) : t) }));
+    try { const r = await fetch(this.SOP_URL + '/rest/v1/tickets?id=eq.' + encodeURIComponent(id), { method: 'PATCH', headers: this.sopHeaders(true), body: JSON.stringify({ confirmado: true, confirmado_por: actor, confirmado_en: ahora }) }); if (!r.ok) throw new Error('patch ' + r.status); this._sopEvento(id, 'confirmado', ''); this.toast('Gracias por confirmar'); }
+    catch (e) { this.setState({ tickets: prev }); this.toast('No pudimos registrar tu respuesta'); } }
+  async sopReabrir(id) { const txt = String(this.state.sopRechazoTxt || '').trim(); if (!txt) { this.toast('Cuéntanos qué sigue pasando'); return; } const actor = this._sopYo() || this.SOP_CLIENTE; const prev = this.state.tickets;
+    this.setState(s => ({ tickets: (s.tickets || []).map(t => String(t.id) === String(id) ? Object.assign({}, t, { estado: 'Abierto', confirmado: false }) : t), sopRechazoId: null, sopRechazoTxt: '' }));
+    try { const r = await fetch(this.SOP_URL + '/rest/v1/tickets?id=eq.' + encodeURIComponent(id), { method: 'PATCH', headers: this.sopHeaders(true), body: JSON.stringify({ estado: 'Abierto', confirmado: false, reabierto_por: actor, motivo_reapertura: txt }) }); if (!r.ok) throw new Error('patch ' + r.status); this._sopEvento(id, 'rechazado', txt); this.toast('Caso reabierto · ODA Labs lo retoma'); }
+    catch (e) { this.setState({ tickets: prev }); this.toast('No pudimos registrar tu respuesta'); } }
+  // ---- producción (órdenes OP de producto terminado) ----
+  // Misma forma que el Hub: una fila por línea en `producciones` { id:'op'+ts+idx, numero:'OP-2026-###',
+  // productoCodigo, cantidad, recarga, fecha } dentro de `data`. El Hub recalcula stock y consumo.
+  async loadProduccion() {
+    const sb = this.sb(); if (!sb || this._prodLoading) return; if (this._modLevel(this.access(), 'produccion') === 'none') return; this._prodLoading = true;
+    try { const [pr, ops] = await Promise.all([
+        this.state.prodProductos ? Promise.resolve(null) : sb.from('productos').select('codigo,data'),
+        (async () => { const all = []; for (let from = 0; from < 20000; from += 1000) { const { data, error } = await sb.from('producciones').select('id,data').range(from, from + 999); if (error) throw error; all.push(...(data || [])); if (!data || data.length < 1000) break; } return all; })() ]);
+      const patch = { ops: ops.map(r => Object.assign({ id: r.id }, r.data || {})).filter(o => o.productoCodigo), prodError: '' };
+      if (pr) { if (pr.error) throw pr.error; patch.prodProductos = (pr.data || []).map(r => r.data || {}).filter(x => x && x.codigo && x.nombre && !x.esReventa).map(x => ({ codigo: x.codigo, nombre: x.nombre, formato: x.formato || '' })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')); }
+      this.setState(patch);
+    } catch (e) { console.warn('produccion', e); this.setState({ ops: this.state.ops || [], prodError: 'No se pudo cargar producción: ' + (e.message || e) }); }
+    finally { this._prodLoading = false; }
+  }
+  nextOP() { let max = 0; (this.state.ops || []).forEach(o => { const m = String(o.numero || '').match(/(\d+)$/); if (m) max = Math.max(max, Number(m[1])); }); return 'OP-2026-' + String(max + 1).padStart(3, '0'); }
+  nuevaOP() { this.setState({ screen: 'prodNueva', opLineas: [], opProdQ: '', opCant: '', opRecarga: false, opProdSel: null }); if (!this.state.prodProductos) this.loadProduccion(); }
+  addOPLinea() { const s = this.state; const p = s.opProdSel; const c = Number(s.opCant); if (!p) { this.toast('Elige el producto'); return; } if (!(c > 0)) { this.toast('Indica la cantidad producida'); return; }
+    const lineas = (s.opLineas || []).slice(); const ix = lineas.findIndex(l => l.productoCodigo === p.codigo && !!l.recarga === !!s.opRecarga);
+    if (ix >= 0) lineas[ix] = Object.assign({}, lineas[ix], { cantidad: lineas[ix].cantidad + c }); else lineas.push({ productoCodigo: p.codigo, nombre: p.nombre, cantidad: c, recarga: !!s.opRecarga });
+    this.setState({ opLineas: lineas, opProdSel: null, opProdQ: '', opCant: '', opRecarga: false }); }
+  async guardarOP() {
+    if (this._opSaving) return; const s = this.state; const lineas = (s.opLineas || []).filter(l => l.productoCodigo && l.cantidad > 0);
+    if (this._modLevel(this.access(), 'produccion') !== 'write') { this.toast('No tienes permiso de escritura en Producción'); return; }
+    if (!lineas.length) { this.toast('Agrega al menos un producto'); return; }
+    if (!s.ops) { this.toast('Espera un momento: cargando el consecutivo…'); this.loadProduccion(); return; }
+    const num = this.nextOP(), fecha = new Date().toISOString().slice(0, 10), ts = Date.now(), yo = (s.user && s.user.name) || '';
+    const rows = lineas.map((l, idx) => ({ id: 'op' + ts + idx, numero: num, productoCodigo: l.productoCodigo, cantidad: l.cantidad, recarga: !!l.recarga, fecha, _creadoPor: yo, _origen: 'app' }));
+    this._opSaving = true; setTimeout(() => { this._opSaving = false; }, 1500);
+    const { error } = await this.sb().from('producciones').upsert(rows.map(o => ({ id: o.id, data: o, actualizado: new Date().toISOString() }))).select('id');
+    if (error) { this.toast('No se pudo guardar: ' + error.message); return; }
+    this.setState(s2 => ({ ops: rows.concat(s2.ops || []), screen: 'prod', opLineas: [] }));
+    this.toast('Producción ' + num + ' registrada · ' + rows.length + (rows.length === 1 ? ' línea' : ' líneas'));
+  }
   urlProducto(p) { if (p.handle) return 'https://oasisdelalma.co/products/' + p.handle; return 'https://oasisdelalma.co/search?q=' + encodeURIComponent(p.nombre); }
 
   async doLogin() {
@@ -750,7 +1111,7 @@ class Component extends DCLogic {
     const s = this.state, a = this.access(), u = s.user || {}, c = s.counts || {};
     const lvlTxt = { none: 'Sin acceso', read: 'Solo lectura', write: 'Lectura y escritura' };
     const cop = n => '$' + Math.round(n).toLocaleString('es-CO');
-    const go = (screen, extra) => () => { if (screen === 'modulo' && extra && extra.modId === 'conversaciones') { this.setState({ screen: 'chats' }); this.loadConvs(); return; } if (screen === 'modulo' && extra && extra.modId === 'inventario') { this.setState({ screen: 'inv' }); this.loadInventario(); return; } this.setState(Object.assign({ screen }, extra || {})); };
+    const go = (screen, extra) => () => { if (screen === 'modulo' && extra && extra.modId === 'conversaciones') { this.setState({ screen: 'chats' }); this.loadConvs(); return; } if (screen === 'modulo' && extra && extra.modId === 'inventario') { this.setState({ screen: 'inv' }); this.loadInventario(); return; } if (screen === 'modulo' && extra && extra.modId === 'produccion') { this.setState({ screen: 'prod' }); this.loadProduccion(); return; } if (screen === 'modulo' && extra && extra.modId === 'reportes') { this.setState({ screen: 'informe' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'finanzas') { this.setState({ screen: 'fin' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'leads') { this.setState({ screen: 'leads' }); this.loadLeads(); return; } if (screen === 'modulo' && extra && extra.modId === 'soporte') { this.setState({ screen: 'soporte' }); this.loadTickets(); return; } this.setState(Object.assign({ screen }, extra || {})); };
     // ---- conversaciones ----
     const chip = on => on ? { bg: '#3A3326', fg: '#FBF8F2', border: '#3A3326' } : { bg: '#FFFFFF', fg: '#574E40', border: '#E4DBCC' };
     const estConv = e => ({ bot: { label: 'Bot', bg: '#EFE6D6', fg: '#7A5E36' }, necesita: { label: 'Necesita asesor', bg: 'rgba(181,80,60,0.14)', fg: '#8F3A28' }, humano: { label: 'Con asesor', bg: 'rgba(101,150,166,0.18)', fg: '#2F5E6E' }, resuelta: { label: 'Resuelta', bg: 'rgba(98,123,96,0.16)', fg: '#3F5A3E' } }[e] || { label: e, bg: '#EFE9DD', fg: '#8A8073' });
@@ -778,7 +1139,30 @@ class Component extends DCLogic {
       { titulo: 'Conteos por aprobar', sub: 'Solo el administrador los aprueba', n: c.conteosPend, color: '#C9962F', go: () => { this.setState({ screen: 'conteos', ctFiltro: 'pendiente' }); this.loadInventario(); } },
       { titulo: 'Leads nuevos', sub: 'Sin contactar todavía', n: c.leadsNuevos, color: '#6596A6', go: go('modulo', { modId: 'leads' }) },
     ].filter(p => typeof p.n === 'number' && p.n > 0);
-    const activeKey = s.screen === 'modulo' ? 'modulo:' + s.modId : (s.screen === 'chats' || s.screen === 'chat') ? 'modulo:conversaciones' : (s.screen === 'inv' || s.screen === 'invItem' || s.screen === 'conteos') ? 'modulo:inventario' : s.screen;
+    const activeKey = s.screen === 'modulo' ? 'modulo:' + s.modId : (s.screen === 'chats' || s.screen === 'chat') ? 'modulo:conversaciones' : (s.screen === 'inv' || s.screen === 'invItem' || s.screen === 'conteos') ? 'modulo:inventario' : (s.screen === 'prod' || s.screen === 'prodNueva') ? 'modulo:produccion' : s.screen === 'informe' ? 'modulo:reportes' : s.screen === 'fin' ? 'modulo:finanzas' : s.screen === 'leads' ? 'modulo:leads' : s.screen === 'soporte' ? 'modulo:soporte' : s.screen;
+    // ---- finanzas (solo consulta; viene en la fila del mes actual del informe) ----
+    const finRow = (s.informes || []).find(x => x.data && Array.isArray(x.data.finCuentas)); const finD = (finRow && finRow.data) || {}; const finTab = s.finTab || 'caja'; const finQ = String(s.finQ || '').toLowerCase().trim();
+    const finCobrarAll = finD.finPorCobrar || []; const finCobrar = finCobrarAll.filter(r => !finQ || String(r.cliente).toLowerCase().includes(finQ) || String(r.ov).toLowerCase().includes(finQ)).slice(0, 80).map(r => ({ cliente: r.cliente || '—', ov: r.ov || '—', metodo: r.metodo || '', saldoTxt: cop(r.saldo), diasTxt: r.dias <= 0 ? 'Hoy' : r.dias + (r.dias === 1 ? ' día' : ' días'), diasFg: r.dias > 30 ? '#B5503C' : r.dias > 7 ? '#8A6F49' : '#8A8073' }));
+    // ---- leads ----
+    const leads = s.leads || []; const leadF = s.leadFiltro || 'activos'; const leadsVis = leads.filter(l => leadF === 'todos' ? true : leadF === 'activos' ? (l.estado !== 'Ganado' && l.estado !== 'Perdido') : l.estado === leadF).slice(0, 120);
+    const canLeads = this._modLevel(a, 'ventas') === 'write'; const nextEstado = e => ({ 'Nuevo': 'Contactado', 'Contactado': 'En negociación', 'En negociación': 'Ganado' }[e] || null);
+    const leadRow = l => { const st = this.leadEstadoStyle(l.estado); const cel = String(l.celular || '').replace(/\D/g, ''); const celI = cel ? (cel.length === 10 ? '57' + cel : cel) : ''; const nx = nextEstado(l.estado); return { nombre: l.nombre || 'Sin nombre', estado: l.estado || 'Nuevo', etBg: st.bg, etFg: st.fg, interes: l.interes || '', meta: [l.origen, l.ciudad, l.creado ? fechaL(l.creado) : '', l.asignado_a ? (this.nombreDe(l.asignado_a) || '') : 'Sin asignar'].filter(Boolean).join(' · '), tieneCel: !!celI, waUrl: 'https://wa.me/' + celI, telUrl: 'tel:+' + celI, puedeAvanzar: canLeads && !!nx, accion: nx === 'Ganado' ? 'Marcar ganado' : nx === 'Contactado' ? 'Marcar contactado' : 'En negociación', avanzar: () => nx && this.setLeadEstado(l.id, nx), puedePerder: canLeads && l.estado !== 'Ganado' && l.estado !== 'Perdido', perder: () => { if (window.confirm('¿Marcar a ' + (l.nombre || 'este lead') + ' como perdido?')) this.setLeadEstado(l.id, 'Perdido'); } }; };
+    // ---- soporte ----
+    const tks = s.tickets || []; const yoSop = this._sopYo(); const misTks = tks.filter(t => { const c = this._sopCreadorDe(t); if (!c) return this.isAdmin(); return c === yoSop || this.isAdmin(); });
+    const estSop = e => ({ 'Abierto': { bg: 'rgba(181,80,60,0.14)', fg: '#8F3A28' }, 'En proceso': { bg: 'rgba(201,150,47,0.16)', fg: '#7A5E36' }, 'Resuelto': { bg: 'rgba(98,123,96,0.16)', fg: '#3F5A3E' }, 'Cerrado': { bg: '#EFE9DD', fg: '#8A8073' } }[e] || { bg: '#EFE9DD', fg: '#8A8073' });
+    const sopRow = t => { const e = estSop(t.estado); const resuelto = t.estado === 'Resuelto' && t.confirmado !== true; return { asunto: t.asunto || '(sin asunto)', estado: t.estado || 'Abierto', estBg: e.bg, estFg: e.fg, meta: ['#' + t.id, t.prioridad, t.creado ? fechaL(t.creado) : '', this._sopCreadorDe(t)].filter(Boolean).join(' · '), respuesta: t.respuesta || t.solucion || '', pideConfirmacion: resuelto && s.sopRechazoId !== t.id, pideMotivo: s.sopRechazoId === t.id, si: () => this.sopConfirmar(t.id), no: () => this.setState({ sopRechazoId: t.id, sopRechazoTxt: '' }), cancelarNo: () => this.setState({ sopRechazoId: null, sopRechazoTxt: '' }), confirmarNo: () => this.sopReabrir(t.id) }; };
+    // ---- informe gerencial ----
+    const infs = s.informes || []; const infIx = Math.max(0, infs.findIndex(x => x.ym === s.infYm)); const infCur = infs[infIx] || null; const infD = (infCur && infCur.data) || {};
+    const infGenL = infCur && infCur.actualizado ? new Date(infCur.actualizado).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+    // ---- producción ----
+    const prodLvl = this._modLevel(a, 'produccion'); const ops = s.ops || []; const opQ = String(s.opQ || '').toLowerCase().trim();
+    const prodNombre = code => { const p = (s.prodProductos || []).find(x => x.codigo === code); return p ? p.nombre : code; };
+    const opsGrp = []; ops.forEach(o => { let g = opsGrp.find(x => x.numero === o.numero); if (!g) { g = { numero: o.numero, fecha: o.fecha || '', lineas: [], creadoPor: o._creadoPor || '' }; opsGrp.push(g); } g.lineas.push(o); });
+    opsGrp.sort((x, y) => (y.fecha || '').localeCompare(x.fecha || '') || String(y.numero).localeCompare(String(x.numero), 'es', { numeric: true }));
+    const opsVis = opsGrp.filter(g => !opQ || g.numero.toLowerCase().includes(opQ) || g.lineas.some(l => prodNombre(l.productoCodigo).toLowerCase().includes(opQ) || String(l.productoCodigo).toLowerCase().includes(opQ))).slice(0, 60).map(g => { const und = g.lineas.reduce((t, l) => t + (Number(l.cantidad) || 0), 0); const fl = g.fecha ? new Date(g.fecha + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short' }) : ''; return { numero: g.numero, fechaL: fl + (g.creadoPor ? ' · ' + g.creadoPor.split(' ')[0] : ''), undTxt: this.fmtCant(und) + ' und', lineas: g.lineas.map(l => ({ nombre: prodNombre(l.productoCodigo), cant: this.fmtCant(l.cantidad) + (l.recarga ? ' · recarga' : '') })) }; });
+    const hoyS = new Date().toISOString().slice(0, 10); const opsHoy = ops.filter(o => o.fecha === hoyS).reduce((t, o) => t + (Number(o.cantidad) || 0), 0);
+    const opProdQ = String(s.opProdQ || '').toLowerCase().trim(); const opProdVis = s.opProdSel ? [] : (s.prodProductos || []).filter(p => opProdQ && (p.nombre.toLowerCase().includes(opProdQ) || p.codigo.toLowerCase().includes(opProdQ))).slice(0, 8);
+    const opLineas = s.opLineas || []; const opTotal = opLineas.reduce((t, l) => t + l.cantidad, 0);
     // ---- inventario ----
     const invLvl = this._modLevel(a, 'inventario'); const inv = s.inv || []; const invQ = String(s.invQ || '').toLowerCase().trim(); const invCat = s.invCat || 'todos';
     const enCat = (r, k) => k === 'todos' ? true : k === 'empenv' ? (r.cat === 'emp' || r.cat === 'env') : r.cat === k;
@@ -816,8 +1200,37 @@ class Component extends DCLogic {
       loginKey: e => { if (e.key === 'Enter') this.doLogin(); }, doLogin: () => this.doLogin(), doLogout: () => this.doLogout(),
       loginBtnBg: s.loginBusy ? '#C1AA81' : '#A78659', loginBtnLabel: s.loginBusy ? 'Entrando…' : 'Entrar',
       isInicio: s.screen === 'inicio', isModulo: s.screen === 'modulo', isPerfil: s.screen === 'perfil', goInicio: go('inicio'), goPerfil: go('perfil'),
-      isChats: s.screen === 'chats', isChat: s.screen === 'chat', showTabs: s.screen !== 'chat' && s.screen !== 'invItem', goChats: () => this.setState({ screen: 'chats', convId: null }),
+      isChats: s.screen === 'chats', isChat: s.screen === 'chat', showTabs: s.screen !== 'chat' && s.screen !== 'invItem' && s.screen !== 'prodNueva', goChats: () => this.setState({ screen: 'chats', convId: null }),
+      isFin: s.screen === 'fin', finSubTxt: finRow ? 'Publicado por el Hub el ' + new Date(finRow.actualizado).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' · solo consulta' : (s.informes ? 'Sin datos' : 'Cargando…'),
+      finTabs: [['caja', 'Caja y bancos'], ['cobrar', 'Por cobrar']].map(([id, label]) => Object.assign({ label, set: () => this.setState({ finTab: id }) }, chip(finTab === id))), finEsCaja: finTab === 'caja', finEsCobrar: finTab === 'cobrar',
+      finVacio: !!s.informes && !finRow, finVacioTxt: s.infError ? s.infError : 'El Hub todavía no ha publicado los saldos. Abre el Hub con el administrador y espera medio minuto.',
+      finSaldoTotal: typeof finD.finSaldoTotal === 'number' ? cop(finD.finSaldoTotal) : '—', finCuentas: (finD.finCuentas || []).map(c => ({ nombre: c.nombre, tipo: c.tipo, saldoTxt: (c.saldo < 0 ? '−' : '') + cop(Math.abs(c.saldo)), fg: c.saldo < 0 ? '#B5503C' : '#3A3326' })),
+      finCobrarTotal: cop(finCobrarAll.reduce((t, r) => t + (Number(r.saldo) || 0), 0)), finCobrarN: finCobrarAll.length + (finCobrarAll.length === 1 ? ' venta' : ' ventas'), finQ: s.finQ || '', setFinQ: e => this.setState({ finQ: e.target.value }), finCobrar,
+      isLeads: s.screen === 'leads', leadsSubTxt: s.leadsError ? 'Sin datos' : s.leads ? leads.filter(l => l.estado === 'Nuevo').length + ' nuevos · ' + leads.filter(l => l.estado !== 'Ganado' && l.estado !== 'Perdido').length + ' activos' : 'Cargando…',
+      leadFiltros: [['activos', 'Activos']].concat(this.LEAD_ESTADOS.map(e => [e, e])).concat([['todos', 'Todos']]).map(([id, label]) => Object.assign({ label, set: () => this.setState({ leadFiltro: id }) }, chip(leadF === id))),
+      leadsVis: leadsVis.map(leadRow), leadsVacio: !!s.leads && leadsVis.length === 0, leadsVacioTxt: s.leadsError ? s.leadsError : 'No hay leads en este filtro.',
+      isSoporte: s.screen === 'soporte', sopAsunto: s.sopAsunto || '', setSopAsunto: e => this.setState({ sopAsunto: e.target.value, sopAsuntoError: false }), sopAsuntoBorder: s.sopAsuntoError ? '#B5503C' : '#B8AE9C', sopDetalle: s.sopDetalle || '', setSopDetalle: e => this.setState({ sopDetalle: e.target.value }),
+      sopPrioridades: ['Baja', 'Media', 'Alta'].map(p => Object.assign({ label: p, set: () => this.setState({ sopPrioridad: p }) }, chip((s.sopPrioridad || 'Media') === p))),
+      sopFotos: (s.sopFotos || []).map((src, i) => ({ src, quitar: () => this.setState(st => ({ sopFotos: (st.sopFotos || []).filter((_, j) => j !== i) })) })), sopPuedeFoto: (s.sopFotos || []).length < 4, sopPickFoto: () => this.sopPickFoto(),
+      sopEnviar: () => this.sopEnviar(), sopBtnBg: s.sopEnviando ? '#C1AA81' : String(s.sopAsunto || '').trim() ? '#A78659' : '#C1AA81', sopBtnLabel: s.sopEnviando ? 'Enviando…' : 'Enviar ticket', sopError: s.sopError || '',
+      sopListaTitulo: this.isAdmin() ? 'Tickets del equipo' : 'Mis tickets', sopTickets: misTks.slice(0, 40).map(sopRow), sopVacio: !!s.tickets && misTks.length === 0, sopVacioTxt: 'Todavía no has enviado tickets.', sopRechazoTxt: s.sopRechazoTxt || '', setSopRechazoTxt: e => this.setState({ sopRechazoTxt: e.target.value }),
+      isInforme: s.screen === 'informe', inf: infD, infHay: !!infCur, infVacio: !!s.informes && !infCur,
+      infVacioTxt: s.infError ? s.infError : 'El Hub todavía no ha publicado el informe. Abre el Hub con el administrador y espera medio minuto.',
+      infGenerado: infCur ? 'Publicado por el Hub el ' + infGenL + (infCur.por ? ' · ' + infCur.por : '') : (s.informes ? '' : 'Cargando…'),
+      infPrev: () => { const n = infs[infIx + 1]; if (n) this.setState({ infYm: n.ym }); }, infNext: () => { const n = infs[infIx - 1]; if (n) this.setState({ infYm: n.ym }); },
+      infPrevFg: infs[infIx + 1] ? '#3A3326' : '#C1AA81', infNextFg: infs[infIx - 1] ? '#3A3326' : '#C1AA81',
       isInv: s.screen === 'inv', isInvItem: s.screen === 'invItem', isConteos: s.screen === 'conteos', goInv: () => this.setState({ screen: 'inv' }), goConteos: () => { this.setState({ screen: 'conteos' }); this.loadConteos(); },
+      isProd: s.screen === 'prod', isProdNueva: s.screen === 'prodNueva', goProd: () => this.setState({ screen: 'prod' }), nuevaOP: () => this.nuevaOP(), prodPuede: prodLvl === 'write',
+      prodSubTxt: s.prodError ? 'Sin datos' : s.ops ? opsGrp.length + ' órdenes · hoy ' + this.fmtCant(opsHoy) + ' und' : 'Cargando…',
+      opQ: s.opQ || '', setOpQ: e => this.setState({ opQ: e.target.value }), opsVis, opsVacio: !!s.ops && opsVis.length === 0, opsVacioTxt: s.prodError ? s.prodError : opQ ? 'Ninguna orden coincide.' : 'Todavía no hay órdenes de producción.',
+      opNum: s.ops ? this.nextOP() : '…', opProdQ: s.opProdSel ? s.opProdSel.nombre : (s.opProdQ || ''), setOpProdQ: e => this.setState({ opProdQ: e.target.value, opProdSel: null }),
+      opProdVis: opProdVis.map(p => ({ nombre: p.nombre, codigo: p.codigo, pick: () => this.setState({ opProdSel: p, opProdQ: '' }) })), opProdSinMatch: !!opProdQ && !s.opProdSel && opProdVis.length === 0 && !!s.prodProductos,
+      opSelBorder: s.opProdSel ? '#A78659' : '#B8AE9C',
+      opCant: s.opCant == null ? '' : s.opCant, setOpCant: e => this.setState({ opCant: e.target.value }),
+      opRecarga: !!s.opRecarga, toggleRecarga: () => this.setState({ opRecarga: !s.opRecarga }), recBg: s.opRecarga ? '#3A3326' : '#FFFFFF', recFg: s.opRecarga ? '#FBF8F2' : '#574E40', recBorder: s.opRecarga ? '#3A3326' : '#E4DBCC',
+      addOPLinea: () => this.addOPLinea(), addBg: s.opProdSel && Number(s.opCant) > 0 ? '#5A4A33' : '#C1AA81',
+      opLineas: opLineas.map((l, i) => ({ nombre: l.nombre, cantTxt: this.fmtCant(l.cantidad) + ' und', recargaTxt: l.recarga ? 'Recarga' : '', quitar: () => this.setState({ opLineas: opLineas.filter((_, j) => j !== i) }) })), opHayLineas: opLineas.length > 0, opTotalTxt: this.fmtCant(opTotal) + ' und en ' + opLineas.length + (opLineas.length === 1 ? ' línea' : ' líneas'),
+      guardarOP: () => this.guardarOP(), opBtnBg: opLineas.length ? '#A78659' : '#C1AA81',
       invSubTxt: s.invError ? 'Sin datos' : s.inv ? inv.length + ' ítems · foto del ' + snapL : 'Cargando…', conteosPendN: ctPendN,
       invQ: s.invQ || '', setInvQ: e => this.setState({ invQ: e.target.value }),
       invCats: [['todos', 'Todos'], ['mp', 'Materia prima'], ['ins', 'Insumos'], ['empenv', 'Empaques y envases'], ['mez', 'Mezclas'], ['pt', 'Producto terminado']].map(([id, label]) => Object.assign({ label: label + (inv.length ? ' · ' + inv.filter(r => enCat(r, id)).length : ''), set: () => this.setState({ invCat: id }) }, chip(invCat === id))),
@@ -866,6 +1279,8 @@ class Component extends DCLogic {
       instaladaTxt: s.standalone ? 'Sí' : 'No · abre desde el navegador', nubeTxt: s.offline ? 'Sin conexión' : 'Conectada',
       esAdmin: this.isAdmin(), adminUsers,
       tabInicio: tab('inicio', go('inicio')), tabCuenta: tab('perfil', go('perfil')),
+      tabProd: tab('modulo:produccion', go('modulo', { modId: 'produccion' }), { visible: prodLvl !== 'none' && (this._modLevel(a, 'informes') === 'none' || this._modLevel(a, 'conversaciones') === 'none') }),
+      tabInv: tab('modulo:inventario', go('modulo', { modId: 'inventario' }), { visible: invLvl !== 'none' && (this._modLevel(a, 'informes') === 'none' || this._modLevel(a, 'conversaciones') === 'none'), badge: this.isAdmin() ? ctPendN : 0 }),
       tabInforme: tab('modulo:reportes', go('modulo', { modId: 'reportes' }), { visible: this._modLevel(a, 'informes') !== 'none' }),
       tabChats: tab('modulo:conversaciones', go('modulo', { modId: 'conversaciones' }), { visible: this._modLevel(a, 'conversaciones') !== 'none', badge: necesitaN }),
     };
