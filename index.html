@@ -526,6 +526,11 @@
         <div style="flex:1;"><div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;">Orden {{ opNum }} · hoy</div><div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;line-height:1.1;margin-top:2px;">Registrar producción</div></div>
       </div>
       <div style="margin-top:14px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
+        <div style="font-size:12px;color:#574E40;font-weight:700;">Fecha de producción</div>
+        <input type="date" value="{{ opFecha }}" max="{{ opHoy }}" onChange="{{ setOpFecha }}" style="width:100%;box-sizing:border-box;margin-top:8px;height:46px;border-radius:14px;border:1px solid #B8AE9C;background:#FBF8F2;padding:0 14px;font-family:inherit;font-size:15px;font-weight:600;color:#3A3326;outline:none;">
+        <div style="font-size:11px;color:#8A8073;margin-top:6px;line-height:1.4;">{{ opFechaTxt }}</div>
+      </div>
+      <div style="margin-top:14px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
         <div style="font-size:12px;color:#574E40;font-weight:700;">Producto</div>
         <input value="{{ opProdQ }}" onChange="{{ setOpProdQ }}" placeholder="Escribe el nombre o código" style="width:100%;box-sizing:border-box;margin-top:8px;height:46px;border-radius:14px;border:1px solid {{ opSelBorder }};background:#FBF8F2;padding:0 14px;font-family:inherit;font-size:15px;font-weight:600;color:#3A3326;outline:none;">
         <sc-if value="{{ opProdSinMatch }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#8A8073;margin-top:8px;">Ningún producto coincide.</div></sc-if>
@@ -1277,17 +1282,21 @@ class Component extends DCLogic {
     finally { this._prodLoading = false; }
   }
   nextOP() { let max = 0; (this.state.ops || []).forEach(o => { const m = String(o.numero || '').match(/(\d+)$/); if (m) max = Math.max(max, Number(m[1])); }); return 'OP-2026-' + String(max + 1).padStart(3, '0'); }
-  nuevaOP() { this.setState({ screen: 'prodNueva', opLineas: [], opProdQ: '', opCant: '', opRecarga: false, opProdSel: null }); if (!this.state.prodProductos) this.loadProduccion(); }
+  nuevaOP() { this.setState({ screen: 'prodNueva', opFecha: this._hoyLocal(), opLineas: [], opProdQ: '', opCant: '', opRecarga: false, opProdSel: null }); if (!this.state.prodProductos) this.loadProduccion(); }
   addOPLinea() { const s = this.state; const p = s.opProdSel; const c = Number(s.opCant); if (!p) { this.toast('Elige el producto'); return; } if (!(c > 0)) { this.toast('Indica la cantidad producida'); return; }
     const lineas = (s.opLineas || []).slice(); const ix = lineas.findIndex(l => l.productoCodigo === p.codigo && !!l.recarga === !!s.opRecarga);
     if (ix >= 0) lineas[ix] = Object.assign({}, lineas[ix], { cantidad: lineas[ix].cantidad + c }); else lineas.push({ productoCodigo: p.codigo, nombre: p.nombre, cantidad: c, recarga: !!s.opRecarga });
     this.setState({ opLineas: lineas, opProdSel: null, opProdQ: '', opCant: '', opRecarga: false }); }
+  _hoyLocal() { const d = new Date(), p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); }
   async guardarOP() {
     if (this._opSaving) return; const s = this.state; const lineas = (s.opLineas || []).filter(l => l.productoCodigo && l.cantidad > 0);
     if (this._modLevel(this.access(), 'produccion') !== 'write') { this.toast('No tienes permiso de escritura en Producción'); return; }
     if (!lineas.length) { this.toast('Agrega al menos un producto'); return; }
     if (!s.ops) { this.toast('Espera un momento: cargando el consecutivo…'); this.loadProduccion(); return; }
-    const num = this.nextOP(), fecha = new Date().toISOString().slice(0, 10), ts = Date.now(), yo = (s.user && s.user.name) || '';
+    const hoyS = this._hoyLocal(); let fecha = String(s.opFecha || hoyS);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) fecha = hoyS;
+    if (fecha > hoyS) { this.toast('La fecha no puede ser futura'); return; }
+    const num = this.nextOP(), ts = Date.now(), yo = (s.user && s.user.name) || '';
     const rows = lineas.map((l, idx) => ({ id: 'op' + ts + idx, numero: num, productoCodigo: l.productoCodigo, cantidad: l.cantidad, recarga: !!l.recarga, fecha, _creadoPor: yo, _origen: 'app' }));
     this._opSaving = true; setTimeout(() => { this._opSaving = false; }, 1500);
     const { error } = await this.sb().from('producciones').upsert(rows.map(o => ({ id: o.id, data: o, actualizado: new Date().toISOString() }))).select('id');
@@ -1443,6 +1452,7 @@ class Component extends DCLogic {
       isProd: s.screen === 'prod', isProdNueva: s.screen === 'prodNueva', goProd: () => this.setState({ screen: 'prod' }), nuevaOP: () => this.nuevaOP(), prodPuede: prodLvl === 'write',
       prodSubTxt: s.prodError ? 'Sin datos' : s.ops ? opsGrp.length + ' órdenes · hoy ' + this.fmtCant(opsHoy) + ' und' : 'Cargando…',
       opQ: s.opQ || '', setOpQ: e => this.setState({ opQ: e.target.value }), opsVis, opsVacio: !!s.ops && opsVis.length === 0, opsVacioTxt: s.prodError ? s.prodError : opQ ? 'Ninguna orden coincide.' : 'Todavía no hay órdenes de producción.',
+      opFecha: s.opFecha || this._hoyLocal(), opHoy: this._hoyLocal(), setOpFecha: e => this.setState({ opFecha: e.target.value }), opFechaTxt: (s.opFecha && s.opFecha !== this._hoyLocal()) ? 'Se registra con fecha ' + s.opFecha.split('-').reverse().join('/') + ' (producción de un día anterior).' : 'Hoy. Cámbiala si la producción fue otro día.',
       opNum: s.ops ? this.nextOP() : '…', opProdQ: s.opProdSel ? s.opProdSel.nombre : (s.opProdQ || ''), setOpProdQ: e => this.setState({ opProdQ: e.target.value, opProdSel: null }),
       opProdVis: opProdVis.map(p => ({ nombre: p.nombre, codigo: p.codigo, pick: () => this.setState({ opProdSel: p, opProdQ: '' }) })), opProdSinMatch: !!opProdQ && !s.opProdSel && opProdVis.length === 0 && !!s.prodProductos,
       opSelBorder: s.opProdSel ? '#A78659' : '#B8AE9C',
