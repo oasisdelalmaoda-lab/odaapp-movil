@@ -44,7 +44,7 @@
       <div style="position:absolute;right:-60px;bottom:-70px;color:#A78659;opacity:0.12;">
         <svg width="260" height="260" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c0-7 1.5-13 9-17C19.5 14 16 19 12 22Z"></path><path d="M12 22C8 16 3 13 1.5 6C9.5 7.5 12 14 12 22Z" opacity="0.55"></path></svg>
       </div>
-      <img src="app-logo-mark-white.png" alt="OdA" style="height:64px;width:auto;display:block;position:relative;">
+      <img src="logo-wordmark-white.png" alt="OdA" style="height:96px;width:auto;max-width:100%;display:block;position:relative;filter:drop-shadow(0 2px 10px rgba(0,0,0,0.35));">
       <div style="font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:#A78659;margin-top:26px;position:relative;">Hub Intelligence de Negocio</div>
       <div style="font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:500;line-height:1.06;margin-top:10px;text-wrap:balance;position:relative;">El corazón operativo de Oasis del Alma.</div>
       <div style="font-size:12px;letter-spacing:0.06em;color:rgba(251,248,242,0.5);margin-top:18px;position:relative;">Bienestar en cada respiro · Hecho en Colombia</div>
@@ -566,6 +566,22 @@
         </div>
         <div onClick="{{ goConteos }}" style="flex:0 0 auto;height:34px;padding:0 12px;border-radius:999px;border:1px solid #B8AE9C;background:#FFFFFF;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#5A4A33;">Conteos<sc-if value="{{ conteosPendN }}" hint-placeholder-val="{{ false }}"><span style="min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#B5503C;color:#FFF;font-size:10px;display:flex;align-items:center;justify-content:center;">{{ conteosPendN }}</span></sc-if></div>
       </div>
+      <sc-if value="{{ invPuedeContar }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px 20px 0;">
+        <div style="background:#3A3326;color:#FBF8F2;border-radius:16px;padding:12px 14px;min-height:44px;">
+          <div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;opacity:0.65;">Conteo físico</div>
+          <div style="font-size:12.5px;line-height:1.35;margin-top:4px;">Toca cualquier ítem de la lista y escribe lo contado.</div>
+        </div>
+        <div onClick="{{ goRecepNueva }}" style="background:#A78659;color:#FBF8F2;border-radius:16px;padding:12px 14px;min-height:44px;display:flex;flex-direction:column;justify-content:space-between;">
+          <div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;opacity:0.8;">Llegó mercancía</div>
+          <div style="font-size:13px;font-weight:700;margin-top:4px;">Ingresar mercancía ›</div>
+        </div>
+      </div>
+      <div onClick="{{ goRecep }}" style="margin:8px 20px 0;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:14px;padding:10px 14px;min-height:44px;">
+        <div style="font-size:12.5px;color:#574E40;">Mis ingresos de mercancía</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#5A4A33;">{{ recepResumenTxt }}<span style="color:#8A6F49;font-size:16px;">›</span></div>
+      </div>
+      </sc-if>
       <div style="padding:12px 20px 0;">
         <input value="{{ invQ }}" onChange="{{ setInvQ }}" placeholder="Buscar por nombre o código" style="width:100%;box-sizing:border-box;height:42px;border-radius:999px;border:1px solid #B8AE9C;background:#FFFFFF;padding:0 16px;font-family:inherit;font-size:14px;color:#3A3326;outline:none;">
       </div>
@@ -586,6 +602,80 @@
               <div style="font-weight:800;font-size:14px;color:{{ i.stockColor }};white-space:nowrap;">{{ i.stockTxt }}</div>
               <div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ i.subTxt }}</div>
             </div>
+            <sc-if value="{{ invPuedeContar }}" hint-placeholder-val="{{ false }}"><div style="flex:0 0 auto;font-size:11px;font-weight:700;color:#A78659;border:1px solid #E4DBCC;border-radius:999px;padding:6px 10px;">Contar</div></sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ===== INVENTARIO · ingresar mercancía ===== -->
+    <sc-if value="{{ isRecepNueva }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Ingresar mercancía" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 40px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInv }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="flex:1;"><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;line-height:1.1;">Ingresar mercancía</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">Lo que llegó a bodega · administración lo asigna a su orden de compra</div></div>
+      </div>
+      <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;margin-top:14px;">
+        <div style="font-size:12px;color:#574E40;font-weight:700;">Proveedor o de quién llegó</div>
+        <input value="{{ rcProv }}" onChange="{{ setRcProv }}" placeholder="Ej. SOS Natural, Envases del Valle…" style="width:100%;box-sizing:border-box;margin-top:8px;height:44px;border-radius:12px;border:1px solid #B8AE9C;background:#FBF8F2;padding:0 14px;font-family:inherit;font-size:14px;color:#3A3326;outline:none;">
+        <div style="font-size:12px;color:#574E40;font-weight:700;margin-top:14px;">Fecha de llegada</div>
+        <input type="date" value="{{ rcFecha }}" onChange="{{ setRcFecha }}" style="width:100%;box-sizing:border-box;margin-top:8px;height:44px;border-radius:12px;border:1px solid #B8AE9C;background:#FBF8F2;padding:0 14px;font-family:inherit;font-size:14px;color:#3A3326;outline:none;">
+      </div>
+
+      <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin:22px 0 10px;">Qué llegó</div>
+      <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
+        <input value="{{ rcQ }}" onChange="{{ setRcQ }}" placeholder="Buscar materia, insumo o empaque" style="width:100%;box-sizing:border-box;height:44px;border-radius:999px;border:1px solid {{ rcSelBorder }};background:#FBF8F2;padding:0 16px;font-family:inherit;font-size:14px;color:#3A3326;outline:none;">
+        <sc-if value="{{ rcHaySug }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:6px;border:1px solid #E4DBCC;border-radius:14px;overflow:hidden;">
+          <sc-for list="{{ rcSug }}" as="p" hint-placeholder-count="3">
+            <div onClick="{{ p.pick }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;border-bottom:1px solid #EFE9DD;min-height:44px;"><div style="min-width:0;"><div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ p.nombre }}</div><div style="font-size:11px;color:#8A8073;">{{ p.codigo }} · {{ p.catLabel }}</div></div><div style="font-size:11px;color:#8A8073;white-space:nowrap;">{{ p.stockTxt }}</div></div>
+          </sc-for>
+        </div>
+        </sc-if>
+        <sc-if value="{{ rcSelNombre }}" hint-placeholder-val="{{ false }}"><div style="margin-top:8px;font-size:12px;color:#4C6149;font-weight:700;">Seleccionado: {{ rcSelNombre }}</div></sc-if>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px;align-items:center;">
+          <input type="number" inputmode="decimal" min="0" value="{{ rcCant }}" onChange="{{ setRcCant }}" placeholder="{{ rcCantPh }}" style="width:100%;box-sizing:border-box;height:48px;border-radius:12px;border:1px solid #B8AE9C;background:#FBF8F2;padding:0 14px;font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:#3A3326;outline:none;">
+          <div onClick="{{ addRcLinea }}" style="height:48px;padding:0 18px;border-radius:999px;background:{{ rcAddBg }};color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">Agregar</div>
+        </div>
+        <sc-if value="{{ rcHayLineas }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:14px;border-top:1px solid #EFE9DD;">
+          <sc-for list="{{ rcLineas }}" as="l" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #EFE9DD;"><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ l.nombre }}</div><div style="font-size:11px;color:#8A8073;">{{ l.codigo }}</div></div><div style="font-weight:800;font-size:13px;white-space:nowrap;">{{ l.cantTxt }}</div><div onClick="{{ l.quitar }}" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:#B5503C;font-size:18px;">×</div></div>
+          </sc-for>
+        </div>
+        </sc-if>
+      </div>
+
+      <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;margin-top:12px;">
+        <div style="font-size:12px;color:#574E40;font-weight:700;">Nota (opcional)</div>
+        <input value="{{ rcNota }}" onChange="{{ setRcNota }}" placeholder="Número de remisión, caja golpeada, faltó algo…" style="width:100%;box-sizing:border-box;margin-top:8px;height:44px;border-radius:12px;border:1px solid #E4DBCC;background:#FBF8F2;padding:0 14px;font-family:inherit;font-size:13px;color:#3A3326;outline:none;">
+      </div>
+      <div onClick="{{ guardarRecep }}" style="margin-top:16px;height:50px;border-radius:999px;background:{{ rcBtnBg }};color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">{{ rcBtnLabel }}</div>
+      <div style="text-align:center;font-size:11px;color:#8A8073;margin-top:8px;line-height:1.45;">Le llega como pendiente a administración; el inventario se suma cuando la asignan a la orden de compra.</div>
+    </div>
+    </sc-if>
+
+    <!-- ===== INVENTARIO · mis ingresos ===== -->
+    <sc-if value="{{ isRecep }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Ingresos de mercancía" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInv }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="flex:1;"><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;line-height:1.1;">Ingresos de mercancía</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ recepSubTxt }}</div></div>
+        <div onClick="{{ goRecepNueva }}" style="flex:0 0 auto;height:36px;padding:0 14px;border-radius:999px;background:#A78659;color:#FBF8F2;display:flex;align-items:center;font-size:12px;font-weight:700;">+ Nuevo</div>
+      </div>
+      <sc-if value="{{ recepVacio }}" hint-placeholder-val="{{ false }}"><div style="margin-top:14px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;line-height:1.5;">{{ recepVacioTxt }}</div></sc-if>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;">
+        <sc-for list="{{ recepVis }}" as="r" hint-placeholder-count="3">
+          <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;">
+            <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">
+              <div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:14px;">{{ r.titulo }}</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ r.sub }}</div></div>
+              <div style="flex:0 0 auto;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:{{ r.estBg }};color:{{ r.estFg }};font-weight:700;">{{ r.estLabel }}</div>
+            </div>
+            <div style="margin-top:8px;display:flex;flex-direction:column;gap:3px;">
+              <sc-for list="{{ r.items }}" as="it" hint-placeholder-count="2"><div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px;"><span style="color:#574E40;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ it.nombre }}</span><span style="font-weight:700;white-space:nowrap;">{{ it.cantTxt }}</span></div></sc-for>
+            </div>
+            <sc-if value="{{ r.pie }}" hint-placeholder-val="{{ false }}"><div style="margin-top:8px;font-size:11.5px;color:#8A8073;line-height:1.4;">{{ r.pie }}</div></sc-if>
           </div>
         </sc-for>
       </div>
@@ -824,7 +914,7 @@ class Component extends DCLogic {
   // Módulos de la app móvil y qué permiso del Hub los abre.
   MODS = [
     { id: 'conversaciones', titulo: 'Conversaciones', icono: '◌', mod: 'conversaciones', fase: 2, listo: true, desc: 'Bandeja de chats de WhatsApp, Instagram, Messenger y web. Tomar conversaciones escaladas por el bot, responder y resolver.' },
-    { id: 'inventario', titulo: 'Inventario', icono: '▤', mod: 'inventario', fase: 3, listo: true, desc: 'Existencias por categoría, registro de conteos físicos desde bodega y aprobación del administrador.' },
+    { id: 'inventario', titulo: 'Inventario', icono: '▤', mod: 'inventario', fase: 3, listo: true, desc: 'Existencias por categoría, conteos físicos desde bodega e ingreso de mercancía que llega (administración la asigna a su orden de compra).' },
     { id: 'produccion', titulo: 'Producción', icono: '◈', mod: 'produccion', fase: 3, listo: true, desc: 'Registrar órdenes de producción de producto terminado: suma el producto y descuenta las materias, igual que en el Hub.' },
     { id: 'finanzas', titulo: 'Finanzas', icono: '◇', mod: 'finanzas', fase: 4, listo: true, desc: 'Saldos por cuenta y ventas por cobrar, publicados por el Hub. Solo consulta.' },
     { id: 'leads', titulo: 'Leads', icono: '✦', mod: 'ventas', fase: 4, listo: true, desc: 'Prospectos por etapa: avanzar, llamar o escribir por WhatsApp con un toque.' },
@@ -850,11 +940,40 @@ class Component extends DCLogic {
       this.setState({ inv: rows.map(r => ({ codigo: r.codigo, nombre: r.nombre || '', clase: r.clase || 'materia', cat: r.cat || 'ins', unidad: r.unidad || 'und', stock: Number(r.stock) || 0, minimo: Number(r.minimo) || 0, costo: Number(r.costo) || 0 })), invSnapAt: snapAt, invError: '' });
     } catch (e) { console.warn('inventario', e); this.setState({ inv: this.state.inv || [], invError: /inventario_snapshot|relation|does not exist/i.test(String(e.message || e)) ? 'Falta la tabla inventario_snapshot en la nube (correr supabase-inventario-snapshot.sql y abrir el Hub para que publique el inventario).' : 'No se pudo cargar el inventario: ' + (e.message || e) }); }
     finally { this._invLoading = false; }
-    this.loadConteos();
+    this.loadConteos(); if (this._modLevel(this.access(), 'inventario') === 'write') this.loadRecepciones();
   }
   _conteoFromDb(r) { return { id: r.id, codigo: r.codigo, nombre: r.nombre || '', unidad: r.unidad || 'und', clase: r.clase || 'materia', fecha: r.fecha || '', sistema: Number(r.sistema) || 0, contado: Number(r.contado) || 0, diferencia: Number(r.diferencia) || 0, motivo: r.motivo || '', nota: r.nota || '', solicitadoPor: r.solicitado_por || '', solicitadoAt: r.solicitado_at || '', estado: r.estado || 'pendiente', aprobadoPor: r.aprobado_por || '', aprobadoAt: r.aprobado_at || '', costoUnit: r.costo_unit, valor: r.valor }; }
   async loadConteos() { const sb = this.sb(); if (!sb) return; try { const { data, error } = await sb.from('conteos').select('*').order('solicitado_at', { ascending: false }).limit(500); if (error) throw error; const list = (data || []).map(r => this._conteoFromDb(r)); this.setState(s => ({ conteos: list, counts: Object.assign({}, s.counts, { conteosPend: list.filter(c => c.estado === 'pendiente').length }) })); } catch (e) { console.warn('conteos', e); } }
   invItem(codigo) { return (this.state.inv || []).find(x => x.codigo === codigo) || null; }
+  // ---- ingresos de mercancía desde bodega (tabla recepciones, misma forma {id,data} del Hub) ----
+  // La bodeguera anota lo que llegó; queda pendiente y administración lo asigna a una OC en el Hub.
+  async loadRecepciones() {
+    const sb = this.sb(); if (!sb || this._rcLoading) return; this._rcLoading = true;
+    try { const rows = []; for (let from = 0; from < 5000; from += 1000) { const { data, error } = await sb.from('recepciones').select('id,data,actualizado').order('actualizado', { ascending: false }).range(from, from + 999); if (error) throw error; rows.push(...(data || [])); if (!data || data.length < 1000) break; }
+      this.setState({ recepciones: rows.map(r => Object.assign({ id: r.id }, r.data || {})), recepError: '' }); }
+    catch (e) { console.warn('recepciones', e); this.setState({ recepciones: this.state.recepciones || [], recepError: /recepciones|relation|does not exist/i.test(String(e.message || e)) ? 'Falta la tabla recepciones en la nube (correr supabase-recepciones.sql).' : 'No se pudieron cargar los ingresos: ' + (e.message || e) }); }
+    finally { this._rcLoading = false; }
+  }
+  addRcLinea() {
+    const s = this.state; const it = this.invItem(s.rcSel); const c = Number(s.rcCant);
+    if (!it) { this.toast('Busca y elige qué llegó'); return; } if (!(c > 0)) { this.toast('Escribe la cantidad'); return; }
+    const lineas = (s.rcLineas || []).filter(l => l.codigo !== it.codigo).concat([{ codigo: it.codigo, nombre: it.nombre, unidad: it.unidad, cantidad: c }]);
+    this.setState({ rcLineas: lineas, rcSel: '', rcQ: '', rcCant: '' });
+  }
+  async guardarRecep() {
+    if (this._rcSaving) return; const s = this.state; const lineas = s.rcLineas || [];
+    if (this._modLevel(this.access(), 'inventario') !== 'write') { this.toast('No tienes permiso de escritura en Inventario'); return; }
+    if (!lineas.length) { this.toast('Agrega al menos un ítem'); return; }
+    const sb = this.sb(); if (!sb) { this.toast('Sin conexión con la nube'); return; }
+    this._rcSaving = true; setTimeout(() => { this._rcSaving = false; }, 2000);
+    const quien = (s.user && s.user.name) || (s.user && s.user.email) || 'App';
+    const data = { fecha: s.rcFecha || new Date().toISOString().slice(0, 10), proveedor: String(s.rcProv || '').trim(), nota: String(s.rcNota || '').trim(), items: lineas.map(l => ({ codigo: l.codigo, nombre: l.nombre, unidad: l.unidad, cantidad: Number(l.cantidad) || 0 })), estado: 'pendiente', creadoPor: quien, creadoAt: new Date().toISOString(), _origen: 'app' };
+    const row = { id: 'rc' + Date.now(), data, actualizado: new Date().toISOString() };
+    const { error } = await sb.from('recepciones').insert(row).select('id');
+    if (error) { this.toast('No se pudo guardar: ' + (/recepciones|relation/i.test(error.message) ? 'falta la tabla recepciones (correr el SQL)' : error.message)); return; }
+    this.setState(s2 => ({ recepciones: [Object.assign({ id: row.id }, data)].concat(s2.recepciones || []), rcLineas: [], rcProv: '', rcNota: '', rcFecha: '', rcSel: '', rcQ: '', rcCant: '', screen: 'recep' }));
+    this.toast('Ingreso enviado a administración · ' + lineas.length + (lineas.length === 1 ? ' ítem' : ' ítems') + ' pendiente' + (lineas.length === 1 ? '' : 's') + ' de asignar a su orden de compra');
+  }
   fmtCant(n) { const v = Math.round((Number(n) || 0) * 1000) / 1000; return Number.isInteger(v) ? v.toLocaleString('es-CO') : v.toLocaleString('es-CO', { maximumFractionDigits: 3 }); }
   async guardarConteo() {
     if (this._ctSaving) return; const s = this.state; const it = this.invItem(s.invCodigo); if (!it) return;
@@ -1338,6 +1457,26 @@ class Component extends DCLogic {
       invVis, invVacio: !!s.inv && invVis.length === 0, invVacioTxt: s.invError ? s.invError : invQ ? 'Nada coincide con la búsqueda.' : inv.length ? 'No hay ítems en esta categoría.' : 'El Hub todavía no ha publicado el inventario. Abre el Hub con un usuario con escritura en Inventario y espera medio minuto.',
       item: Object.assign(itUI, { unidad: itRaw.unidad, ladoLabel: itRaw.cat === 'pt' || itRaw.cat === 'mez' ? 'Costo unitario' : 'Stock mínimo', ladoTxt: itRaw.cat === 'pt' || itRaw.cat === 'mez' ? cop(itRaw.costo) : this.fmtCant(itRaw.minimo) + ' ' + itRaw.unidad, snapTxt: snapL ? 'Stock del sistema según la foto del Hub del ' + snapL + '. La diferencia se recalcula al aprobar.' : '', pendTxt: ctPendItem.length ? ctPendItem.length + ' conteo' + (ctPendItem.length === 1 ? '' : 's') + ' de este ítem esperando aprobación.' : '', hist: ctHistItem.map(c => { const e = estCt(c.estado), d = difFmt(c.diferencia, c.unidad); return { fechaL: fechaL(c.solicitadoAt || c.fecha), motivo: c.motivo, quien: c.solicitadoPor || 'Sin autor', difTxt: d.txt, difColor: d.color, estLabel: e.label, estFg: e.fg }; }), tieneHist: ctHistItem.length > 0 }),
       invPuedeContar: invLvl === 'write', invSoloLectura: invLvl === 'read',
+      // ---- ingresos de mercancía ----
+      isRecep: s.screen === 'recep', isRecepNueva: s.screen === 'recepNueva',
+      goRecep: () => { this.setState({ screen: 'recep' }); this.loadRecepciones(); },
+      goRecepNueva: () => { this.setState({ screen: 'recepNueva', rcFecha: s.rcFecha || new Date().toISOString().slice(0, 10) }); if (!s.recepciones) this.loadRecepciones(); },
+      recepResumenTxt: (() => { const rs = s.recepciones; if (!rs) return 'Ver'; const p = rs.filter(r => r.estado === 'pendiente').length; return p ? p + ' pendiente' + (p === 1 ? '' : 's') : rs.length ? 'Todo asignado' : 'Ninguno aún'; })(),
+      rcProv: s.rcProv || '', setRcProv: e => this.setState({ rcProv: e.target.value }), rcFecha: s.rcFecha || '', setRcFecha: e => this.setState({ rcFecha: e.target.value }),
+      rcNota: s.rcNota || '', setRcNota: e => this.setState({ rcNota: e.target.value }),
+      rcQ: s.rcQ || '', setRcQ: e => this.setState({ rcQ: e.target.value, rcSel: '' }),
+      rcSug: (() => { const q = String(s.rcQ || '').trim().toLowerCase(); if (!q || s.rcSel) return []; return inv.filter(i => i.cat !== 'pt' && i.cat !== 'mez' && (i.nombre.toLowerCase().includes(q) || i.codigo.toLowerCase().includes(q))).slice(0, 6).map(i => ({ codigo: i.codigo, nombre: i.nombre, catLabel: (this.CAT_META[i.cat] || {}).label || i.cat, stockTxt: this.fmtCant(i.stock) + ' ' + i.unidad, pick: () => this.setState({ rcSel: i.codigo, rcQ: i.nombre }) })); })(),
+      rcHaySug: !!String(s.rcQ || '').trim() && !s.rcSel, rcSelNombre: (() => { const it = this.invItem(s.rcSel); return it ? it.nombre + ' (' + it.unidad + ')' : ''; })(),
+      rcSelBorder: s.rcSel ? '#A78659' : '#B8AE9C', rcCant: s.rcCant == null ? '' : s.rcCant, setRcCant: e => this.setState({ rcCant: e.target.value }), rcCantPh: (() => { const it = this.invItem(s.rcSel); return it ? 'Cantidad en ' + it.unidad : 'Cantidad'; })(),
+      addRcLinea: () => this.addRcLinea(), rcAddBg: s.rcSel && Number(s.rcCant) > 0 ? '#5A4A33' : '#C1AA81',
+      rcLineas: (s.rcLineas || []).map((l, i) => ({ codigo: l.codigo, nombre: l.nombre, cantTxt: this.fmtCant(l.cantidad) + ' ' + l.unidad, quitar: () => this.setState({ rcLineas: (this.state.rcLineas || []).filter((_, j) => j !== i) }) })), rcHayLineas: (s.rcLineas || []).length > 0,
+      guardarRecep: () => this.guardarRecep(), rcBtnBg: (s.rcLineas || []).length ? '#A78659' : '#C1AA81', rcBtnLabel: 'Enviar ingreso a administración',
+      recepSubTxt: s.recepError ? 'Sin datos' : s.recepciones ? (s.recepciones.filter(r => r.estado === 'pendiente').length + ' pendiente(s) · ' + s.recepciones.length + ' en total') : 'Cargando…',
+      recepVacio: !!s.recepciones && s.recepciones.length === 0 || !!s.recepError, recepVacioTxt: s.recepError || 'Todavía no hay ingresos registrados. Cuando llegue mercancía, tócala en «Ingresar mercancía».',
+      recepVis: (s.recepciones || []).slice(0, 100).map(r => { const est = r.estado || 'pendiente'; const em = est === 'aplicada' ? { l: 'Asignada', bg: 'rgba(98,123,96,0.14)', fg: '#4C6149' } : est === 'rechazada' ? { l: 'Rechazada', bg: 'rgba(181,80,60,0.12)', fg: '#8F3A28' } : { l: 'Pendiente', bg: 'rgba(201,150,47,0.14)', fg: '#7A5E36' };
+        return { titulo: r.proveedor || 'Sin proveedor', sub: (r.fecha ? r.fecha.split('-').reverse().join('/') : '') + ' · ' + (r.creadoPor || ''), estLabel: em.l, estBg: em.bg, estFg: em.fg,
+          items: (r.items || []).map(it => ({ nombre: it.nombre || it.codigo, cantTxt: this.fmtCant(it.cantidad) + ' ' + (it.unidad || '') })),
+          pie: est === 'aplicada' ? 'Asignada a ' + (r.ordenNumero || 'una orden') + (r.resueltoPor ? ' por ' + r.resueltoPor : '') : est === 'rechazada' ? 'Rechazada' + (r.resueltoPor ? ' por ' + r.resueltoPor : '') + (r.motivo ? ': ' + r.motivo : '') : (r.nota ? 'Nota: ' + r.nota : '') }; }),
       ctContado: s.ctContado == null ? '' : s.ctContado, setCtContado: e => this.setState({ ctContado: e.target.value }), ctNota: s.ctNota || '', setCtNota: e => this.setState({ ctNota: e.target.value }), ctNotaPh: s.ctMotivo === 'Otro' ? 'Explica qué pasó (obligatorio)' : 'Nota (opcional)',
       ctDifTxt: ctD ? ctD.txt : '—', ctDifColor: ctD ? ctD.color : '#8A8073',
       ctMotivos: this.MOTIVOS_CONTEO.map(m => Object.assign({ label: m, set: () => this.setState({ ctMotivo: m }) }, chip((s.ctMotivo || 'Conteo periódico') === m))),
