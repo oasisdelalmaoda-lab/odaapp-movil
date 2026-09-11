@@ -39,21 +39,46 @@
 
   <!-- ===== LOGIN ===== -->
   <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
-  <div data-screen-label="Ingreso" style="flex:1;overflow:auto;display:flex;flex-direction:column;justify-content:center;padding:calc(env(safe-area-inset-top) + 40px) 28px 40px;">
-    <img src="app-logo-wordmark-brown.png" alt="OdA" style="width:150px;height:auto;align-self:flex-start;">
-    <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin-top:22px;">Oasis del Alma · Operación</div>
-    <div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;line-height:1.1;margin-top:6px;text-wrap:balance;">Bienvenido a la app del equipo</div>
-    <div style="font-size:13px;color:#574E40;margin-top:10px;line-height:1.5;">Entra con el mismo correo y contraseña del Hub.</div>
-    <div style="display:flex;flex-direction:column;gap:10px;margin-top:28px;">
-      <input type="email" value="{{ loginEmail }}" onChange="{{ setLoginEmail }}" onKeyDown="{{ loginKey }}" placeholder="Correo" autoComplete="username" style="height:50px;border-radius:999px;border:1px solid #B8AE9C;background:#FFFFFF;padding:0 18px;font-size:15px;outline:none;color:#3A3326;">
-      <input type="password" value="{{ loginPwd }}" onChange="{{ setLoginPwd }}" onKeyDown="{{ loginKey }}" placeholder="Contraseña" autoComplete="current-password" style="height:50px;border-radius:999px;border:1px solid #B8AE9C;background:#FFFFFF;padding:0 18px;font-size:15px;outline:none;color:#3A3326;">
-      <sc-if value="{{ loginError }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#8F3A28;background:rgba(181,80,60,0.1);border-radius:14px;padding:10px 14px;line-height:1.45;">{{ loginError }}</div></sc-if>
-      <div onClick="{{ doLogin }}" style="margin-top:6px;height:50px;border-radius:999px;background:{{ loginBtnBg }};color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;gap:10px;">
-        <sc-if value="{{ loginBusy }}" hint-placeholder-val="{{ false }}"><div style="width:16px;height:16px;border-radius:999px;border:2px solid rgba(251,248,242,0.4);border-top-color:#FBF8F2;animation:oda-spin 0.8s linear infinite;"></div></sc-if>
-        {{ loginBtnLabel }}
+  <div data-screen-label="Ingreso" style="flex:1;overflow:auto;display:flex;flex-direction:column;background:#F7F2E9;">
+    <div style="background:#2A2419;color:#FBF8F2;padding:calc(env(safe-area-inset-top) + 36px) 28px 44px;position:relative;overflow:hidden;flex-shrink:0;">
+      <div style="position:absolute;right:-60px;bottom:-70px;color:#A78659;opacity:0.12;">
+        <svg width="260" height="260" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c0-7 1.5-13 9-17C19.5 14 16 19 12 22Z"></path><path d="M12 22C8 16 3 13 1.5 6C9.5 7.5 12 14 12 22Z" opacity="0.55"></path></svg>
       </div>
+      <img src="app-logo-mark-white.png" alt="OdA" style="height:64px;width:auto;display:block;position:relative;">
+      <div style="font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:#A78659;margin-top:26px;position:relative;">Hub Intelligence de Negocio</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:500;line-height:1.06;margin-top:10px;text-wrap:balance;position:relative;">El corazón operativo de Oasis del Alma.</div>
+      <div style="font-size:12px;letter-spacing:0.06em;color:rgba(251,248,242,0.5);margin-top:18px;position:relative;">Bienestar en cada respiro · Hecho en Colombia</div>
     </div>
-    <div style="font-size:12px;color:#8A8073;margin-top:26px;line-height:1.5;">Si no tienes acceso, pídele al administrador que te cree en Usuarios y permisos del Hub y en la cuenta de acceso.</div>
+    <div style="padding:28px 24px calc(env(safe-area-inset-bottom) + 32px);display:flex;flex-direction:column;">
+      <div style="font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#8A8073;">Bienvenido de nuevo</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;line-height:1.1;margin-top:6px;color:#3A3326;">Inicia sesión</div>
+      <div style="font-size:13.5px;color:#8A8073;margin-top:6px;line-height:1.5;">Accede con tu cuenta de Oasis del Alma.</div>
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:24px;">
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#574E40;">Correo
+          <input type="email" value="{{ loginEmail }}" onChange="{{ setLoginEmail }}" onKeyDown="{{ loginKey }}" placeholder="tucorreo@oasisdelalma.co" autoComplete="username" style="height:50px;border-radius:12px;border:1.5px solid #B8AE9C;background:#FFFFFF;padding:0 14px;font-size:15px;font-family:inherit;font-weight:400;outline:none;color:#3A3326;width:100%;box-sizing:border-box;">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#574E40;">Contraseña
+          <span style="position:relative;display:block;">
+            <input type="{{ loginPwdType }}" value="{{ loginPwd }}" onChange="{{ setLoginPwd }}" onKeyDown="{{ loginKey }}" placeholder="Ingresa tu contraseña" autoComplete="current-password" style="height:50px;border-radius:12px;border:1.5px solid #B8AE9C;background:#FFFFFF;padding:0 48px 0 14px;font-size:15px;font-family:inherit;font-weight:400;outline:none;color:#3A3326;width:100%;box-sizing:border-box;">
+            <button type="button" onClick="{{ toggleLoginPwd }}" title="{{ loginPwdToggleTitle }}" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;color:#8A8073;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:10px;">{{ loginPwdIcon }}</button>
+          </span>
+        </label>
+        <label onClick="{{ toggleRecordar }}" style="display:flex;align-items:center;gap:10px;font-size:13px;color:#574E40;min-height:44px;">
+          <span style="width:22px;height:22px;border-radius:7px;border:1.5px solid {{ recordarBorder }};background:{{ recordarBg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <sc-if value="{{ recordar }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FBF8F2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+          </span>
+          Recordar mi correo en este teléfono
+        </label>
+        <sc-if value="{{ loginError }}" hint-placeholder-val="{{ false }}"><div style="font-size:12.5px;font-weight:600;color:#B5503C;background:rgba(181,80,60,0.09);border-radius:10px;padding:10px 13px;line-height:1.45;">{{ loginError }}</div></sc-if>
+        <sc-if value="{{ loginInfo }}" hint-placeholder-val="{{ false }}"><div style="font-size:12.5px;font-weight:600;color:#4C6149;background:rgba(76,97,73,0.10);border-radius:10px;padding:10px 13px;line-height:1.5;">{{ loginInfo }}</div></sc-if>
+        <div onClick="{{ doLogin }}" style="height:50px;border-radius:999px;background:{{ loginBtnBg }};color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;gap:10px;">
+          <sc-if value="{{ loginBusy }}" hint-placeholder-val="{{ false }}"><div style="width:16px;height:16px;border-radius:999px;border:2px solid rgba(251,248,242,0.4);border-top-color:#FBF8F2;animation:oda-spin 0.8s linear infinite;"></div></sc-if>
+          {{ loginBtnLabel }}
+        </div>
+        <button type="button" onClick="{{ sendRecovery }}" style="background:none;border:none;font-family:inherit;font-size:13px;font-weight:700;color:#A78659;min-height:44px;padding:4px;">¿Olvidaste tu contraseña?</button>
+      </div>
+      <div style="font-size:11.5px;color:#8A8073;line-height:1.5;text-align:center;">Escribe tu correo arriba y te enviaremos un enlace para restablecerla. ¿Necesitas una cuenta? Contacta al administrador.</div>
+    </div>
   </div>
   </sc-if>
 
@@ -895,7 +920,10 @@ class Component extends DCLogic {
   }
   componentWillUnmount() { window.removeEventListener('online', this._onl); window.removeEventListener('offline', this._off); window.removeEventListener('beforeinstallprompt', this._bip); document.removeEventListener('visibilitychange', this._vis); }
   // Recarga los números del Inicio. `forzar` = botón manual; si no, solo cuando llevan más de 60 s.
-  refrescarInicio(forzar) { if (this.state.view !== 'app' || this._countsLoading || !this._authUid) return; if (!forzar && this.state.countsAt && Date.now() - this.state.countsAt < 60000) return; this._countsLoading = true; this.setState({ countsCargando: true }); this.loadCounts().finally(() => { this._countsLoading = false; this.setState({ countsCargando: false }); }); }
+  refrescarInicio(forzar) { if (this.state.view !== 'app') return; if (this._countsLoading && Date.now() - (this._countsStart || 0) < 45000) return; if (!forzar && this.state.countsAt && Date.now() - this.state.countsAt < 60000) return; this._countsLoading = true; this._countsStart = Date.now(); this.setState({ countsCargando: true }); this.loadCounts().finally(() => { this._countsLoading = false; this.setState({ countsCargando: false }); }); }
+  // Recupera el uid de Auth si se perdió (la app abrió con sesión en caché y la nube aún no confirmó).
+  async _asegurarAuth() { if (this._authUid) return true; const sb = this.sb(); if (!sb) return false; try { let { data } = await sb.auth.getSession(); let su = data && data.session && data.session.user; if (!su) { const r = await sb.auth.refreshSession(); su = r.data && r.data.session && r.data.session.user; } if (su) { this._authUid = su.id; return true; } } catch (e) { console.warn('auth', e); } return false; }
+  _sesionVencida() { this._authUid = ''; const email = (this.state.user && this.state.user.email) || this.state.loginEmail || ''; try { localStorage.removeItem(this.SESSION_KEY); } catch (e) {} this.setState({ view: 'login', loginEmail: email, loginBusy: false, loginError: 'Tu sesión venció. Entra de nuevo para ver los datos actualizados.', loginInfo: '', loginPwd: '', loginPwdShow: false, countsCargando: false, countsAt: 0 }); }
   // ---- notificaciones push (Web Push; la Edge Function `push` envía, el SW muestra) ----
   VAPID_PUBLIC = 'PEGAR_AQUI_LA_CLAVE_PUBLICA_VAPID';
   _abrirDesdeUrl(url) { try { const cid = new URL(url, location.href).searchParams.get('conv'); if (cid) { if (this.state.view === 'app') { this.setState({ screen: 'chats' }); this.loadConvs(); this.openConv(cid); } else this._convPendiente = cid; } } catch (e) {} }
@@ -917,11 +945,16 @@ class Component extends DCLogic {
   async boot() {
     // Sesión guardada → entra de una (aun sin red); luego la nube confirma o corrige.
     let cached = null; try { cached = JSON.parse(localStorage.getItem(this.SESSION_KEY)); } catch (e) {}
+    this._leerRecordado();
     if (cached && cached.user) this.setState({ view: 'app', user: cached.user, perms: cached.perms || {}, usersCfg: cached.usersCfg || this.state.usersCfg, counts: cached.counts || {} }, () => { if (this._convPendiente) { const cid = this._convPendiente; this._convPendiente = null; this.setState({ screen: 'chats' }); this.loadConvs(); this.openConv(cid); } });
     let tries = 0; while (!this.sb() && tries++ < 40) await new Promise(r => setTimeout(r, 250));
     const sb = this.sb(); if (!sb) { if (!cached) this.setState({ view: 'login', loginError: 'No se pudo conectar con la nube. Revisa tu conexión.' }); return; }
-    try { const { data } = await sb.auth.getSession(); const su = data && data.session && data.session.user; if (su) { await this.enter(su); return; } } catch (e) {}
-    if (!cached) this.setState({ view: 'login' });
+    try { sb.auth.onAuthStateChange((ev, ses) => { const su = ses && ses.user; if (su) this._authUid = su.id; if (ev === 'SIGNED_OUT' && this.state.view === 'app' && !this._saliendo) this._sesionVencida(); }); } catch (e) {}
+    let su = null; try { const { data } = await sb.auth.getSession(); su = data && data.session && data.session.user; if (!su) { const r = await sb.auth.refreshSession(); su = r.data && r.data.session && r.data.session.user; } } catch (e) { console.warn('sesión', e); }
+    if (su) { await this.enter(su); return; }
+    // Sin sesión válida en la nube: con caché la app mostraba los números viejos y se quedaba
+    // «Cargando…» para siempre (nunca se fijaba _authUid). Ahora pide entrar de nuevo.
+    if (cached) { if (navigator.onLine) this._sesionVencida(); } else this.setState({ view: 'login' });
   }
   async loadPermisos() {
     const sb = this.sb(); if (!sb) return; const { data, error } = await sb.from('permisos').select('user_key,perms'); if (error) throw error;
@@ -940,12 +973,12 @@ class Component extends DCLogic {
   }
   persistSession() { const s = this.state; try { localStorage.setItem(this.SESSION_KEY, JSON.stringify({ user: s.user, perms: s.perms, usersCfg: s.usersCfg, counts: s.counts })); } catch (e) {} }
   async loadCounts() {
-    const sb = this.sb(); if (!sb || !this.state.user || this.state.offline || !this._authUid) return; const a = this.access(); const c = {};
+    const sb = this.sb(); if (!sb || !this.state.user || this.state.offline) return; if (!(await this._asegurarAuth())) { if (navigator.onLine) this._sesionVencida(); return; } const a = this.access(); const c = {};
     const cnt = async (tabla, col, val) => { try { const { count, error } = await sb.from(tabla).select('*', { count: 'exact', head: true }).eq(col, val); if (error) throw error; return count || 0; } catch (e) { console.warn('conteo ' + tabla, e); return null; } };
     if (this._modLevel(a, 'conversaciones') !== 'none') c.convsNecesita = await cnt('conversaciones', 'estado', 'necesita');
     if (this.isAdmin()) c.conteosPend = await cnt('conteos', 'estado', 'pendiente');
     if (this._modLevel(a, 'ventas') !== 'none') c.leadsNuevos = await cnt('leads', 'estado', 'Nuevo');
-    if (this._modLevel(a, 'ventas') !== 'none' || this._modLevel(a, 'finanzas') !== 'none') Object.assign(c, await this.loadVentasResumen());
+    if (this._modLevel(a, 'ventas') !== 'none' || this._modLevel(a, 'finanzas') !== 'none') { const r = await this.loadVentasResumen(); if (r._error) { this.setState({ countsError: r._error }); const prev = this.state.counts || {}; ['ventasHoy','ventasHoyN','ventasAyer','ventasMes','ventasMesN','ventasMesAnt','ventasMesAntTotal','porCobrar'].forEach(k => { if (k in prev) c[k] = prev[k]; }); } else { Object.assign(c, r); this.setState({ countsError: '' }); } }
     this.setState({ counts: c, countsAt: Date.now() }, () => this.persistSession());
   }
   // Resumen de ventas: baja `data` de la tabla ventas por páginas (la API corta en ~1000) y
@@ -962,13 +995,14 @@ class Component extends DCLogic {
       // completo hacía ver el mes en curso siempre por debajo).
       const diaHoy = hoy.getDate();
       let hoyT = 0, hoyN = 0, ayerT = 0, mesT = 0, mesN = 0, antT = 0, antTot = 0, cobrar = 0, from = 0; const page = 500;
-      for (let g = 0; g < 200; g++) { const { data, error } = await sb.from('ventas').select('id,data').order('id', { ascending: true }).range(from, from + page - 1); if (error) throw error; if (!data || !data.length) break;
+      const conTope = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('La nube tardó demasiado')), ms))]);
+      for (let g = 0; g < 200; g++) { const { data, error } = await conTope(sb.from('ventas').select('id,data').order('id', { ascending: true }).range(from, from + page - 1), 25000); if (error) throw error; if (!data || !data.length) break;
         data.forEach(r => { const v = r.data || {}; if (v.origen === 'historico') return; const f = parseF(v.fecha); if (!f || f < '2026-06-01') return; const t = total(v);
           if (f === hoyS) { hoyT += t; hoyN++; } if (f === ayerS) ayerT += t; if (f.slice(0, 7) === mesS) { mesT += t; mesN++; } if (f.slice(0, 7) === antS) { antTot += t; if (Number(f.slice(8, 10)) <= diaHoy) antT += t; }
           const pg = Number(v.pagado) || 0; if (t > pg) cobrar += (t - pg); });
         if (data.length < page) break; from += page; }
       out.ventasHoy = hoyT; out.ventasHoyN = hoyN; out.ventasAyer = ayerT; out.ventasMes = mesT; out.ventasMesN = mesN; out.ventasMesAnt = antT; out.ventasMesAntTotal = antTot; out.porCobrar = cobrar;
-    } catch (e) { console.warn('ventas resumen', e); }
+    } catch (e) { console.warn('ventas resumen', e); const m = String((e && e.message) || e); out._error = /JWT|expired|401|permission|policy/i.test(m) ? 'Sesión vencida: entra de nuevo' : m; }
     return out;
   }
   // ===== CONVERSACIONES (fase 2) =====
@@ -1063,7 +1097,7 @@ class Component extends DCLogic {
   // ---- informe gerencial: lo publica el Hub ya calculado (informe_snapshot, un mes por fila) ----
   async loadInforme() {
     const sb = this.sb(); if (!sb || this._infLoading) return; if (this._modLevel(this.access(), 'informes') === 'none') return; this._infLoading = true;
-    try { const { data, error } = await sb.from('informe_snapshot').select('ym,data,actualizado,por').order('ym', { ascending: false }).limit(12); if (error) throw error;
+    try { if (!(await this._asegurarAuth())) throw new Error('Sesión vencida: entra de nuevo'); const { data, error } = await sb.from('informe_snapshot').select('ym,data,actualizado,por').order('ym', { ascending: false }).limit(12); if (error) throw error;
       const list = (data || []).map(r => ({ ym: r.ym, data: r.data || {}, actualizado: r.actualizado || '', por: r.por || '' }));
       this.setState(s => ({ informes: list, infYm: s.infYm && list.some(x => x.ym === s.infYm) ? s.infYm : (list[0] ? list[0].ym : null), infError: '' })); }
     catch (e) { console.warn('informe', e); this.setState({ informes: this.state.informes || [], infError: /informe_snapshot|relation|does not exist/i.test(String(e.message || e)) ? 'Falta la tabla informe_snapshot en la nube (correr supabase-informe-snapshot.sql y abrir el Hub para que publique el informe).' : 'No se pudo cargar el informe: ' + (e.message || e) }); }
@@ -1144,15 +1178,27 @@ class Component extends DCLogic {
   }
   urlProducto(p) { if (p.handle) return 'https://oasisdelalma.co/products/' + p.handle; return 'https://oasisdelalma.co/search?q=' + encodeURIComponent(p.nombre); }
 
+  RECORDAR_KEY = 'oda_app_recordar_v1';
+  // Correo recordado (opt-in en el login). Se lee al arrancar y al volver al login por sesión vencida.
+  _leerRecordado() { try { const e = localStorage.getItem(this.RECORDAR_KEY); if (e) { this.setState(s => ({ recordar: true, loginEmail: s.loginEmail || e })); } } catch (err) {} }
+  async sendRecovery() {
+    const sb = this.sb(); const email = String(this.state.loginEmail || '').trim().toLowerCase();
+    if (!email) { this.setState({ loginError: 'Escribe tu correo arriba para enviarte el enlace.' }); return; }
+    if (!sb) { this.setState({ loginError: 'Conectando con la nube… intenta de nuevo en un momento.' }); return; }
+    this.setState({ loginBusy: true, loginError: '', loginInfo: '' });
+    try { const { error } = await sb.auth.resetPasswordForEmail(email); if (error) throw error; this.setState({ loginBusy: false, loginInfo: 'Te enviamos un enlace a ' + email + ' para restablecer tu contraseña. Revisa también el correo no deseado.' }); }
+    catch (e) { this.setState({ loginBusy: false, loginError: /rate|limit/i.test(String(e && e.message)) ? 'Ya te enviamos un enlace hace poco. Espera un momento antes de pedir otro.' : 'No se pudo enviar el enlace: ' + ((e && e.message) || e) }); }
+  }
   async doLogin() {
     const sb = this.sb(); if (!sb) { this.setState({ loginError: 'Conectando con la nube… intenta de nuevo en un momento.' }); return; }
     const email = String(this.state.loginEmail || '').trim().toLowerCase(), pwd = String(this.state.loginPwd || '');
     if (!email || !pwd) { this.setState({ loginError: 'Escribe tu correo y contraseña.' }); return; }
-    this.setState({ loginBusy: true, loginError: '' });
+    this.setState({ loginBusy: true, loginError: '', loginInfo: '' });
+    try { if (this.state.recordar) localStorage.setItem(this.RECORDAR_KEY, email); } catch (e) {}
     try { const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd }); if (error) throw error; await this.enter(data.user); }
     catch (e) { const m = (e && e.message) || ''; let es = 'No se pudo iniciar sesión.'; if (/invalid login/i.test(m)) es = 'Correo o contraseña incorrectos.'; else if (/email not confirmed/i.test(m)) es = 'Tu correo aún no está confirmado.'; else if (/fetch|network/i.test(m)) es = 'Sin conexión con la nube. Revisa tu internet.'; this.setState({ loginBusy: false, loginError: es }); }
   }
-  async doLogout() { try { await this.sb().auth.signOut(); } catch (e) {} try { localStorage.removeItem(this.SESSION_KEY); } catch (e) {} if (this._convSub) { try { this._convSub.unsubscribe(); } catch (e) {} this._convSub = null; } clearInterval(this._convPoll); this._convSig = null; this._msgCache = {}; this.setState({ view: 'login', user: null, screen: 'inicio', counts: {}, convs: null, msgs: [], convId: null }); }
+  async doLogout() { this._saliendo = true; this._authUid = ''; try { await this.sb().auth.signOut(); } catch (e) {} this._saliendo = false; try { localStorage.removeItem(this.SESSION_KEY); } catch (e) {} if (this._convSub) { try { this._convSub.unsubscribe(); } catch (e) {} this._convSub = null; } clearInterval(this._convPoll); this._convSig = null; this._msgCache = {}; this.setState({ view: 'login', user: null, screen: 'inicio', counts: {}, convs: null, msgs: [], convId: null, loginError: '', loginInfo: '', loginPwd: '', loginPwdShow: false }); this._leerRecordado(); }
 
   renderVals() {
     const s = this.state, a = this.access(), u = s.user || {}, c = s.counts || {};
@@ -1244,11 +1290,17 @@ class Component extends DCLogic {
     const segOn = { bg: '#FBF8F2', fg: '#3A3326' }, segOff = { bg: 'transparent', fg: 'rgba(251,248,242,0.75)' };
     return {
       isLogin: s.view === 'login', isApp: s.view === 'app', toast: s.toast, offline: s.offline,
-      loginEmail: s.loginEmail, loginPwd: s.loginPwd, loginError: s.loginError, loginBusy: s.loginBusy,
+      loginEmail: s.loginEmail, loginPwd: s.loginPwd, loginError: s.loginError, loginBusy: s.loginBusy, loginInfo: s.loginInfo || '',
+      loginPwdType: s.loginPwdShow ? 'text' : 'password', loginPwdToggleTitle: s.loginPwdShow ? 'Ocultar contraseña' : 'Mostrar contraseña', toggleLoginPwd: () => this.setState({ loginPwdShow: !this.state.loginPwdShow }),
+      loginPwdIcon: s.loginPwdShow
+        ? React.createElement('svg', { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' }, React.createElement('path', { d: 'M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24' }), React.createElement('line', { x1: 1, y1: 1, x2: 23, y2: 23 }))
+        : React.createElement('svg', { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' }, React.createElement('path', { d: 'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z' }), React.createElement('circle', { cx: 12, cy: 12, r: 3 })),
+      recordar: !!s.recordar, recordarBg: s.recordar ? '#A78659' : '#FFFFFF', recordarBorder: s.recordar ? '#A78659' : '#B8AE9C', toggleRecordar: () => { const v = !this.state.recordar; this.setState({ recordar: v }); try { if (v) localStorage.setItem(this.RECORDAR_KEY, String(this.state.loginEmail || '').trim().toLowerCase()); else localStorage.removeItem(this.RECORDAR_KEY); } catch (e) {} },
+      sendRecovery: () => this.sendRecovery(),
       setLoginEmail: e => this.setState({ loginEmail: e.target.value, loginError: '' }), setLoginPwd: e => this.setState({ loginPwd: e.target.value, loginError: '' }),
       loginKey: e => { if (e.key === 'Enter') this.doLogin(); }, doLogin: () => this.doLogin(), doLogout: () => this.doLogout(),
       loginBtnBg: s.loginBusy ? '#C1AA81' : '#A78659', loginBtnLabel: s.loginBusy ? 'Entrando…' : 'Entrar',
-      isInicio: s.screen === 'inicio', refrescar: () => this.refrescarInicio(true), actualizadoTxt: s.countsCargando ? 'Actualizando…' : s.countsAt ? 'Actualizado ' + new Date(s.countsAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) + ' · toca para refrescar' : 'Cargando…', isModulo: s.screen === 'modulo', isPerfil: s.screen === 'perfil', goInicio: go('inicio'), goPerfil: go('perfil'),
+      isInicio: s.screen === 'inicio', refrescar: () => this.refrescarInicio(true), actualizadoTxt: s.countsCargando ? 'Actualizando…' : s.countsError ? 'No se pudo actualizar (' + s.countsError + ') · toca para reintentar' : s.countsAt ? 'Actualizado ' + new Date(s.countsAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) + ' · toca para refrescar' : 'Cargando…', isModulo: s.screen === 'modulo', isPerfil: s.screen === 'perfil', goInicio: go('inicio'), goPerfil: go('perfil'),
       isChats: s.screen === 'chats', isChat: s.screen === 'chat', showTabs: s.screen !== 'chat' && s.screen !== 'invItem' && s.screen !== 'prodNueva', goChats: () => this.setState({ screen: 'chats', convId: null }),
       isFin: s.screen === 'fin', finSubTxt: finRow ? 'Publicado por el Hub el ' + new Date(finRow.actualizado).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' · solo consulta' : (s.informes ? 'Sin datos' : 'Cargando…'),
       finTabs: [['caja', 'Caja y bancos'], ['cobrar', 'Por cobrar']].map(([id, label]) => Object.assign({ label, set: () => this.setState({ finTab: id }) }, chip(finTab === id))), finEsCaja: finTab === 'caja', finEsCobrar: finTab === 'cobrar',

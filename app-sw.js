@@ -1,7 +1,7 @@
-// OdA App · service worker (fase 1)
+// OdA App · service worker (fase 5: notificaciones)
 // Cachea la "cáscara" (HTML, estilos, fuentes, librerías) para que la app abra sin red.
 // Los datos de Supabase NUNCA se cachean aquí: siempre van a la red.
-const VERSION = 'oda-app-v3';
+const VERSION = 'oda-app-v6';
 const SHELL = ['./', './index.html', './app-manifest.json', './app-icon-192.png', './app-icon-512.png'];
 
 self.addEventListener('install', (e) => {
@@ -23,4 +23,22 @@ self.addEventListener('fetch', (e) => {
       return res;
     }).catch(() => caches.match(e.request).then((hit) => hit || (e.request.mode === 'navigate' ? caches.match('./index.html') : undefined)))
   );
+});
+// --- Notificaciones push (las manda la Edge Function `push` cuando escribe un cliente) ---
+self.addEventListener('push', (e) => {
+  let d = {}; try { d = e.data ? e.data.json() : {}; } catch (_) { d = { body: e.data ? e.data.text() : '' }; }
+  const title = d.title || 'Oasis del Alma';
+  e.waitUntil(self.registration.showNotification(title, {
+    body: (d.canal ? d.canal + ' · ' : '') + (d.body || ''), icon: './app-icon-192.png', badge: './app-icon-192.png',
+    tag: d.tag || 'oda', renotify: true, data: { url: d.url || './' },
+  }));
+});
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const url = new URL((e.notification.data && e.notification.data.url) || './', self.location.href).href;
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((cs) => {
+    const c = cs.find((x) => x.url.startsWith(self.registration.scope));
+    if (c) { c.focus(); c.postMessage({ tipo: 'abrir', url }); return; }
+    return self.clients.openWindow(url);
+  }));
 });
