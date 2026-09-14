@@ -146,6 +146,7 @@
         </sc-for>
       </div>
 
+      <sc-if value="{{ hayAcciones }}" hint-placeholder-val="{{ true }}">
       <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin:24px 0 10px;">Acciones rápidas</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
         <sc-for list="{{ modulos }}" as="m" hint-placeholder-count="4">
@@ -155,6 +156,7 @@
           </div>
         </sc-for>
       </div>
+      </sc-if>
     </div>
     </sc-if>
 
@@ -246,6 +248,7 @@
             <div style="max-width:80%;padding:{{ m.pad }};border-radius:{{ m.radius }};background:{{ m.bg }};color:{{ m.fg }};font-size:13.5px;line-height:1.4;border:{{ m.border }};text-align:{{ m.align }};overflow:hidden;">
               <sc-if value="{{ m.etiqueta }}" hint-placeholder-val="{{ false }}"><div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;opacity:0.7;margin-bottom:4px;padding:{{ m.etPad }};">{{ m.etiqueta }}</div></sc-if>
               <sc-if value="{{ m.esImg }}" hint-placeholder-val="{{ false }}"><img src="{{ m.img }}" loading="lazy" alt="" style="display:block;max-width:100%;max-height:260px;border-radius:12px;object-fit:cover;"></sc-if>
+              <sc-if value="{{ m.esDoc }}" hint-placeholder-val="{{ false }}"><a href="{{ m.docUrl }}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;color:inherit;text-decoration:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg><span style="font-weight:700;word-break:break-word;text-decoration:underline;">{{ m.docNombre }}</span></a></sc-if>
               <sc-if value="{{ m.texto }}" hint-placeholder-val="{{ true }}"><div style="white-space:pre-wrap;word-break:break-word;">{{ m.texto }}</div></sc-if>
               <sc-if value="{{ m.noEntregado }}" hint-placeholder-val="{{ false }}">
                 <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
@@ -284,6 +287,7 @@
         </div>
         <div style="display:flex;gap:6px;padding:8px 14px calc(env(safe-area-inset-bottom) + 12px);align-items:flex-end;">
           <div onClick="{{ pickFoto }}" title="Adjuntar foto" style="width:42px;height:42px;border-radius:999px;border:1px solid #B8AE9C;background:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:17px;color:#5A4A33;flex:0 0 auto;">{{ fotoIcono }}</div>
+          <div onClick="{{ pickArchivo }}" title="Adjuntar archivo (PDF, Word, Excel)" style="width:42px;height:42px;border-radius:999px;border:1px solid #B8AE9C;background:#FFFFFF;display:flex;align-items:center;justify-content:center;color:#5A4A33;flex:0 0 auto;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#5A4A33" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg></div>
           <div onClick="{{ toggleProductos }}" title="Enlace de producto" style="width:42px;height:42px;border-radius:999px;border:1px solid {{ prodBtnBorder }};background:{{ prodBtnBg }};display:flex;align-items:center;justify-content:center;font-size:15px;color:#5A4A33;flex:0 0 auto;">✦</div>
           <textarea value="{{ msgDraft }}" onChange="{{ setMsgDraft }}" placeholder="Escribe una respuesta…" rows="1" style="flex:1;min-height:42px;max-height:120px;border-radius:20px;border:1px solid #B8AE9C;background:#FFFFFF;padding:11px 16px;font-size:14px;outline:none;color:#3A3326;resize:none;line-height:1.35;box-sizing:border-box;"></textarea>
           <div onClick="{{ enviarMsg }}" style="width:42px;height:42px;border-radius:999px;background:{{ enviarBg }};color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-size:16px;flex:0 0 auto;">➤</div>
@@ -1196,27 +1200,43 @@ class Component extends DCLogic {
     this._pushLocalMsg(id, { de: 'sistema', texto, at: now, manual: true }); const sb = this.sb(); if (!sb) return;
     try { await sb.from('mensajes').insert({ conversacion_id: id, de: 'sistema', texto, meta: { manual: true, asesor: me } }); } catch (e) {}
     this.patchConv(id, { estado: 'humano', asignado_a: me, no_leidos: 0, ultimo_mensaje: texto, ultimo_at: now }, { estado: 'humano', asignadoA: me, noLeidos: 0 }); }
-  async enviar(texto, imagenUrl) {
+  // adj = { url, esImg, nombre } (opcional). Imagen → '[IMG:url]' (igual que el Hub); archivo → '[DOC:url|nombre]'.
+  async enviar(texto, adj) {
+    if (typeof adj === 'string') adj = { url: adj, esImg: true, nombre: '' };
     const id = this.state.convId, c = (this.state.convs || []).find(x => x.id === id); if (!c || !this.puedeEscribir(c)) { this.toast('Solo puede responder quien tiene asignada la conversación'); return; }
-    texto = String(texto || '').trim(); if (!texto && !imagenUrl) return; const me = this.meUid(), now = new Date().toISOString(), guardado = imagenUrl ? '[IMG:' + imagenUrl + ']' : texto;
-    this._pushLocalMsg(id, { de: 'asesor', texto: guardado, at: now, asesor: me }); if (imagenUrl && texto) this._pushLocalMsg(id, { de: 'asesor', texto, at: now, asesor: me });
+    texto = String(texto || '').trim(); const url = adj && adj.url; if (!texto && !url) return; const me = this.meUid(), now = new Date().toISOString();
+    const guardado = url ? (adj.esImg ? '[IMG:' + url + ']' : '[DOC:' + url + '|' + (adj.nombre || 'archivo') + ']') : texto; const resumen = texto || (url ? (adj.esImg ? '📷 imagen' : '📎 ' + (adj.nombre || 'archivo')) : '');
+    this._pushLocalMsg(id, { de: 'asesor', texto: guardado, at: now, asesor: me }); if (url && texto) this._pushLocalMsg(id, { de: 'asesor', texto, at: now, asesor: me });
     this.setState({ msgDraft: '', showProductos: false });
     const sb = this.sb(); if (!sb) { this.toast('Sin conexión: el mensaje no salió'); return; }
-    try { await sb.from('mensajes').insert({ conversacion_id: id, de: 'asesor', texto: guardado, meta: { asesor: me } }); if (imagenUrl && texto) await sb.from('mensajes').insert({ conversacion_id: id, de: 'asesor', texto, meta: { asesor: me } });
-      await sb.from('conversaciones').update({ estado: 'humano', asignado_a: c.asignadoA || me, no_leidos: 0, ultimo_mensaje: (texto || '📷 imagen'), ultimo_at: now }).eq('id', id); } catch (e) { console.warn('guardar msg', e); }
-    this.setState(s => ({ convs: (s.convs || []).map(x => x.id === id ? Object.assign({}, x, { ultimo: texto || '📷 imagen', ultimoAt: now, noLeidos: 0 }) : x) }));
+    try { await sb.from('mensajes').insert({ conversacion_id: id, de: 'asesor', texto: guardado, meta: { asesor: me } }); if (url && texto) await sb.from('mensajes').insert({ conversacion_id: id, de: 'asesor', texto, meta: { asesor: me } });
+      await sb.from('conversaciones').update({ estado: 'humano', asignado_a: c.asignadoA || me, no_leidos: 0, ultimo_mensaje: resumen, ultimo_at: now }).eq('id', id); } catch (e) { console.warn('guardar msg', e); }
+    this.setState(s => ({ convs: (s.convs || []).map(x => x.id === id ? Object.assign({}, x, { ultimo: resumen, ultimoAt: now, noLeidos: 0 }) : x) }));
     const hdr = { 'content-type': 'application/json', apikey: this.CLOUD_KEY, authorization: 'Bearer ' + this.CLOUD_KEY };
     if (c.canal === 'whatsapp') { if (!c.telefono) { this.toast('Esta conversación no tiene número: quedó guardado pero no se envió'); return; }
-      const body = imagenUrl ? { to: c.telefono, imageUrl: imagenUrl, text: texto, origen: 'app', conversacion: id } : { to: c.telefono, text: texto, origen: 'app', conversacion: id };
+      const body = { to: c.telefono, text: texto, origen: 'app', conversacion: id }; if (url) { if (adj.esImg) body.imageUrl = url; else { body.documentUrl = url; body.filename = adj.nombre || 'archivo'; } }
       fetch(this.CLOUD_URL + '/functions/v1/whatsapp', { method: 'POST', headers: hdr, body: JSON.stringify(body) }).then(r => r.json()).then(d => { if (d && d.error) { this.toast('WhatsApp no envió: ' + d.error); this.avisoNoEntregado(id, 'WhatsApp', d.error); } else this.toast('Enviado por WhatsApp'); }).catch(() => { this.toast('Sin conexión: el mensaje no salió a WhatsApp'); this.avisoNoEntregado(id, 'WhatsApp', 'sin conexión con el servidor'); });
     } else if (c.canal === 'instagram' || c.canal === 'messenger') { const cl = c.canal === 'instagram' ? 'Instagram' : 'Messenger';
-      fetch(this.CLOUD_URL + '/functions/v1/meta-send', { method: 'POST', headers: hdr, body: JSON.stringify({ conversacionId: id, canal: c.canal, texto, imagenUrl: imagenUrl || '' }) }).then(r => r.json()).then(d => { if (d && d.error) { this.toast(cl + ' no envió: ' + d.error); this.avisoNoEntregado(id, cl, d.error); } else this.toast('Enviado por ' + cl); }).catch(() => { this.toast('Sin conexión: el mensaje no salió a ' + cl); this.avisoNoEntregado(id, cl, 'sin conexión con el servidor'); });
+      fetch(this.CLOUD_URL + '/functions/v1/meta-send', { method: 'POST', headers: hdr, body: JSON.stringify({ conversacionId: id, canal: c.canal, texto, imagenUrl: url && adj.esImg ? url : '', archivoUrl: url && !adj.esImg ? url : '' }) }).then(r => r.json()).then(d => { if (d && d.error) { this.toast(cl + ' no envió: ' + d.error); this.avisoNoEntregado(id, cl, d.error); } else this.toast('Enviado por ' + cl); }).catch(() => { this.toast('Sin conexión: el mensaje no salió a ' + cl); this.avisoNoEntregado(id, cl, 'sin conexión con el servidor'); });
     } else { this.toast('Enviado al chat de la web'); }
   }
-  pickFoto() { const c = (this.state.convs || []).find(x => x.id === this.state.convId); if (!this.puedeEscribir(c)) { this.toast('Solo puede responder quien tiene asignada la conversación'); return; } if (this.state.fotoSubiendo) return;
-    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.onchange = async () => { const f = inp.files && inp.files[0]; if (!f) return; this.setState({ fotoSubiendo: true });
-      try { const sb = this.sb(); const path = 'chat/' + Date.now() + '_' + Math.floor(Math.random() * 99999) + '_' + String(f.name || 'foto').replace(/[^a-zA-Z0-9._-]/g, '_'); const { error } = await sb.storage.from('adjuntos').upload(path, f, { cacheControl: '3600', upsert: false }); if (error) throw error; const { data } = sb.storage.from('adjuntos').getPublicUrl(path); await this.enviar(this.state.msgDraft, data.publicUrl); }
-      catch (e) { this.toast('No se pudo subir la foto: ' + ((e && e.message) || e)); } this.setState({ fotoSubiendo: false }); }; inp.click(); }
+  // Sube al bucket `adjuntos` (carpeta chat/) y VERIFICA que la URL pública responda antes de enviar:
+  // getPublicUrl devuelve una URL aunque el bucket no exista o no sea público, y Meta rechaza esa URL en silencio.
+  pickFoto() { this.pickAdjunto(true); }
+  pickArchivo() { this.pickAdjunto(false); }
+  pickAdjunto(soloImg) { const c = (this.state.convs || []).find(x => x.id === this.state.convId); if (!this.puedeEscribir(c)) { this.toast('Solo puede responder quien tiene asignada la conversación'); return; } if (this.state.fotoSubiendo) return;
+    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = soloImg ? 'image/*' : '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/plain,text/csv';
+    inp.onchange = async () => { const f = inp.files && inp.files[0]; if (!f) return; const esImg = /^image\//.test(f.type || ''); if (soloImg && !esImg) { this.toast('Elige una imagen'); return; }
+      const MAX = esImg ? 5 * 1024 * 1024 : 100 * 1024 * 1024; if (f.size > MAX) { this.toast(esImg ? 'La imagen supera 5 MB (límite de WhatsApp)' : 'El archivo supera 100 MB'); return; }
+      this.setState({ fotoSubiendo: true });
+      try { const sb = this.sb(); if (!sb) throw new Error('sin conexión con la nube');
+        const nombre = String(f.name || (esImg ? 'foto' : 'archivo')); const path = 'chat/' + Date.now() + '_' + Math.floor(Math.random() * 99999) + '_' + nombre.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const { error } = await sb.storage.from('adjuntos').upload(path, f, { cacheControl: '3600', upsert: false, contentType: f.type || undefined }); if (error) throw new Error((error.message || String(error)) + (/not found|bucket/i.test(error.message || '') ? ' — falta crear el bucket «adjuntos» en Supabase Storage (supabase-adjuntos.sql)' : ''));
+        const { data } = sb.storage.from('adjuntos').getPublicUrl(path); const url = data && data.publicUrl; if (!url) throw new Error('no se obtuvo la URL pública');
+        let ok = false; try { const r = await fetch(url, { method: 'HEAD', cache: 'no-store' }); ok = r.ok; } catch (e) {}
+        if (!ok) throw new Error('el archivo se subió pero no es accesible públicamente: el bucket «adjuntos» debe ser público (supabase-adjuntos.sql)');
+        await this.enviar(this.state.msgDraft, { url, esImg, nombre }); }
+      catch (e) { this.toast('No se pudo adjuntar: ' + ((e && e.message) || e)); console.warn('adjunto', e); } this.setState({ fotoSubiendo: false }); }; inp.click(); }
   async loadProductos() { const sb = this.sb(); if (!sb || this.state.productos) return; try { const [p, k] = await Promise.all([sb.from('productos').select('codigo,data'), sb.from('kits').select('codigo,data')]); const rows = [].concat((p.data || []).map(r => r.data || {}), (k.data || []).map(r => r.data || {})).filter(x => x && x.nombre).map(x => ({ codigo: x.codigo, nombre: x.nombre, precio: Number(x.precio) || 0, handle: x.shopifyHandle || '' })); this.setState({ productos: rows }); } catch (e) { console.warn('productos', e); } }
   // ---- informe gerencial: lo publica el Hub ya calculado (informe_snapshot, un mes por fila) ----
   async loadInforme() {
@@ -1348,7 +1368,7 @@ class Component extends DCLogic {
     const autoChips = (() => { const cuenta = {}; convsBase.forEach(c => autosDe(c).forEach(k => { cuenta[k] = (cuenta[k] || 0) + 1; })); const sin = convsBase.filter(c => autosDe(c).length === 0).length; const chips = [{ k: 'todos', l: 'Todas', n: convsBase.length }]; Object.keys(this.AUTOL).forEach(k => { if (cuenta[k]) chips.push({ k, l: this.AUTOL[k], n: cuenta[k] }); }); if (sin && chips.length > 1) chips.push({ k: 'ninguna', l: 'Sin automatización', n: sin }); return chips.length > 1 ? chips : []; })();
     const cv = convs.find(x => x.id === s.convId) || {}; const cvE = estConv(cv.estado || 'bot'), cvK = canalInfo(cv.canal || 'web');
     const puedeEscribir = this.puedeEscribir(cv); const canWrite = this._modLevel(a, 'conversaciones') === 'write';
-    const msgsUI = (s.msgs || []).map((m, i, arr) => { const im = /^\[IMG:(.+)\]$/.exec(String(m.texto || '').trim()); const prev = arr[i - 1]; const dia = m.at ? new Date(m.at).toDateString() : ''; const nuevoDia = !!(dia && (!prev || new Date(prev.at).toDateString() !== dia)); const hora = m.at ? new Date(m.at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) : ''; const base = { texto: im ? '' : m.texto, esImg: !!im, img: im ? im[1] : 'data:image/gif;base64,R0lGODlhAQABAAAAACw=', hora, nuevoDia, fechaL: fechaL(m.at), pad: im ? '4px' : '10px 13px', etPad: im ? '6px 9px 0' : '0', noEntregado: false, canalL: cvK.l, nativoUrl: cvK.url };
+    const msgsUI = (s.msgs || []).map((m, i, arr) => { const im = /^\[IMG:(.+)\]$/.exec(String(m.texto || '').trim()); const dc = im ? null : /^\[DOC:([^|\]]+)\|?([^\]]*)\]$/.exec(String(m.texto || '').trim()); const prev = arr[i - 1]; const dia = m.at ? new Date(m.at).toDateString() : ''; const nuevoDia = !!(dia && (!prev || new Date(prev.at).toDateString() !== dia)); const hora = m.at ? new Date(m.at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) : ''; const base = { texto: (im || dc) ? '' : m.texto, esImg: !!im, img: im ? im[1] : 'data:image/gif;base64,R0lGODlhAQABAAAAACw=', esDoc: !!dc, docUrl: dc ? dc[1] : '#', docNombre: dc ? (dc[2] || decodeURIComponent(dc[1].split('/').pop() || 'archivo').replace(/^\d+_\d+_/, '')) : '', hora, nuevoDia, fechaL: fechaL(m.at), pad: im ? '4px' : '10px 13px', etPad: im ? '6px 9px 0' : '0', noEntregado: false, canalL: cvK.l, nativoUrl: cvK.url };
       if (m.de === 'sistema') return Object.assign(base, { just: 'center', radius: '12px', bg: m.manual ? 'transparent' : 'rgba(181,80,60,0.06)', fg: m.manual ? '#8A8073' : '#8F3A28', border: m.manual ? '1px dashed #B8AE9C' : '1px dashed rgba(181,80,60,0.5)', align: 'center', etiqueta: m.noEntregado ? 'No entregado' : 'Aviso', noEntregado: !!m.noEntregado && !arr.slice(i + 1).some(x => x.manual) });
       if (m.de === 'cliente') return Object.assign(base, { just: 'flex-start', radius: '16px 16px 16px 4px', bg: '#FFFFFF', fg: '#3A3326', border: '1px solid #E4DBCC', align: 'left', etiqueta: '' });
       const bot = m.de === 'bot'; return Object.assign(base, { just: 'flex-end', radius: '16px 16px 4px 16px', bg: bot ? '#EFE6D6' : '#A78659', fg: bot ? '#3A3326' : '#FBF8F2', border: 'none', align: 'left', etiqueta: bot ? (m.auto ? ('Automático · ' + (this.AUTOL[m.auto] || m.auto)) : 'Agente IA') : (this.nombreDe(m.asesor) || 'Asesor') }); });
@@ -1357,6 +1377,13 @@ class Component extends DCLogic {
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
     const mods = this.MODS.map(m => { const lvl = m.mod ? this._modLevel(a, m.mod) : 'write'; return Object.assign({}, m, { lvl }); }).filter(m => m.lvl !== 'none');
     const modAct = mods.find(m => m.id === s.modId) || mods[0] || this.MODS[5];
+    // Módulos que ya tienen pestaña en la barra inferior (misma regla que tabProd/tabInv/tabInforme/tabChats)
+    const _faltaInfOConv = this._modLevel(a, 'informes') === 'none' || this._modLevel(a, 'conversaciones') === 'none';
+    const enBarra = [];
+    if (this._modLevel(a, 'informes') !== 'none') enBarra.push('reportes');
+    if (this._modLevel(a, 'conversaciones') !== 'none') enBarra.push('conversaciones');
+    if (this._modLevel(a, 'produccion') !== 'none' && _faltaInfOConv) enBarra.push('produccion');
+    if (this._modLevel(a, 'inventario') !== 'none' && _faltaInfOConv) enBarra.push('inventario');
     const pend = [
       { titulo: 'Chats que necesitan asesor', sub: 'El bot escaló y nadie ha respondido', n: (s.convs ? convs.filter(x => x.estado === 'necesita').length : c.convsNecesita), color: '#B5503C', go: () => { this.setState({ screen: 'chats', convFiltro: 'necesita' }); this.loadConvs(); } },
       { titulo: 'Conteos por aprobar', sub: 'Solo el administrador los aprueba', n: c.conteosPend, color: '#C9962F', go: () => { this.setState({ screen: 'conteos', ctFiltro: 'pendiente' }); this.loadInventario(); } },
@@ -1507,7 +1534,7 @@ class Component extends DCLogic {
       convPuedeEscribir: puedeEscribir, tomarConv: () => this.tomarConv(), resolverConv: () => this.resolverConv(), devolverBot: () => this.devolverBot(), marcarManual: () => this.marcarManual(),
       respRapidas: this.RESP_RAPIDAS.map(t => t.replace('{yo}', yo)).map(t => ({ label: t.length > 36 ? t.slice(0, 34) + '…' : t, use: () => this.setState({ msgDraft: t }) })),
       msgDraft: s.msgDraft || '', setMsgDraft: e => this.setState({ msgDraft: e.target.value }), enviarMsg: () => this.enviar(s.msgDraft), enviarBg: String(s.msgDraft || '').trim() ? '#A78659' : '#C1AA81',
-      pickFoto: () => this.pickFoto(), fotoIcono: s.fotoSubiendo ? '…' : '📷',
+      pickFoto: () => this.pickFoto(), pickArchivo: () => this.pickArchivo(), fotoIcono: s.fotoSubiendo ? '…' : '📷',
       showProductos: !!s.showProductos, toggleProductos: () => { this.setState({ showProductos: !s.showProductos }); if (!s.productos) this.loadProductos(); }, prodBtnBg: s.showProductos ? '#EFE6D6' : '#FFFFFF', prodBtnBorder: s.showProductos ? '#A78659' : '#B8AE9C',
       prodQ: s.prodQ || '', setProdQ: e => this.setState({ prodQ: e.target.value }), prodVis: prodVis.map(p => ({ nombre: p.nombre, precio: p.precio ? cop(p.precio) : '', use: () => this.setState({ msgDraft: (String(s.msgDraft || '').trim() ? s.msgDraft.trim() + '\n' : '') + p.nombre + ': ' + this.urlProducto(p), showProductos: false }) })),
       prodVacio: !!s.productos && prodVis.length === 0, prodVacioTxt: s.productos ? 'Ningún producto coincide.' : 'Cargando catálogo…',
@@ -1524,7 +1551,8 @@ class Component extends DCLogic {
       perHoyBg: (esHoy ? segOn : segOff).bg, perHoyFg: (esHoy ? segOn : segOff).fg, perMesBg: (esHoy ? segOff : segOn).bg, perMesFg: (esHoy ? segOff : segOn).fg,
       deltaLabel: esHoy ? 'vs. ayer' : 'vs. ' + mesAntNombre + ' al día ' + new Date().getDate(), deltaRef: esHoy ? '' : (typeof c.ventasMesAnt === 'number' ? '· ' + cop(c.ventasMesAnt) + (typeof c.ventasMesAntTotal === 'number' ? ' (cerró en ' + cop(c.ventasMesAntTotal) + ')' : '') : ''), deltaTxt: delta === null ? '—' : (delta >= 0 ? '+' : '') + delta + '%', deltaColor: delta === null ? '#FBF8F2' : delta >= 0 ? '#8AB38D' : '#E8B56A',
       pendientes: pend, sinPendientes: pend.length === 0, pendientesVacioTxt: s.countsAt ? 'Todo al día. Nada pendiente por ahora.' : 'Cargando lo pendiente…',
-      modulos: mods.map(m => ({ titulo: m.titulo, icono: m.icono, nivel: lvlTxt[m.lvl], tag: 'Fase ' + m.fase, tagFg: m.fase === 1 ? '#3F5A3E' : '#8A8073', bg: '#FFFFFF', border: '#E4DBCC', go: go('modulo', { modId: m.id }) })),
+      hayAcciones: mods.some(m => !enBarra.includes(m.id)),
+      modulos: mods.filter(m => !enBarra.includes(m.id)).map(m => ({ titulo: m.titulo, icono: m.icono, nivel: lvlTxt[m.lvl], tag: 'Fase ' + m.fase, tagFg: m.fase === 1 ? '#3F5A3E' : '#8A8073', bg: '#FFFFFF', border: '#E4DBCC', go: go('modulo', { modId: m.id }) })),
       modulo: { titulo: modAct.titulo, tag: 'Llega en la fase ' + modAct.fase, desc: modAct.desc, nivel: lvlTxt[modAct.lvl || 'write'] },
       permisosRows: [['conversaciones', 'Conversaciones'], ['inventario', 'Inventario'], ['finanzas', 'Finanzas'], ['ventas', 'Ventas y leads'], ['informes', 'Informes'], ['compras', 'Compras'], ['produccion', 'Producción']].map(([k, label]) => { const l = this._modLevel(a, k); return { label, nivel: lvlTxt[l], fg: l === 'none' ? '#8A8073' : l === 'read' ? '#2F5E6E' : '#3F5A3E' }; }),
       instaladaTxt: s.standalone ? 'Sí' : 'No · abre desde el navegador', nubeTxt: s.offline ? 'Sin conexión' : 'Conectada',
