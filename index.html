@@ -393,6 +393,55 @@
     </div>
     </sc-if>
 
+    <!-- ===== MARKETING (solo consulta, foto de Meta Ads publicada por el Hub) ===== -->
+    <sc-if value="{{ isMkt }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Marketing" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInicio }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="flex:1;min-width:0;"><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;line-height:1.1;">Marketing</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ mktSubTxt }}</div></div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:12px;overflow-x:auto;scrollbar-width:none;">
+        <sc-for list="{{ mktRangos }}" as="f" hint-placeholder-count="4"><div onClick="{{ f.set }}" style="flex:0 0 auto;padding:8px 14px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.fg }};">{{ f.label }}</div></sc-for>
+      </div>
+      <sc-if value="{{ mktVacio }}" hint-placeholder-val="{{ false }}"><div style="margin-top:14px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;line-height:1.5;">{{ mktVacioTxt }}</div></sc-if>
+      <sc-if value="{{ mktHay }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-top:14px;background:#3A3326;color:#FBF8F2;border-radius:18px;padding:18px 20px;">
+          <div style="display:flex;justify-content:space-between;gap:10px;"><div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;opacity:0.7;">Inversión · {{ mktPeriodo }}</div><div style="font-size:11px;opacity:0.6;">{{ mktSyncTxt }}</div></div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1;margin-top:6px;">{{ mktSpend }}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(251,248,242,0.15);">
+            <div><div style="font-size:11px;opacity:0.7;">Ingresos atribuidos</div><div style="font-size:18px;font-weight:800;margin-top:3px;">{{ mktIngresos }}</div></div>
+            <div><div style="font-size:11px;opacity:0.7;">ROAS</div><div style="font-size:18px;font-weight:800;margin-top:3px;color:#E8D5B0;">{{ mktRoas }}</div><div style="font-size:10.5px;opacity:0.6;margin-top:2px;line-height:1.3;">{{ mktRoasTotal }}</div></div>
+          </div>
+          <sc-if value="{{ mktSparkHay }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 300 60" preserveAspectRatio="none" style="display:block;width:100%;height:52px;margin-top:14px;"><path d="{{ mktSpark }}" fill="none" stroke="#C1AA81" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><div style="font-size:10.5px;opacity:0.6;margin-top:4px;">Resultados por día</div></sc-if>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
+          <sc-for list="{{ mktKpis }}" as="k" hint-placeholder-count="6"><div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:12px 14px;"><div style="font-size:11px;color:#8A8073;">{{ k.label }}</div><div style="font-weight:800;font-size:16px;margin-top:3px;">{{ k.valor }}</div></div></sc-for>
+        </div>
+        <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin:22px 0 10px;">Alertas</div>
+        <sc-if value="{{ mktAlertasVacio }}" hint-placeholder-val="{{ false }}"><div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;font-size:13px;color:#574E40;">Sin alertas en el periodo: la pauta va dentro de lo esperado.</div></sc-if>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <sc-for list="{{ mktAlertas }}" as="a" hint-placeholder-count="2"><div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:12px 16px;display:flex;gap:10px;align-items:flex-start;"><span style="width:8px;height:8px;border-radius:99px;background:{{ a.color }};flex:0 0 auto;margin-top:5px;"></span><div style="min-width:0;"><div style="font-size:10.5px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:{{ a.color }};">{{ a.tipo }}</div><div style="font-size:12.5px;color:#3A3326;line-height:1.4;margin-top:2px;">{{ a.txt }}</div></div></div></sc-for>
+        </div>
+        <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin:22px 0 10px;">Campañas con inversión</div>
+        <sc-if value="{{ mktTopVacio }}" hint-placeholder-val="{{ false }}"><div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;font-size:13px;color:#574E40;">Sin campañas con inversión en el periodo.</div></sc-if>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <sc-for list="{{ mktTop }}" as="c" hint-placeholder-count="3">
+            <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;">
+              <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;"><div style="min-width:0;"><div style="font-weight:700;font-size:13.5px;line-height:1.3;">{{ c.nombre }}</div><div style="font-size:11px;font-weight:700;margin-top:3px;color:{{ c.objFg }};">{{ c.objetivo }}</div></div><div style="flex:0 0 auto;display:inline-flex;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;background:{{ c.estBg }};color:{{ c.estFg }};">{{ c.estado }}</div></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;">
+                <div><div style="font-size:10.5px;color:#8A8073;">Inversión</div><div style="font-weight:800;font-size:13px;margin-top:2px;">{{ c.spendTxt }}</div></div>
+                <div><div style="font-size:10.5px;color:#8A8073;">Ingresos</div><div style="font-weight:800;font-size:13px;margin-top:2px;">{{ c.ingTxt }}</div></div>
+                <div><div style="font-size:10.5px;color:#8A8073;">ROAS</div><div style="font-weight:800;font-size:13px;margin-top:2px;color:{{ c.roasFg }};">{{ c.roasTxt }}</div></div>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:#8A8073;margin-top:10px;"><span>{{ c.resTxt }}</span><span>·</span><span>{{ c.ctrTxt }}</span><span>·</span><span style="color:{{ c.frecFg }};">{{ c.frecTxt }}</span></div>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ mktTopNota }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;color:#8A8073;margin-top:10px;">{{ mktTopNota }}</div></sc-if>
+      </sc-if>
+    </div>
+    </sc-if>
+
     <!-- ===== FINANZAS (solo consulta, publicado por el Hub) ===== -->
     <sc-if value="{{ isFin }}" hint-placeholder-val="{{ false }}">
     <div data-screen-label="Finanzas" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
@@ -927,6 +976,7 @@ class Component extends DCLogic {
     { id: 'produccion', titulo: 'Producción', icono: '◈', mod: 'produccion', fase: 3, listo: true, desc: 'Registrar órdenes de producción de producto terminado: suma el producto y descuenta las materias, igual que en el Hub.' },
     { id: 'finanzas', titulo: 'Finanzas', icono: '◇', mod: 'finanzas', fase: 4, listo: true, desc: 'Saldos por cuenta y ventas por cobrar, publicados por el Hub. Solo consulta.' },
     { id: 'leads', titulo: 'Leads', icono: '✦', mod: 'ventas', fase: 4, listo: true, desc: 'Prospectos por etapa: avanzar, llamar o escribir por WhatsApp con un toque.' },
+    { id: 'marketing', titulo: 'Marketing', icono: '◉', mod: 'marketing', fase: 5, listo: true, desc: 'Resumen de la pauta en Meta Ads: inversión, ingresos, ROAS, campañas principales y alertas. Publicado por el Hub, solo consulta.' },
     { id: 'reportes', titulo: 'Informe gerencial', icono: '▥', mod: 'informes', fase: 4, listo: true, desc: 'El mismo informe gerencial del Hub: ingreso, margen, canales, clientes, inventario, caja y marketing.' },
     { id: 'soporte', titulo: 'Soporte', icono: '?', mod: null, fase: 4, listo: true, desc: 'Reportar un problema de la app o del Hub y confirmar cuando quede resuelto.' },
   ];
@@ -1238,6 +1288,16 @@ class Component extends DCLogic {
         await this.enviar(this.state.msgDraft, { url, esImg, nombre }); }
       catch (e) { this.toast('No se pudo adjuntar: ' + ((e && e.message) || e)); console.warn('adjunto', e); } this.setState({ fotoSubiendo: false }); }; inp.click(); }
   async loadProductos() { const sb = this.sb(); if (!sb || this.state.productos) return; try { const [p, k] = await Promise.all([sb.from('productos').select('codigo,data'), sb.from('kits').select('codigo,data')]); const rows = [].concat((p.data || []).map(r => r.data || {}), (k.data || []).map(r => r.data || {})).filter(x => x && x.nombre).map(x => ({ codigo: x.codigo, nombre: x.nombre, precio: Number(x.precio) || 0, handle: x.shopifyHandle || '' })); this.setState({ productos: rows }); } catch (e) { console.warn('productos', e); } }
+  // ---- marketing: resumen de Meta Ads publicado por el Hub (marketing_snapshot, una fila por rango) ----
+  MKT_RANGOS = [['today', 'Hoy'], ['mes', 'Este mes'], ['mesant', 'Mes anterior'], ['year', 'Este año']];
+  async loadMarketing() {
+    const sb = this.sb(); if (!sb || this._mktLoading) return; if (this._modLevel(this.access(), 'marketing') === 'none') return; this._mktLoading = true;
+    try { if (!(await this._asegurarAuth())) throw new Error('Sesión vencida: entra de nuevo'); const { data, error } = await sb.from('marketing_snapshot').select('rango,data,actualizado,por'); if (error) throw error;
+      const map = {}; (data || []).forEach(r => { map[r.rango] = { data: r.data || {}, actualizado: r.actualizado || '', por: r.por || '' }; });
+      this.setState(s => ({ mkt: map, mktRango: s.mktRango && map[s.mktRango] ? s.mktRango : (map.mes ? 'mes' : (Object.keys(map)[0] || 'mes')), mktError: '' })); }
+    catch (e) { console.warn('marketing', e); this.setState({ mkt: this.state.mkt || {}, mktError: /marketing_snapshot|relation|does not exist/i.test(String(e.message || e)) ? 'Falta la tabla marketing_snapshot en la nube (correr supabase-marketing-snapshot.sql y abrir Marketing → Resumen en el Hub para que publique).' : 'No se pudo cargar el resumen: ' + (e.message || e) }); }
+    finally { this._mktLoading = false; }
+  }
   // ---- informe gerencial: lo publica el Hub ya calculado (informe_snapshot, un mes por fila) ----
   async loadInforme() {
     const sb = this.sb(); if (!sb || this._infLoading) return; if (this._modLevel(this.access(), 'informes') === 'none') return; this._infLoading = true;
@@ -1352,7 +1412,7 @@ class Component extends DCLogic {
     const s = this.state, a = this.access(), u = s.user || {}, c = s.counts || {};
     const lvlTxt = { none: 'Sin acceso', read: 'Solo lectura', write: 'Lectura y escritura' };
     const cop = n => '$' + Math.round(n).toLocaleString('es-CO');
-    const go = (screen, extra) => () => { if (screen === 'inicio') this.refrescarInicio(false); if (screen === 'modulo' && extra && extra.modId === 'conversaciones') { this.setState({ screen: 'chats' }); this.loadConvs(); return; } if (screen === 'modulo' && extra && extra.modId === 'inventario') { this.setState({ screen: 'inv' }); this.loadInventario(); return; } if (screen === 'modulo' && extra && extra.modId === 'produccion') { this.setState({ screen: 'prod' }); this.loadProduccion(); return; } if (screen === 'modulo' && extra && extra.modId === 'reportes') { this.setState({ screen: 'informe' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'finanzas') { this.setState({ screen: 'fin' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'leads') { this.setState({ screen: 'leads' }); this.loadLeads(); return; } if (screen === 'modulo' && extra && extra.modId === 'soporte') { this.setState({ screen: 'soporte' }); this.loadTickets(); return; } this.setState(Object.assign({ screen }, extra || {})); };
+    const go = (screen, extra) => () => { if (screen === 'inicio') this.refrescarInicio(false); if (screen === 'modulo' && extra && extra.modId === 'conversaciones') { this.setState({ screen: 'chats' }); this.loadConvs(); return; } if (screen === 'modulo' && extra && extra.modId === 'inventario') { this.setState({ screen: 'inv' }); this.loadInventario(); return; } if (screen === 'modulo' && extra && extra.modId === 'produccion') { this.setState({ screen: 'prod' }); this.loadProduccion(); return; } if (screen === 'modulo' && extra && extra.modId === 'reportes') { this.setState({ screen: 'informe' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'finanzas') { this.setState({ screen: 'fin' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'leads') { this.setState({ screen: 'leads' }); this.loadLeads(); return; } if (screen === 'modulo' && extra && extra.modId === 'marketing') { this.setState({ screen: 'mkt' }); this.loadMarketing(); return; } if (screen === 'modulo' && extra && extra.modId === 'soporte') { this.setState({ screen: 'soporte' }); this.loadTickets(); return; } this.setState(Object.assign({ screen }, extra || {})); };
     // ---- conversaciones ----
     const chip = on => on ? { bg: '#3A3326', fg: '#FBF8F2', border: '#3A3326' } : { bg: '#FFFFFF', fg: '#574E40', border: '#E4DBCC' };
     const estConv = e => ({ bot: { label: 'Bot', bg: '#EFE6D6', fg: '#7A5E36' }, necesita: { label: 'Necesita asesor', bg: 'rgba(181,80,60,0.14)', fg: '#8F3A28' }, humano: { label: 'Con asesor', bg: 'rgba(101,150,166,0.18)', fg: '#2F5E6E' }, resuelta: { label: 'Resuelta', bg: 'rgba(98,123,96,0.16)', fg: '#3F5A3E' } }[e] || { label: e, bg: '#EFE9DD', fg: '#8A8073' });
@@ -1392,6 +1452,13 @@ class Component extends DCLogic {
     const activeKey = s.screen === 'modulo' ? 'modulo:' + s.modId : (s.screen === 'chats' || s.screen === 'chat') ? 'modulo:conversaciones' : (s.screen === 'inv' || s.screen === 'invItem' || s.screen === 'conteos') ? 'modulo:inventario' : (s.screen === 'prod' || s.screen === 'prodNueva') ? 'modulo:produccion' : s.screen === 'informe' ? 'modulo:reportes' : s.screen === 'fin' ? 'modulo:finanzas' : s.screen === 'leads' ? 'modulo:leads' : s.screen === 'soporte' ? 'modulo:soporte' : s.screen;
     // ---- finanzas (solo consulta; viene en la fila del mes actual del informe) ----
     const finRow = (s.informes || []).find(x => x.data && Array.isArray(x.data.finCuentas)); const finD = (finRow && finRow.data) || {}; const finTab = s.finTab || 'caja'; const finQ = String(s.finQ || '').toLowerCase().trim();
+    // ---- marketing (solo consulta; foto de Meta Ads publicada por el Hub) ----
+    const mktRango = s.mktRango || 'mes'; const mktRow = (s.mkt || {})[mktRango]; const mktD = (mktRow && mktRow.data) || {}; const mk = mktD.kpis || {};
+    const fmtK = n => { n = Number(n) || 0; if (n >= 1000000) return (n / 1000000).toFixed(n >= 10000000 ? 0 : 1) + 'M'; if (n >= 1000) return Math.round(n / 1000) + 'K'; return String(Math.round(n)); };
+    const roasFg = r => r >= 3 ? '#4C6149' : r >= 2 ? '#7A5E36' : '#8F3A28';
+    const mktTr = Array.isArray(mktD.tendencia) && mktD.tendencia.length > 1 ? mktD.tendencia : null; let mktSpark = '';
+    if (mktTr) { const mn = Math.min(...mktTr), mx = Math.max(...mktTr), W = 300, H = 60, p = 4; mktSpark = 'M' + mktTr.map((v, i) => (p + i / (mktTr.length - 1) * (W - 2 * p)).toFixed(1) + ' ' + (H - p - (v - mn) / ((mx - mn) || 1) * (H - 2 * p)).toFixed(1)).join(' L '); }
+    const mktObjFg = o => ({ Ventas: '#4C6149', Reconocimiento: '#3F6A7A', Mensajes: '#7A5E36' }[o] || '#7A5E36');
     const finCobrarAll = finD.finPorCobrar || []; const finCobrar = finCobrarAll.filter(r => !finQ || String(r.cliente).toLowerCase().includes(finQ) || String(r.ov).toLowerCase().includes(finQ)).slice(0, 80).map(r => ({ cliente: r.cliente || '—', ov: r.ov || '—', metodo: r.metodo || '', saldoTxt: cop(r.saldo), diasTxt: r.dias <= 0 ? 'Hoy' : r.dias + (r.dias === 1 ? ' día' : ' días'), diasFg: r.dias > 30 ? '#B5503C' : r.dias > 7 ? '#8A6F49' : '#8A8073' }));
     // ---- leads ----
     const leads = s.leads || []; const leadF = s.leadFiltro || 'activos'; const leadsVis = leads.filter(l => leadF === 'todos' ? true : leadF === 'activos' ? (l.estado !== 'Ganado' && l.estado !== 'Perdido') : l.estado === leadF).slice(0, 120);
@@ -1457,6 +1524,14 @@ class Component extends DCLogic {
       loginBtnBg: s.loginBusy ? '#C1AA81' : '#A78659', loginBtnLabel: s.loginBusy ? 'Entrando…' : 'Entrar',
       isInicio: s.screen === 'inicio', refrescar: () => this.refrescarInicio(true), actualizadoTxt: s.countsCargando ? 'Actualizando…' : s.countsError ? 'No se pudo actualizar (' + s.countsError + ') · toca para reintentar' : s.countsAt ? 'Actualizado ' + new Date(s.countsAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) + ' · toca para refrescar' : 'Cargando…', isModulo: s.screen === 'modulo', isPerfil: s.screen === 'perfil', goInicio: go('inicio'), goPerfil: go('perfil'),
       isChats: s.screen === 'chats', isChat: s.screen === 'chat', showTabs: s.screen !== 'chat' && s.screen !== 'invItem' && s.screen !== 'prodNueva', goChats: () => this.setState({ screen: 'chats', convId: null }),
+      isMkt: s.screen === 'mkt', mktSubTxt: mktRow ? 'Meta Ads · actualizado el ' + new Date(mktRow.actualizado).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : (s.mkt ? 'Sin datos publicados' : 'Cargando…'),
+      mktRangos: this.MKT_RANGOS.map(([id, label]) => Object.assign({ label, set: () => this.setState({ mktRango: id }) }, chip(mktRango === id))),
+      mktVacio: !!s.mkt && !mktRow, mktVacioTxt: s.mktError ? s.mktError : 'Todavía no hay datos de este rango. Se actualizan solos cada 6 horas desde Meta; si acabas de activar el módulo, espera la primera corrida o abre Marketing → Resumen en el Hub.',
+      mktHay: !!mktRow, mktPeriodo: mktD.periodo || '', mktSyncTxt: mktD.syncTs ? 'Meta sincronizado ' + new Date(mktD.syncTs).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '',
+      mktSpend: typeof mk.spend === 'number' ? cop(mk.spend) : '—', mktIngresos: typeof mk.ingresos === 'number' ? cop(mk.ingresos) : '—', mktRoas: typeof mk.roas === 'number' ? mk.roas.toFixed(2) + 'x' : '—', mktRoasFg: roasFg(Number(mk.roas) || 0), mktRoasTotal: typeof mk.roasTotal === 'number' && mk.roasTotal !== mk.roas ? 'Sobre toda la inversión ' + mk.roasTotal.toFixed(2) + 'x' : 'Ingresos ÷ inversión en campañas de venta',
+      mktKpis: [['Compras', String(mk.resultados ?? '—')], ['Costo por compra', typeof mk.cpa === 'number' && mk.cpa > 0 ? cop(mk.cpa) : '—'], ['CTR', typeof mk.ctr === 'number' ? mk.ctr.toFixed(2) + '%' : '—'], ['CPM', typeof mk.cpm === 'number' ? cop(mk.cpm) : '—'], ['Alcance', mk.alcance != null ? fmtK(mk.alcance) : '—'], ['Impresiones', mk.impresiones != null ? fmtK(mk.impresiones) : '—'], ['Clics', mk.clicks != null ? fmtK(mk.clicks) : '—']].map(([label, valor]) => ({ label, valor })),
+      mktSparkHay: !!mktSpark, mktSpark, mktTop: (mktD.top || []).map(c => ({ nombre: c.nombre, objetivo: c.objetivo, objFg: mktObjFg(c.objetivo), estado: c.estado === 'activa' ? 'Activa' : 'Pausada', estBg: c.estado === 'activa' ? 'rgba(98,123,96,0.14)' : '#EFE9DD', estFg: c.estado === 'activa' ? '#4C6149' : '#8A8073', spendTxt: cop(c.spend || 0), ingTxt: c.ingresos > 0 ? cop(c.ingresos) : '—', roasTxt: c.objetivo === 'Ventas' && c.roas > 0 ? c.roas.toFixed(1) + 'x' : '—', roasFg: c.objetivo === 'Ventas' ? roasFg(c.roas || 0) : '#8A8073', resTxt: (c.resultados || 0) + ' ' + (c.objetivo === 'Mensajes' ? 'conversaciones' : c.objetivo === 'Reconocimiento' ? 'alcance' : 'compras'), ctrTxt: 'CTR ' + (Number(c.ctr) || 0).toFixed(2) + '%', frecTxt: 'Frec. ' + (Number(c.frecuencia) || 0).toFixed(1), frecFg: (Number(c.frecuencia) || 0) >= 3 ? '#8F3A28' : '#8A8073' })),
+      mktTopVacio: !!mktRow && !(mktD.top || []).length, mktTopNota: mktD.topNota || '', mktAlertas: (mktD.alertas || []).map(a => ({ tipo: a.tipo, txt: a.txt, color: a.color || '#7A5E36' })), mktAlertasVacio: !!mktRow && !(mktD.alertas || []).length,
       isFin: s.screen === 'fin', finSubTxt: finRow ? 'Publicado por el Hub el ' + new Date(finRow.actualizado).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' · solo consulta' : (s.informes ? 'Sin datos' : 'Cargando…'),
       finTabs: [['caja', 'Caja y bancos'], ['cobrar', 'Por cobrar']].map(([id, label]) => Object.assign({ label, set: () => this.setState({ finTab: id }) }, chip(finTab === id))), finEsCaja: finTab === 'caja', finEsCobrar: finTab === 'cobrar',
       finVacio: !!s.informes && !finRow, finVacioTxt: s.infError ? s.infError : 'El Hub todavía no ha publicado los saldos. Abre el Hub con el administrador y espera medio minuto.',
@@ -1510,10 +1585,11 @@ class Component extends DCLogic {
       guardarRecep: () => this.guardarRecep(), rcBtnBg: (s.rcLineas || []).length ? '#A78659' : '#C1AA81', rcBtnLabel: 'Enviar ingreso a administración',
       recepSubTxt: s.recepError ? 'Sin datos' : s.recepciones ? (s.recepciones.filter(r => r.estado === 'pendiente').length + ' pendiente(s) · ' + s.recepciones.length + ' en total') : 'Cargando…',
       recepVacio: !!s.recepciones && s.recepciones.length === 0 || !!s.recepError, recepVacioTxt: s.recepError || 'Todavía no hay ingresos registrados. Cuando llegue mercancía, tócala en «Ingresar mercancía».',
-      recepVis: (s.recepciones || []).slice(0, 100).map(r => { const est = r.estado || 'pendiente'; const em = est === 'aplicada' ? { l: 'Asignada', bg: 'rgba(98,123,96,0.14)', fg: '#4C6149' } : est === 'rechazada' ? { l: 'Rechazada', bg: 'rgba(181,80,60,0.12)', fg: '#8F3A28' } : { l: 'Pendiente', bg: 'rgba(201,150,47,0.14)', fg: '#7A5E36' };
+      recepVis: (s.recepciones || []).slice(0, 100).map(r => { const est = r.estado || 'pendiente'; const parcial = est === 'pendiente' && (r.asignaciones || []).length > 0; const em = est === 'aplicada' ? { l: 'Asignada', bg: 'rgba(98,123,96,0.14)', fg: '#4C6149' } : est === 'rechazada' ? { l: 'Rechazada', bg: 'rgba(181,80,60,0.12)', fg: '#8F3A28' } : parcial ? { l: 'Parcial', bg: 'rgba(201,150,47,0.14)', fg: '#7A5E36' } : { l: 'Pendiente', bg: 'rgba(201,150,47,0.14)', fg: '#7A5E36' };
+        const asigA = (r.asignaciones || []).map(a => a.ordenNumero).filter(Boolean).join(', ');
         return { titulo: r.proveedor || 'Sin proveedor', sub: (r.fecha ? r.fecha.split('-').reverse().join('/') : '') + ' · ' + (r.creadoPor || ''), estLabel: em.l, estBg: em.bg, estFg: em.fg,
-          items: (r.items || []).map(it => ({ nombre: it.nombre || it.codigo, cantTxt: this.fmtCant(it.cantidad) + ' ' + (it.unidad || '') })),
-          pie: est === 'aplicada' ? 'Asignada a ' + (r.ordenNumero || 'una orden') + (r.resueltoPor ? ' por ' + r.resueltoPor : '') : est === 'rechazada' ? 'Rechazada' + (r.resueltoPor ? ' por ' + r.resueltoPor : '') + (r.motivo ? ': ' + r.motivo : '') : (r.nota ? 'Nota: ' + r.nota : '') }; }),
+          items: (est === 'aplicada' ? (r.itemsOriginales || r.items || []) : (r.items || [])).map(it => ({ nombre: it.nombre || it.codigo, cantTxt: this.fmtCant(it.cantidad) + ' ' + (it.unidad || '') })),
+          pie: est === 'aplicada' ? 'Asignada a ' + (r.ordenNumero || asigA || 'una orden') + (r.resueltoPor ? ' por ' + r.resueltoPor : '') : est === 'rechazada' ? 'Rechazada' + (r.resueltoPor ? ' por ' + r.resueltoPor : '') + (r.motivo ? ': ' + r.motivo : '') : parcial ? 'Ya asignados otros ítems a ' + asigA + ' · estos siguen por asignar' + (r.nota ? ' · Nota: ' + r.nota : '') : (r.nota ? 'Nota: ' + r.nota : '') }; }),
       ctContado: s.ctContado == null ? '' : s.ctContado, setCtContado: e => this.setState({ ctContado: e.target.value }), ctNota: s.ctNota || '', setCtNota: e => this.setState({ ctNota: e.target.value }), ctNotaPh: s.ctMotivo === 'Otro' ? 'Explica qué pasó (obligatorio)' : 'Nota (opcional)',
       ctDifTxt: ctD ? ctD.txt : '—', ctDifColor: ctD ? ctD.color : '#8A8073',
       ctMotivos: this.MOTIVOS_CONTEO.map(m => Object.assign({ label: m, set: () => this.setState({ ctMotivo: m }) }, chip((s.ctMotivo || 'Conteo periódico') === m))),
@@ -1554,7 +1630,7 @@ class Component extends DCLogic {
       hayAcciones: mods.some(m => !enBarra.includes(m.id)),
       modulos: mods.filter(m => !enBarra.includes(m.id)).map(m => ({ titulo: m.titulo, icono: m.icono, nivel: lvlTxt[m.lvl], tag: 'Fase ' + m.fase, tagFg: m.fase === 1 ? '#3F5A3E' : '#8A8073', bg: '#FFFFFF', border: '#E4DBCC', go: go('modulo', { modId: m.id }) })),
       modulo: { titulo: modAct.titulo, tag: 'Llega en la fase ' + modAct.fase, desc: modAct.desc, nivel: lvlTxt[modAct.lvl || 'write'] },
-      permisosRows: [['conversaciones', 'Conversaciones'], ['inventario', 'Inventario'], ['finanzas', 'Finanzas'], ['ventas', 'Ventas y leads'], ['informes', 'Informes'], ['compras', 'Compras'], ['produccion', 'Producción']].map(([k, label]) => { const l = this._modLevel(a, k); return { label, nivel: lvlTxt[l], fg: l === 'none' ? '#8A8073' : l === 'read' ? '#2F5E6E' : '#3F5A3E' }; }),
+      permisosRows: [['conversaciones', 'Conversaciones'], ['inventario', 'Inventario'], ['finanzas', 'Finanzas'], ['ventas', 'Ventas y leads'], ['informes', 'Informes'], ['marketing', 'Marketing'], ['compras', 'Compras'], ['produccion', 'Producción']].map(([k, label]) => { const l = this._modLevel(a, k); return { label, nivel: lvlTxt[l], fg: l === 'none' ? '#8A8073' : l === 'read' ? '#2F5E6E' : '#3F5A3E' }; }),
       instaladaTxt: s.standalone ? 'Sí' : 'No · abre desde el navegador', nubeTxt: s.offline ? 'Sin conexión' : 'Conectada',
       esAdmin: this.isAdmin(), adminUsers,
       pushToggle: () => this.pushToggle(), pushBg: s.pushEstado === 'on' ? '#627B60' : '#D9CFBF', pushKnob: s.pushEstado === 'on' ? '21px' : '3px',
