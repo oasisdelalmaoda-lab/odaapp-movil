@@ -393,6 +393,109 @@
     </div>
     </sc-if>
 
+    <!-- ===== COTIZACIONES · lista ===== -->
+    <sc-if value="{{ isCot }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Cotizaciones" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInicio }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="flex:1;min-width:0;"><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;line-height:1.1;">Cotizaciones</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ cotSubTxt }}</div></div>
+      </div>
+      <sc-if value="{{ cotPuede }}" hint-placeholder-val="{{ true }}">
+        <div onClick="{{ nuevaCot }}" style="margin-top:14px;background:#A78659;color:#FBF8F2;border-radius:999px;height:50px;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:15px;">＋ Nueva cotización</div>
+      </sc-if>
+      <input value="{{ cotQ }}" onChange="{{ setCotQ }}" placeholder="Buscar por cliente o número" style="width:100%;box-sizing:border-box;margin-top:12px;height:44px;border-radius:999px;border:1px solid #E4DBCC;background:#FFFFFF;padding:0 16px;font-family:inherit;font-size:14px;color:#3A3326;outline:none;">
+      <sc-if value="{{ cotVacio }}" hint-placeholder-val="{{ false }}"><div style="margin-top:14px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;line-height:1.5;">{{ cotVacioTxt }}</div></sc-if>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+        <sc-for list="{{ cotVis }}" as="c" hint-placeholder-count="3">
+          <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+              <div style="min-width:0;"><div style="font-weight:700;font-size:14px;line-height:1.3;">{{ c.cliente }}</div><div style="font-size:11px;color:#8A8073;margin-top:3px;">{{ c.numero }} · {{ c.sub }}</div></div>
+              <div style="flex:0 0 auto;text-align:right;"><div style="font-weight:800;font-size:15px;">{{ c.totalTxt }}</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ c.nItems }}</div></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <div onClick="{{ c.wa }}" style="flex:1;height:42px;border-radius:999px;border:1px solid #B8AE9C;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#5A4A33;">WhatsApp</div>
+              <div onClick="{{ c.doc }}" style="flex:1;height:42px;border-radius:999px;background:#EFE6D6;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#5A4A33;">Documento</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ===== COTIZACIONES · nueva ===== -->
+    <sc-if value="{{ isCotNueva }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Nueva cotización" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInicio }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="flex:1;min-width:0;"><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;line-height:1.1;">Nueva cotización</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ cnNum }}</div></div>
+      </div>
+
+      <div style="margin-top:14px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
+        <div style="font-size:12px;color:#574E40;font-weight:700;">Cliente</div>
+        <input value="{{ cnCliente }}" onChange="{{ setCnCliente }}" placeholder="Nombre del cliente" style="width:100%;box-sizing:border-box;margin-top:8px;height:46px;border-radius:14px;border:1px solid #B8AE9C;background:#FBF8F2;padding:0 14px;font-family:inherit;font-size:15px;font-weight:600;color:#3A3326;outline:none;">
+        <div style="display:flex;flex-direction:column;">
+          <sc-for list="{{ cliVis }}" as="x" hint-placeholder-count="0">
+            <div onClick="{{ x.pick }}" style="display:flex;justify-content:space-between;gap:10px;padding:11px 4px;border-bottom:1px solid #EFE9DD;font-size:13px;"><span style="font-weight:600;flex:1;min-width:0;">{{ x.nombre }}</span><span style="color:#8A8073;flex:0 0 auto;font-size:11px;">{{ x.de }}</span></div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+          <input value="{{ cnCel }}" onChange="{{ setCnCel }}" placeholder="Celular" style="box-sizing:border-box;height:44px;border-radius:14px;border:1px solid #E4DBCC;background:#FBF8F2;padding:0 14px;font-family:inherit;font-size:14px;color:#3A3326;outline:none;">
+          <input value="{{ cnCiudad }}" onChange="{{ setCnCiudad }}" placeholder="Ciudad" style="box-sizing:border-box;height:44px;border-radius:14px;border:1px solid #E4DBCC;background:#FBF8F2;padding:0 14px;font-family:inherit;font-size:14px;color:#3A3326;outline:none;">
+        </div>
+        <input value="{{ cnCorreo }}" onChange="{{ setCnCorreo }}" placeholder="Correo (opcional)" style="width:100%;box-sizing:border-box;margin-top:10px;height:44px;border-radius:14px;border:1px solid #E4DBCC;background:#FBF8F2;padding:0 14px;font-family:inherit;font-size:14px;color:#3A3326;outline:none;">
+      </div>
+
+      <div style="margin-top:14px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
+        <div style="font-size:12px;color:#574E40;font-weight:700;">Producto</div>
+        <input value="{{ cnProdQ }}" onChange="{{ setCnProdQ }}" placeholder="Escribe el nombre o código" style="width:100%;box-sizing:border-box;margin-top:8px;height:46px;border-radius:14px;border:1px solid {{ cnSelBorder }};background:#FBF8F2;padding:0 14px;font-family:inherit;font-size:15px;font-weight:600;color:#3A3326;outline:none;">
+        <sc-if value="{{ cnProdSinMatch }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#8A8073;margin-top:8px;">Ningún producto coincide.</div></sc-if>
+        <div style="display:flex;flex-direction:column;">
+          <sc-for list="{{ cnProdVis }}" as="p" hint-placeholder-count="0">
+            <div onClick="{{ p.pick }}" style="display:flex;justify-content:space-between;gap:10px;padding:11px 4px;border-bottom:1px solid #EFE9DD;font-size:13px;"><span style="font-weight:600;flex:1;min-width:0;">{{ p.nombre }}</span><span style="color:#8A8073;flex:0 0 auto;">{{ p.precioTxt }}</span></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px;align-items:flex-end;">
+          <label style="flex:0 0 78px;font-size:11px;color:#8A8073;font-weight:700;">Unidades<input value="{{ cnCant }}" onChange="{{ setCnCant }}" type="number" inputmode="numeric" placeholder="0" style="display:block;width:100%;box-sizing:border-box;margin-top:5px;height:46px;border-radius:14px;border:1px solid #B8AE9C;background:#FBF8F2;padding:0 12px;font-family:inherit;font-size:16px;font-weight:700;color:#3A3326;outline:none;"></label>
+          <label style="flex:1;min-width:0;font-size:11px;color:#8A8073;font-weight:700;">Valor unitario<input value="{{ cnValor }}" onChange="{{ setCnValor }}" type="number" inputmode="numeric" placeholder="0" style="display:block;width:100%;box-sizing:border-box;margin-top:5px;height:46px;border-radius:14px;border:1px solid #B8AE9C;background:#FBF8F2;padding:0 12px;font-family:inherit;font-size:16px;font-weight:700;color:#3A3326;outline:none;"></label>
+          <div onClick="{{ addCotLinea }}" style="flex:0 0 auto;height:46px;padding:0 18px;border-radius:14px;background:#3A3326;color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">Agregar</div>
+        </div>
+      </div>
+
+      <sc-if value="{{ cnSinItems }}" hint-placeholder-val="{{ true }}"><div style="margin-top:14px;font-size:12px;color:#8A8073;text-align:center;line-height:1.5;">Agrega los productos de la cotización.</div></sc-if>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+        <sc-for list="{{ cnItemsVis }}" as="l" hint-placeholder-count="0">
+          <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+            <div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:13.5px;line-height:1.3;">{{ l.nombre }}</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ l.det }}</div></div>
+            <div style="font-weight:800;font-size:14px;white-space:nowrap;">{{ l.sub }}</div>
+            <div onClick="{{ l.quitar }}" style="width:30px;height:30px;border-radius:999px;background:#EFE9DD;display:flex;align-items:center;justify-content:center;color:#8F3A28;font-size:15px;flex:0 0 auto;">×</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="margin-top:14px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <label style="font-size:11px;color:#8A8073;font-weight:700;">Descuento %<input value="{{ cnDesc }}" onChange="{{ setCnDesc }}" type="number" inputmode="numeric" placeholder="0" style="display:block;width:100%;box-sizing:border-box;margin-top:5px;height:44px;border-radius:14px;border:1px solid #E4DBCC;background:#FBF8F2;padding:0 12px;font-family:inherit;font-size:15px;font-weight:700;color:#3A3326;outline:none;"></label>
+          <label style="font-size:11px;color:#8A8073;font-weight:700;">Envío<input value="{{ cnEnvio }}" onChange="{{ setCnEnvio }}" type="number" inputmode="numeric" placeholder="0" style="display:block;width:100%;box-sizing:border-box;margin-top:5px;height:44px;border-radius:14px;border:1px solid #E4DBCC;background:#FBF8F2;padding:0 12px;font-family:inherit;font-size:15px;font-weight:700;color:#3A3326;outline:none;"></label>
+        </div>
+        <label style="display:block;font-size:11px;color:#8A8073;font-weight:700;margin-top:12px;">Validez (días)<input value="{{ cnValidez }}" onChange="{{ setCnValidez }}" type="number" inputmode="numeric" style="display:block;width:100%;box-sizing:border-box;margin-top:5px;height:44px;border-radius:14px;border:1px solid #E4DBCC;background:#FBF8F2;padding:0 12px;font-family:inherit;font-size:15px;font-weight:700;color:#3A3326;outline:none;"></label>
+        <label style="display:block;font-size:11px;color:#8A8073;font-weight:700;margin-top:12px;">Nota (opcional)<textarea value="{{ cnNota }}" onChange="{{ setCnNota }}" rows="2" placeholder="Condiciones, tiempos de entrega…" style="display:block;width:100%;box-sizing:border-box;margin-top:5px;border-radius:14px;border:1px solid #E4DBCC;background:#FBF8F2;padding:10px 12px;font-family:inherit;font-size:14px;color:#3A3326;outline:none;resize:none;"></textarea></label>
+      </div>
+
+      <div style="margin-top:14px;background:#3A3326;color:#FBF8F2;border-radius:18px;padding:16px 18px;">
+        <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="opacity:0.75;">Subtotal</span><span>{{ cnMercTxt }}</span></div>
+        <sc-if value="{{ cnHayDesc }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:space-between;font-size:13px;margin-top:6px;"><span style="opacity:0.75;">Descuento</span><span style="color:#E8D5B0;">{{ cnDmTxt }}</span></div></sc-if>
+        <sc-if value="{{ cnHayEnvio }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:space-between;font-size:13px;margin-top:6px;"><span style="opacity:0.75;">Envío</span><span>{{ cnEnvioTxt }}</span></div></sc-if>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;padding-top:12px;border-top:1px solid rgba(251,248,242,0.18);"><span style="font-size:12px;letter-spacing:0.18em;text-transform:uppercase;opacity:0.75;">Total</span><span style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;">{{ cnTotTxt }}</span></div>
+      </div>
+
+      <div onClick="{{ cnGuardarWa }}" style="margin-top:14px;background:{{ cnBtnBg }};color:#FBF8F2;border-radius:999px;height:52px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;">Guardar y enviar por WhatsApp</div>
+      <div style="display:flex;gap:10px;margin-top:10px;">
+        <div onClick="{{ cnGuardarDoc }}" style="flex:1;height:48px;border-radius:999px;background:#EFE6D6;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#5A4A33;">Guardar y ver documento</div>
+        <div onClick="{{ cnGuardar }}" style="flex:0 0 auto;height:48px;padding:0 20px;border-radius:999px;border:1px solid #B8AE9C;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#5A4A33;">{{ cnGuardarTxt }}</div>
+      </div>
+    </div>
+    </sc-if>
+
     <!-- ===== MARKETING (solo consulta, foto de Meta Ads publicada por el Hub) ===== -->
     <sc-if value="{{ isMkt }}" hint-placeholder-val="{{ false }}">
     <div data-screen-label="Marketing" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
@@ -976,6 +1079,7 @@ class Component extends DCLogic {
     { id: 'produccion', titulo: 'Producción', icono: '◈', mod: 'produccion', fase: 3, listo: true, desc: 'Registrar órdenes de producción de producto terminado: suma el producto y descuenta las materias, igual que en el Hub.' },
     { id: 'finanzas', titulo: 'Finanzas', icono: '◇', mod: 'finanzas', fase: 4, listo: true, desc: 'Saldos por cuenta y ventas por cobrar, publicados por el Hub. Solo consulta.' },
     { id: 'leads', titulo: 'Leads', icono: '✦', mod: 'ventas', fase: 4, listo: true, desc: 'Prospectos por etapa: avanzar, llamar o escribir por WhatsApp con un toque.' },
+    { id: 'cotizaciones', titulo: 'Cotizaciones', icono: '❏', mod: 'ventas', fase: 5, listo: true, desc: 'Arma una cotización desde el celular y mándala por WhatsApp o como documento.' },
     { id: 'marketing', titulo: 'Marketing', icono: '◉', mod: 'marketing', fase: 5, listo: true, desc: 'Resumen de la pauta en Meta Ads: inversión, ingresos, ROAS, campañas principales y alertas. Publicado por el Hub, solo consulta.' },
     { id: 'reportes', titulo: 'Informe gerencial', icono: '▥', mod: 'informes', fase: 4, listo: true, desc: 'El mismo informe gerencial del Hub: ingreso, margen, canales, clientes, inventario, caja y marketing.' },
     { id: 'soporte', titulo: 'Soporte', icono: '?', mod: null, fase: 4, listo: true, desc: 'Reportar un problema de la app o del Hub y confirmar cuando quede resuelto.' },
@@ -1288,6 +1392,88 @@ class Component extends DCLogic {
         await this.enviar(this.state.msgDraft, { url, esImg, nombre }); }
       catch (e) { this.toast('No se pudo adjuntar: ' + ((e && e.message) || e)); console.warn('adjunto', e); } this.setState({ fotoSubiendo: false }); }; inp.click(); }
   async loadProductos() { const sb = this.sb(); if (!sb || this.state.productos) return; try { const [p, k] = await Promise.all([sb.from('productos').select('codigo,data'), sb.from('kits').select('codigo,data')]); const rows = [].concat((p.data || []).map(r => r.data || {}), (k.data || []).map(r => r.data || {})).filter(x => x && x.nombre).map(x => ({ codigo: x.codigo, nombre: x.nombre, precio: Number(x.precio) || 0, handle: x.shopifyHandle || '' })); this.setState({ productos: rows }); } catch (e) { console.warn('productos', e); } }
+  // ---- cotizaciones (permiso Ventas; write para crear) ----
+  // Misma tabla y MISMA forma de fila que el Hub (`cotizaciones` {id,data}): número COT-2026-###
+  // por máximo+1, ítems {referencia,producto,productoCodigo,tipo,unidades,valorUnit,valorBruto,
+  // descPct}, descuento general y envío. Los totales espejan cotTotal() del Hub.
+  async loadCotizaciones() {
+    const sb = this.sb(); if (!sb || this._cotLoading) return; if (this._modLevel(this.access(), 'ventas') === 'none') return; this._cotLoading = true;
+    try { if (!(await this._asegurarAuth())) throw new Error('Sesión vencida: entra de nuevo');
+      const all = []; for (let from = 0; from < 6000; from += 1000) { const { data, error } = await sb.from('cotizaciones').select('id,data').range(from, from + 999); if (error) throw error; all.push(...(data || [])); if ((data || []).length < 1000) break; }
+      this.setState({ cotizaciones: all.map(r => Object.assign({ id: r.id }, r.data || {})), cotError: '' }); }
+    catch (e) { console.warn('cotizaciones', e); this.setState({ cotizaciones: this.state.cotizaciones || [], cotError: 'No se pudieron cargar: ' + (e.message || e) }); }
+    finally { this._cotLoading = false; }
+  }
+  nextCot() { let max = 0; (this.state.cotizaciones || []).forEach(c => { const m = String(c.numero || '').match(/(\d+)$/); if (m) max = Math.max(max, Number(m[1])); }); return 'COT-2026-' + String(max + 1).padStart(3, '0'); }
+  cotMerc(c) { return (c.items || []).reduce((a, it) => a + (Number(it.unidades) || 0) * (Number(it.valorUnit) || 0), 0); }
+  cotDescMonto(c) { const d = Math.max(0, Math.min(100, Number(c.descuentoPct) || 0)); return Math.round(this.cotMerc(c) * d / 100); }
+  cotTotal(c) { return this.cotMerc(c) - this.cotDescMonto(c) + (Number(c.envio) || 0); }
+  nuevaCot() { this.setState({ screen: 'cotNueva', cnCliente: '', cnCel: '', cnCiudad: '', cnCorreo: '', cnItems: [], cnProdQ: '', cnProdSel: null, cnCant: '', cnValor: '', cnDesc: '', cnEnvio: '', cnValidez: 15, cnNota: '', cnClienteQ: '' });
+    if (!this.state.productos) this.loadProductos(); if (!this.state.leads) this.loadLeads(); if (!this.state.cotizaciones) this.loadCotizaciones(); }
+  addCotLinea() { const s = this.state, p = s.cnProdSel, u = Number(s.cnCant);
+    if (!p) { this.toast('Elige el producto'); return; } if (!(u > 0)) { this.toast('Indica las unidades'); return; }
+    const v = (s.cnValor === '' || s.cnValor == null) ? (Number(p.precio) || 0) : Math.max(0, Number(s.cnValor) || 0);
+    const items = (s.cnItems || []).slice(); items.push({ referencia: p.codigo, producto: p.nombre, productoCodigo: p.codigo, tipo: 'producto', unidades: u, valorUnit: v, valorBruto: v, descPct: 0 });
+    this.setState({ cnItems: items, cnProdSel: null, cnProdQ: '', cnCant: '', cnValor: '' }); }
+  removeCotLinea(i) { const items = (this.state.cnItems || []).slice(); items.splice(i, 1); this.setState({ cnItems: items }); }
+  _cotDraft() { const s = this.state; return { cliente: String(s.cnCliente || '').trim(), celular: String(s.cnCel || '').trim(), ciudad: String(s.cnCiudad || '').trim(), correo: String(s.cnCorreo || '').trim(),
+    items: s.cnItems || [], envio: Number(s.cnEnvio) || 0, descuentoPct: Math.max(0, Math.min(100, Number(s.cnDesc) || 0)), validez: Number(s.cnValidez) || 15, nota: String(s.cnNota || '').trim() }; }
+  async guardarCot(luego) {
+    const s = this.state; if (this._modLevel(this.access(), 'ventas') !== 'write') { this.toast('No tienes permiso para crear cotizaciones'); return null; }
+    const d = this._cotDraft(); if (!d.cliente) { this.toast('Escribe el cliente'); return null; } if (!(d.items || []).length) { this.toast('Agrega al menos un producto'); return null; }
+    if (this._cotSaving) return null; this._cotSaving = true; this.setState({ cotSaving: true });
+    try { const sb = this.sb(); if (!sb) throw new Error('sin conexión con la nube');
+      if (!this.state.cotizaciones) await this.loadCotizaciones();
+      const row = Object.assign({ id: 'c' + Date.now(), numero: this.nextCot(), fecha: this._hoyLocal(), cedula: '', estado: 'borrador' }, d, { _creadoPor: ((this.state.user && this.state.user.name) || ''), _origen: 'app' });
+      const { error } = await sb.from('cotizaciones').upsert({ id: row.id, data: row, actualizado: new Date().toISOString() }); if (error) throw error;
+      this.setState(st => ({ cotizaciones: [row].concat(st.cotizaciones || []) }));
+      this.toast('Cotización ' + row.numero + ' guardada');
+      if (luego === 'wa') this.cotWhatsApp(row); else if (luego === 'doc') this.cotDocumento(row);
+      this.setState({ screen: 'cot' });
+      return row; }
+    catch (e) { this.toast('No se pudo guardar: ' + ((e && e.message) || e)); return null; }
+    finally { this._cotSaving = false; this.setState({ cotSaving: false }); }
+  }
+  cotTexto(c) { const cop = n => '$' + Math.round(Number(n) || 0).toLocaleString('es-CO');
+    const L = ['*Cotización ' + (c.numero || '') + '* · Oasis del Alma', ''];
+    (c.items || []).forEach(it => { const u = Number(it.unidades) || 0; L.push('• ' + (it.producto || it.referencia) + ' × ' + u + ' — ' + cop(u * (Number(it.valorUnit) || 0))); });
+    L.push(''); const dm = this.cotDescMonto(c);
+    if (dm > 0) { L.push('Subtotal: ' + cop(this.cotMerc(c))); L.push('Descuento (' + (Number(c.descuentoPct) || 0) + '%): −' + cop(dm)); }
+    if ((Number(c.envio) || 0) > 0) L.push('Envío: ' + cop(c.envio));
+    L.push('*Total: ' + cop(this.cotTotal(c)) + '*');
+    L.push(''); L.push('Precios válidos por ' + (Number(c.validez) || 15) + ' días.');
+    if (c.nota) { L.push(''); L.push(c.nota); }
+    return L.join('\n'); }
+  cotWhatsApp(c) { const cel = String(c.celular || '').replace(/\D/g, ''); const full = cel ? (cel.length === 10 ? '57' + cel : cel) : '';
+    const url = 'https://wa.me/' + full + '?text=' + encodeURIComponent(this.cotTexto(c));
+    try { window.open(url, '_blank'); } catch (e) { this.toast('No se pudo abrir WhatsApp'); } }
+  // Documento formal en una pestaña nueva: desde ahí el celular lo comparte o lo guarda como PDF.
+  cotDocumento(c) { const cop = n => '$' + Math.round(Number(n) || 0).toLocaleString('es-CO');
+    const esc = t => String(t == null ? '' : t).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+    const filas = (c.items || []).map(it => { const u = Number(it.unidades) || 0, v = Number(it.valorUnit) || 0;
+      return '<tr><td style="padding:10px 12px;border-bottom:1px solid #E4DBCC;">' + esc(it.producto || it.referencia) + '</td><td style="padding:10px 12px;border-bottom:1px solid #E4DBCC;text-align:center;">' + u + '</td><td style="padding:10px 12px;border-bottom:1px solid #E4DBCC;text-align:right;">' + cop(v) + '</td><td style="padding:10px 12px;border-bottom:1px solid #E4DBCC;text-align:right;font-weight:700;">' + cop(u * v) + '</td></tr>'; }).join('');
+    const dm = this.cotDescMonto(c); const env = Number(c.envio) || 0;
+    const tot = r => '<tr><td colspan="3" style="padding:7px 12px;text-align:right;color:#8A8073;">' + r[0] + '</td><td style="padding:7px 12px;text-align:right;' + (r[2] ? 'font-weight:800;font-size:16px;' : '') + '">' + r[1] + '</td></tr>';
+    const html = '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + esc(c.numero || 'Cotización') + '</title></head>'
+      + '<body style="margin:0;background:#F7F2E9;font-family:Georgia,\'Times New Roman\',serif;color:#3A3326;">'
+      + '<div style="max-width:720px;margin:0 auto;background:#FBF8F2;padding:26px 22px 34px;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:2px solid #A78659;padding-bottom:14px;">'
+      + '<div><div style="font-size:26px;letter-spacing:0.02em;">Oasis del Alma</div><div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8073;margin-top:3px;">ODA Labs S.A.S. · NIT 902.063.571-6</div></div>'
+      + '<div style="text-align:right;"><div style="font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#8A8073;">Cotización</div><div style="font-size:19px;font-weight:700;">' + esc(c.numero || '') + '</div><div style="font-size:12px;color:#8A8073;">' + esc(String(c.fecha || '').split('-').reverse().join('/')) + '</div></div></div>'
+      + '<div style="margin-top:18px;font-size:13px;line-height:1.7;"><strong>' + esc(c.cliente) + '</strong>'
+      + (c.ciudad ? '<br>' + esc(c.ciudad) : '') + (c.celular ? '<br>' + esc(c.celular) : '') + (c.correo ? '<br>' + esc(c.correo) : '') + '</div>'
+      + '<table style="width:100%;border-collapse:collapse;margin-top:18px;font-size:13px;font-family:Helvetica,Arial,sans-serif;">'
+      + '<tr style="background:#A78659;color:#fff;text-align:left;"><th style="padding:10px 12px;font-weight:600;">Producto</th><th style="padding:10px 12px;text-align:center;font-weight:600;">Und.</th><th style="padding:10px 12px;text-align:right;font-weight:600;">Valor</th><th style="padding:10px 12px;text-align:right;font-weight:600;">Subtotal</th></tr>'
+      + filas
+      + (dm > 0 ? tot(['Subtotal', cop(this.cotMerc(c))]) + tot(['Descuento (' + (Number(c.descuentoPct) || 0) + '%)', '−' + cop(dm)]) : '')
+      + (env > 0 ? tot(['Envío', cop(env)]) : '')
+      + tot(['Total', cop(this.cotTotal(c)), true])
+      + '</table>'
+      + '<div style="margin-top:20px;font-size:12px;color:#574E40;line-height:1.6;">Precios válidos por ' + (Number(c.validez) || 15) + ' días.' + (c.nota ? '<br>' + esc(c.nota) : '') + '</div>'
+      + '<div style="margin-top:26px;border-top:1px solid #E4DBCC;padding-top:12px;font-size:11px;color:#8A8073;text-align:center;">oasisdelalma.co · WhatsApp +57 313 406 3259 · Cali, Colombia</div>'
+      + '</div></body></html>';
+    try { const b = new Blob([html], { type: 'text/html' }); const u = URL.createObjectURL(b); const w = window.open(u, '_blank'); if (!w) this.toast('Permite las ventanas emergentes para ver el documento'); setTimeout(() => URL.revokeObjectURL(u), 60000); }
+    catch (e) { this.toast('No se pudo abrir el documento'); } }
   // ---- marketing: resumen de Meta Ads publicado por el Hub (marketing_snapshot, una fila por rango) ----
   MKT_RANGOS = [['today', 'Hoy'], ['mes', 'Este mes'], ['mesant', 'Mes anterior'], ['year', 'Este año']];
   async loadMarketing() {
@@ -1412,7 +1598,7 @@ class Component extends DCLogic {
     const s = this.state, a = this.access(), u = s.user || {}, c = s.counts || {};
     const lvlTxt = { none: 'Sin acceso', read: 'Solo lectura', write: 'Lectura y escritura' };
     const cop = n => '$' + Math.round(n).toLocaleString('es-CO');
-    const go = (screen, extra) => () => { if (screen === 'inicio') this.refrescarInicio(false); if (screen === 'modulo' && extra && extra.modId === 'conversaciones') { this.setState({ screen: 'chats' }); this.loadConvs(); return; } if (screen === 'modulo' && extra && extra.modId === 'inventario') { this.setState({ screen: 'inv' }); this.loadInventario(); return; } if (screen === 'modulo' && extra && extra.modId === 'produccion') { this.setState({ screen: 'prod' }); this.loadProduccion(); return; } if (screen === 'modulo' && extra && extra.modId === 'reportes') { this.setState({ screen: 'informe' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'finanzas') { this.setState({ screen: 'fin' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'leads') { this.setState({ screen: 'leads' }); this.loadLeads(); return; } if (screen === 'modulo' && extra && extra.modId === 'marketing') { this.setState({ screen: 'mkt' }); this.loadMarketing(); return; } if (screen === 'modulo' && extra && extra.modId === 'soporte') { this.setState({ screen: 'soporte' }); this.loadTickets(); return; } this.setState(Object.assign({ screen }, extra || {})); };
+    const go = (screen, extra) => () => { if (screen === 'inicio') this.refrescarInicio(false); if (screen === 'modulo' && extra && extra.modId === 'conversaciones') { this.setState({ screen: 'chats' }); this.loadConvs(); return; } if (screen === 'modulo' && extra && extra.modId === 'inventario') { this.setState({ screen: 'inv' }); this.loadInventario(); return; } if (screen === 'modulo' && extra && extra.modId === 'produccion') { this.setState({ screen: 'prod' }); this.loadProduccion(); return; } if (screen === 'modulo' && extra && extra.modId === 'reportes') { this.setState({ screen: 'informe' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'finanzas') { this.setState({ screen: 'fin' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'leads') { this.setState({ screen: 'leads' }); this.loadLeads(); return; } if (screen === 'modulo' && extra && extra.modId === 'marketing') { this.setState({ screen: 'mkt' }); this.loadMarketing(); return; } if (screen === 'modulo' && extra && extra.modId === 'cotizaciones') { this.setState({ screen: 'cot' }); this.loadCotizaciones(); return; } if (screen === 'modulo' && extra && extra.modId === 'soporte') { this.setState({ screen: 'soporte' }); this.loadTickets(); return; } this.setState(Object.assign({ screen }, extra || {})); };
     // ---- conversaciones ----
     const chip = on => on ? { bg: '#3A3326', fg: '#FBF8F2', border: '#3A3326' } : { bg: '#FFFFFF', fg: '#574E40', border: '#E4DBCC' };
     const estConv = e => ({ bot: { label: 'Bot', bg: '#EFE6D6', fg: '#7A5E36' }, necesita: { label: 'Necesita asesor', bg: 'rgba(181,80,60,0.14)', fg: '#8F3A28' }, humano: { label: 'Con asesor', bg: 'rgba(101,150,166,0.18)', fg: '#2F5E6E' }, resuelta: { label: 'Resuelta', bg: 'rgba(98,123,96,0.16)', fg: '#3F5A3E' } }[e] || { label: e, bg: '#EFE9DD', fg: '#8A8073' });
@@ -1452,6 +1638,21 @@ class Component extends DCLogic {
     const activeKey = s.screen === 'modulo' ? 'modulo:' + s.modId : (s.screen === 'chats' || s.screen === 'chat') ? 'modulo:conversaciones' : (s.screen === 'inv' || s.screen === 'invItem' || s.screen === 'conteos') ? 'modulo:inventario' : (s.screen === 'prod' || s.screen === 'prodNueva') ? 'modulo:produccion' : s.screen === 'informe' ? 'modulo:reportes' : s.screen === 'fin' ? 'modulo:finanzas' : s.screen === 'leads' ? 'modulo:leads' : s.screen === 'soporte' ? 'modulo:soporte' : s.screen;
     // ---- finanzas (solo consulta; viene en la fila del mes actual del informe) ----
     const finRow = (s.informes || []).find(x => x.data && Array.isArray(x.data.finCuentas)); const finD = (finRow && finRow.data) || {}; const finTab = s.finTab || 'caja'; const finQ = String(s.finQ || '').toLowerCase().trim();
+    // ---- cotizaciones ----
+    const cotPuede = this._modLevel(a, 'ventas') === 'write';
+    const cotQ = String(s.cotQ || '').toLowerCase().trim();
+    const cotList = (s.cotizaciones || []).slice().sort((x, y) => String(y.fecha || '').localeCompare(String(x.fecha || '')) || String(y.numero || '').localeCompare(String(x.numero || '')));
+    const cotVis = cotList.filter(c => !cotQ || (String(c.cliente || '') + ' ' + String(c.numero || '') + ' ' + String(c.ciudad || '')).toLowerCase().includes(cotQ)).slice(0, 80);
+    const cnProdQ = String(s.cnProdQ || '').toLowerCase().trim();
+    const cnProdVis = s.cnProdSel ? [] : (s.productos || []).filter(p => cnProdQ && (p.nombre.toLowerCase().includes(cnProdQ) || String(p.codigo).toLowerCase().includes(cnProdQ))).slice(0, 8);
+    const cnItems = s.cnItems || [];
+    const cnDraft = this._cotDraft();
+    const cnMerc = this.cotMerc(cnDraft), cnDm = this.cotDescMonto(cnDraft), cnTot = this.cotTotal(cnDraft);
+    // Clientes conocidos por la app: leads + clientes de cotizaciones anteriores (las ventas viven en el Hub).
+    const cnCliQ = String(s.cnClienteQ || '').toLowerCase().trim();
+    const cliMap = {}; (s.leads || []).forEach(l => { const k = String(l.nombre || '').trim(); if (k) cliMap[k.toLowerCase()] = { nombre: k, celular: l.celular || '', ciudad: l.ciudad || '', correo: l.correo || '', de: 'Lead' }; });
+    (s.cotizaciones || []).forEach(c => { const k = String(c.cliente || '').trim(); if (k && !cliMap[k.toLowerCase()]) cliMap[k.toLowerCase()] = { nombre: k, celular: c.celular || '', ciudad: c.ciudad || '', correo: c.correo || '', de: 'Cotización previa' }; });
+    const cliVis = cnCliQ ? Object.values(cliMap).filter(x => x.nombre.toLowerCase().includes(cnCliQ)).slice(0, 6) : [];
     // ---- marketing (solo consulta; foto de Meta Ads publicada por el Hub) ----
     const mktRango = s.mktRango || 'mes'; const mktRow = (s.mkt || {})[mktRango]; const mktD = (mktRow && mktRow.data) || {}; const mk = mktD.kpis || {};
     const fmtK = n => { n = Number(n) || 0; if (n >= 1000000) return (n / 1000000).toFixed(n >= 10000000 ? 0 : 1) + 'M'; if (n >= 1000) return Math.round(n / 1000) + 'K'; return String(Math.round(n)); };
@@ -1524,6 +1725,38 @@ class Component extends DCLogic {
       loginBtnBg: s.loginBusy ? '#C1AA81' : '#A78659', loginBtnLabel: s.loginBusy ? 'Entrando…' : 'Entrar',
       isInicio: s.screen === 'inicio', refrescar: () => this.refrescarInicio(true), actualizadoTxt: s.countsCargando ? 'Actualizando…' : s.countsError ? 'No se pudo actualizar (' + s.countsError + ') · toca para reintentar' : s.countsAt ? 'Actualizado ' + new Date(s.countsAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) + ' · toca para refrescar' : 'Cargando…', isModulo: s.screen === 'modulo', isPerfil: s.screen === 'perfil', goInicio: go('inicio'), goPerfil: go('perfil'),
       isChats: s.screen === 'chats', isChat: s.screen === 'chat', showTabs: s.screen !== 'chat' && s.screen !== 'invItem' && s.screen !== 'prodNueva', goChats: () => this.setState({ screen: 'chats', convId: null }),
+      isCot: s.screen === 'cot', isCotNueva: s.screen === 'cotNueva',
+      cotSubTxt: s.cotizaciones ? (cotList.length + ' cotización' + (cotList.length === 1 ? '' : 'es')) : 'Cargando…',
+      cotPuede, nuevaCot: () => this.nuevaCot(),
+      cotQ: s.cotQ || '', setCotQ: e => this.setState({ cotQ: e.target.value }),
+      cotVis: cotVis.map(c => ({ numero: c.numero || '—', cliente: c.cliente || '—', sub: (String(c.fecha || '').split('-').reverse().join('/')) + (c.ciudad ? ' · ' + c.ciudad : '') + (c._creadoPor ? ' · ' + c._creadoPor : ''),
+        totalTxt: cop(this.cotTotal(c)), nItems: (c.items || []).length + ' ítem' + ((c.items || []).length === 1 ? '' : 's'),
+        wa: () => this.cotWhatsApp(c), doc: () => this.cotDocumento(c) })),
+      cotVacio: !!s.cotizaciones && cotVis.length === 0, cotVacioTxt: s.cotError ? s.cotError : (cotQ ? 'Ninguna cotización coincide.' : 'Todavía no hay cotizaciones.'),
+      cnNum: s.cotizaciones ? this.nextCot() : '…',
+      cnCliente: s.cnCliente || '', setCnCliente: e => this.setState({ cnCliente: e.target.value, cnClienteQ: e.target.value }),
+      cliVis: cliVis.map(x => ({ nombre: x.nombre, de: x.de, pick: () => this.setState({ cnCliente: x.nombre, cnCel: x.celular || '', cnCiudad: x.ciudad || '', cnCorreo: x.correo || '', cnClienteQ: '' }) })),
+      cnCel: s.cnCel || '', setCnCel: e => this.setState({ cnCel: e.target.value }),
+      cnCiudad: s.cnCiudad || '', setCnCiudad: e => this.setState({ cnCiudad: e.target.value }),
+      cnCorreo: s.cnCorreo || '', setCnCorreo: e => this.setState({ cnCorreo: e.target.value }),
+      cnProdQ: s.cnProdSel ? s.cnProdSel.nombre : (s.cnProdQ || ''), setCnProdQ: e => this.setState({ cnProdQ: e.target.value, cnProdSel: null }),
+      cnProdVis: cnProdVis.map(p => ({ nombre: p.nombre, codigo: p.codigo, precioTxt: p.precio ? cop(p.precio) : 'sin precio', pick: () => this.setState({ cnProdSel: p, cnProdQ: '', cnValor: String(Number(p.precio) || 0) }) })),
+      cnProdSinMatch: !!cnProdQ && !s.cnProdSel && cnProdVis.length === 0,
+      cnSelBorder: s.cnProdSel ? '#A78659' : '#B8AE9C',
+      cnCant: s.cnCant == null ? '' : s.cnCant, setCnCant: e => this.setState({ cnCant: e.target.value }),
+      cnValor: s.cnValor == null ? '' : s.cnValor, setCnValor: e => this.setState({ cnValor: e.target.value }),
+      addCotLinea: () => this.addCotLinea(),
+      cnItemsVis: cnItems.map((it, i) => ({ nombre: it.producto || it.referencia, det: it.unidades + ' × ' + cop(it.valorUnit), sub: cop((Number(it.unidades) || 0) * (Number(it.valorUnit) || 0)), quitar: () => this.removeCotLinea(i) })),
+      cnSinItems: cnItems.length === 0,
+      cnDesc: s.cnDesc == null ? '' : s.cnDesc, setCnDesc: e => this.setState({ cnDesc: e.target.value }),
+      cnEnvio: s.cnEnvio == null ? '' : s.cnEnvio, setCnEnvio: e => this.setState({ cnEnvio: e.target.value }),
+      cnValidez: s.cnValidez == null ? 15 : s.cnValidez, setCnValidez: e => this.setState({ cnValidez: e.target.value }),
+      cnNota: s.cnNota || '', setCnNota: e => this.setState({ cnNota: e.target.value }),
+      cnMercTxt: cop(cnMerc), cnDmTxt: '−' + cop(cnDm), cnHayDesc: cnDm > 0, cnEnvioTxt: cop(Number(s.cnEnvio) || 0), cnHayEnvio: (Number(s.cnEnvio) || 0) > 0, cnTotTxt: cop(cnTot),
+      cnListo: !!String(s.cnCliente || '').trim() && cnItems.length > 0 && !s.cotSaving,
+      cnBtnBg: (!!String(s.cnCliente || '').trim() && cnItems.length > 0 && !s.cotSaving) ? '#A78659' : '#C1AA81',
+      cnGuardar: () => this.guardarCot(null), cnGuardarWa: () => this.guardarCot('wa'), cnGuardarDoc: () => this.guardarCot('doc'),
+      cnGuardarTxt: s.cotSaving ? 'Guardando…' : 'Guardar',
       isMkt: s.screen === 'mkt', mktSubTxt: mktRow ? 'Meta Ads · actualizado el ' + new Date(mktRow.actualizado).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : (s.mkt ? 'Sin datos publicados' : 'Cargando…'),
       mktRangos: this.MKT_RANGOS.map(([id, label]) => Object.assign({ label, set: () => this.setState({ mktRango: id }) }, chip(mktRango === id))),
       mktVacio: !!s.mkt && !mktRow, mktVacioTxt: s.mktError ? s.mktError : 'Todavía no hay datos de este rango. Se actualizan solos cada 6 horas desde Meta; si acabas de activar el módulo, espera la primera corrida o abre Marketing → Resumen en el Hub.',
