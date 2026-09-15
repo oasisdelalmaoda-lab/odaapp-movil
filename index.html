@@ -1207,10 +1207,18 @@ class Component extends DCLogic {
   async _asegurarAuth() { if (this._authUid) return true; const sb = this.sb(); if (!sb) return false; try { let { data } = await sb.auth.getSession(); let su = data && data.session && data.session.user; if (!su) { const r = await sb.auth.refreshSession(); su = r.data && r.data.session && r.data.session.user; } if (su) { this._authUid = su.id; return true; } } catch (e) { console.warn('auth', e); } return false; }
   _sesionVencida() { this._authUid = ''; const email = (this.state.user && this.state.user.email) || this.state.loginEmail || ''; try { localStorage.removeItem(this.SESSION_KEY); } catch (e) {} this.setState({ view: 'login', loginEmail: email, loginBusy: false, loginError: 'Tu sesión venció. Entra de nuevo para ver los datos actualizados.', loginInfo: '', loginPwd: '', loginPwdShow: false, countsCargando: false, countsAt: 0 }); }
   // ---- notificaciones push (Web Push; la Edge Function `push` envía, el SW muestra) ----
-  VAPID_PUBLIC = 'PEGAR_AQUI_LA_CLAVE_PUBLICA_VAPID';
+  VAPID_PUBLIC = 'BPhTrxupKYDNBKZwzg6XDAM8rIr_EnQMkRHGcleZ0J8uEuoYJGgq_A7a3sIfigki4eurngrMJT12QBCfqeqHc1g';
   _abrirDesdeUrl(url) { try { const cid = new URL(url, location.href).searchParams.get('conv'); if (cid) { if (this.state.view === 'app') { this.setState({ screen: 'chats' }); this.loadConvs(); this.openConv(cid); } else this._convPendiente = cid; } } catch (e) {} }
   pushSoportado() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
-  async pushRefrescarEstado() { if (!this.pushSoportado() || !this._swReg) { this.setState({ pushEstado: 'nosoporta' }); return; } try { const sub = await this._swReg.pushManager.getSubscription(); this.setState({ pushEstado: sub ? 'on' : (Notification.permission === 'denied' ? 'denegado' : 'off') }); } catch (e) { this.setState({ pushEstado: 'off' }); } }
+  async pushRefrescarEstado() { if (!this.pushSoportado() || !this._swReg) { this.setState({ pushEstado: 'nosoporta' }); return; } try { const sub = await this._swReg.pushManager.getSubscription(); this.setState({ pushEstado: sub ? 'on' : (Notification.permission === 'denied' ? 'denegado' : 'off') }); if (sub) this._pushSyncSoon(); } catch (e) { this.setState({ pushEstado: 'off' }); } }
+  // Mantiene al día quién es el dueño de la suscripción (si cambió de rol o de cuenta, el filtro de destinatarios cambia).
+  _pushSyncSoon() { clearTimeout(this._pushSyncT); this._pushSyncT = setTimeout(() => this.pushSyncPerfil(), 6000); }
+  async pushSyncPerfil() { if (this.state.view !== 'app') return; const sb = this.sb(); if (!sb || !this._swReg) return;
+    try { const sub = await this._swReg.pushManager.getSubscription(); if (!sub) return; await this._asegurarAuth(); const u = this.state.user || {};
+      const p = { user_key: String(u.email || '').toLowerCase(), nombre: u.name || '', es_admin: this.isAdmin(), user_uid: this.meUid() || null, actualizado: new Date().toISOString() };
+      let { error } = await sb.from('push_suscripciones').update(p).eq('endpoint', sub.endpoint);
+      if (error && /es_admin|user_uid|column/i.test(String(error.message || ''))) { delete p.es_admin; delete p.user_uid; await sb.from('push_suscripciones').update(p).eq('endpoint', sub.endpoint); }
+    } catch (e) { console.warn('push perfil', e); } }
   _b64ToU8(b64) { const p = '='.repeat((4 - b64.length % 4) % 4); const raw = atob((b64 + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from([...raw].map(c => c.charCodeAt(0))); }
   async pushToggle() { const s = this.state; if (s.pushBusy) return; if (!this.pushSoportado()) { this.toast('Este navegador no soporta notificaciones'); return; }
     if (!s.standalone && /iPhone|iPad/.test(navigator.userAgent)) { this.toast('En iPhone primero agrega la app a la pantalla de inicio (Compartir → Agregar a inicio)'); return; }
@@ -1220,9 +1228,13 @@ class Component extends DCLogic {
       if (cur) { try { if (sb) await sb.from('push_suscripciones').delete().eq('endpoint', cur.endpoint); } catch (e) {} await cur.unsubscribe(); this.setState({ pushEstado: 'off', pushBusy: false }); this.toast('Notificaciones apagadas en este teléfono'); return; }
       const perm = await Notification.requestPermission(); if (perm !== 'granted') { this.setState({ pushEstado: perm === 'denied' ? 'denegado' : 'off', pushBusy: false }); this.toast(perm === 'denied' ? 'El teléfono bloqueó las notificaciones: actívalas en Ajustes' : 'No se activaron'); return; }
       const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: this._b64ToU8(this.VAPID_PUBLIC) });
-      const u = s.user || {}; const { error } = await sb.from('push_suscripciones').upsert({ endpoint: sub.endpoint, user_key: String(u.email || '').toLowerCase(), nombre: u.name || '', sub: sub.toJSON(), ua: navigator.userAgent.slice(0, 180), actualizado: new Date().toISOString() }, { onConflict: 'endpoint' });
+      const u = s.user || {}; await this._asegurarAuth();
+      const fila = { endpoint: sub.endpoint, user_key: String(u.email || '').toLowerCase(), nombre: u.name || '', sub: sub.toJSON(), ua: navigator.userAgent.slice(0, 180), actualizado: new Date().toISOString(), es_admin: this.isAdmin(), user_uid: this.meUid() || null };
+      let { error } = await sb.from('push_suscripciones').upsert(fila, { onConflict: 'endpoint' });
+      if (error && /es_admin|user_uid|column/i.test(String(error.message || ''))) { // base sin las columnas nuevas (falta correr supabase-push.sql)
+        delete fila.es_admin; delete fila.user_uid; ({ error } = await sb.from('push_suscripciones').upsert(fila, { onConflict: 'endpoint' })); }
       if (error) { await sub.unsubscribe(); throw error; }
-      this.setState({ pushEstado: 'on', pushBusy: false }); this.toast('Listo: te avisamos cuando escriba un cliente'); }
+      this.setState({ pushEstado: 'on', pushBusy: false }); this.toast(this.isAdmin() ? 'Listo: te avisamos de todos los mensajes' : 'Listo: te avisamos de los chats asignados a ti'); }
     catch (e) { console.warn('push', e); this.setState({ pushBusy: false }); this.toast(/push_suscripciones|relation/i.test(String(e.message || e)) ? 'Falta la tabla push_suscripciones en la nube (supabase-push.sql)' : 'No se pudieron activar: ' + (e.message || e)); } }
   async boot() {
     // Sesión guardada → entra de una (aun sin red); luego la nube confirma o corrige.
@@ -1251,7 +1263,7 @@ class Component extends DCLogic {
     if (!lu) { try { await this.sb().auth.signOut(); } catch (e) {} this.setState({ view: 'login', loginBusy: false, loginError: 'Tu cuenta (' + email + ') no está vinculada a un usuario del sistema. Pídele al administrador que te cree en Usuarios y permisos.' }); return; }
     const user = { id: lu.id, name: lu.name, email: lu.email, role: lu.role, color: lu.color || '#A78659' };
     this._authUid = su.id || '';
-    this.setState({ view: 'app', user, loginBusy: false, loginError: '', loginPwd: '' }, () => { this.persistSession(); this.loadCounts(); this.loadProfiles(); this.loadConvs(); this.subscribeConvs(); if (this._convPendiente) { const cid = this._convPendiente; this._convPendiente = null; this.setState({ screen: 'chats' }); this.openConv(cid); } });
+    this.setState({ view: 'app', user, loginBusy: false, loginError: '', loginPwd: '' }, () => { this.persistSession(); this._pushSyncSoon(); this.loadCounts(); this.loadProfiles(); this.loadConvs(); this.subscribeConvs(); if (this._convPendiente) { const cid = this._convPendiente; this._convPendiente = null; this.setState({ screen: 'chats' }); this.openConv(cid); } });
   }
   persistSession() { const s = this.state; try { localStorage.setItem(this.SESSION_KEY, JSON.stringify({ user: s.user, perms: s.perms, usersCfg: s.usersCfg, counts: s.counts })); } catch (e) {} }
   async loadCounts() {
@@ -1867,7 +1879,7 @@ class Component extends DCLogic {
       instaladaTxt: s.standalone ? 'Sí' : 'No · abre desde el navegador', nubeTxt: s.offline ? 'Sin conexión' : 'Conectada',
       esAdmin: this.isAdmin(), adminUsers,
       pushToggle: () => this.pushToggle(), pushBg: s.pushEstado === 'on' ? '#627B60' : '#D9CFBF', pushKnob: s.pushEstado === 'on' ? '21px' : '3px',
-      pushTxt: s.pushBusy ? 'Un momento…' : s.pushEstado === 'on' ? 'Te avisamos en este teléfono cuando escriba un cliente' : s.pushEstado === 'denegado' ? 'Bloqueadas por el teléfono: actívalas en Ajustes del navegador' : s.pushEstado === 'nosoporta' ? 'Este navegador no las soporta' : (!s.standalone && /iPhone|iPad/.test(navigator.userAgent)) ? 'En iPhone: agrega la app a la pantalla de inicio y actívalas desde ahí' : 'Apagadas · recibe un aviso por cada mensaje de cliente',
+      pushTxt: s.pushBusy ? 'Un momento…' : s.pushEstado === 'on' ? (this.isAdmin() ? 'Te avisamos en este teléfono de todos los mensajes de clientes' : 'Te avisamos en este teléfono de los chats asignados a ti') : s.pushEstado === 'denegado' ? 'Bloqueadas por el teléfono: actívalas en Ajustes del navegador' : s.pushEstado === 'nosoporta' ? 'Este navegador no las soporta' : (!s.standalone && /iPhone|iPad/.test(navigator.userAgent)) ? 'En iPhone: agrega la app a la pantalla de inicio y actívalas desde ahí' : 'Apagadas · recibe un aviso por cada mensaje de cliente',
       tabInicio: tab('inicio', go('inicio')), tabCuenta: tab('perfil', go('perfil')),
       tabProd: tab('modulo:produccion', go('modulo', { modId: 'produccion' }), { visible: prodLvl !== 'none' && (this._modLevel(a, 'informes') === 'none' || this._modLevel(a, 'conversaciones') === 'none') }),
       tabInv: tab('modulo:inventario', go('modulo', { modId: 'inventario' }), { visible: invLvl !== 'none' && (this._modLevel(a, 'informes') === 'none' || this._modLevel(a, 'conversaciones') === 'none'), badge: this.isAdmin() ? ctPendN : 0 }),
