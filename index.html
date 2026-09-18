@@ -247,6 +247,15 @@
           <div style="display:flex;justify-content:{{ m.just }};">
             <div style="max-width:80%;padding:{{ m.pad }};border-radius:{{ m.radius }};background:{{ m.bg }};color:{{ m.fg }};font-size:13.5px;line-height:1.4;border:{{ m.border }};text-align:{{ m.align }};overflow:hidden;">
               <sc-if value="{{ m.etiqueta }}" hint-placeholder-val="{{ false }}"><div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;opacity:0.7;margin-bottom:4px;padding:{{ m.etPad }};">{{ m.etiqueta }}</div></sc-if>
+              <sc-if value="{{ m.hayCita }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:7px;align-items:center;padding:6px 9px;margin-bottom:6px;border-left:3px solid #A78659;background:rgba(167,134,89,0.1);border-radius:8px;">
+                  <sc-if value="{{ m.citaEsImg }}" hint-placeholder-val="{{ false }}"><img src="{{ m.citaImg }}" loading="lazy" alt="" style="width:30px;height:30px;flex-shrink:0;border-radius:6px;object-fit:cover;"></sc-if>
+                  <span style="min-width:0;text-align:left;">
+                    <span style="display:block;font-size:9.5px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#A78659;">Respondió a esto nuestro</span>
+                    <span style="display:block;font-size:11px;color:#8A8073;line-height:1.35;">{{ m.citaTxt }}</span>
+                  </span>
+                </div>
+              </sc-if>
               <sc-if value="{{ m.esImg }}" hint-placeholder-val="{{ false }}"><img src="{{ m.img }}" loading="lazy" alt="" style="display:block;max-width:100%;max-height:260px;border-radius:12px;object-fit:cover;"></sc-if>
               <sc-if value="{{ m.esDoc }}" hint-placeholder-val="{{ false }}"><a href="{{ m.docUrl }}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;color:inherit;text-decoration:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg><span style="font-weight:700;word-break:break-word;text-decoration:underline;">{{ m.docNombre }}</span></a></sc-if>
               <sc-if value="{{ m.texto }}" hint-placeholder-val="{{ true }}"><div style="white-space:pre-wrap;word-break:break-word;">{{ m.texto }}</div></sc-if>
@@ -1348,7 +1357,7 @@ class Component extends DCLogic {
     if (cache[id] && c && cache[id].ts === c.ultimoAt) { this.setState({ msgs: cache[id].msgs, msgsCargando: false }); return; }
     this.setState({ msgsCargando: !cache[id], msgs: cache[id] ? cache[id].msgs : [] });
     try { let all = []; for (let off = 0, page = 1000; ; off += page) { const { data, error } = await sb.from('mensajes').select('de,texto,meta,creado_at').eq('conversacion_id', id).order('creado_at', { ascending: true }).range(off, off + page - 1); if (error) throw error; all = all.concat(data || []); if (!data || data.length < page || off > 50000) break; }
-      const msgs = all.map(m => ({ de: m.de, texto: m.texto, at: m.creado_at, asesor: (m.meta && m.meta.asesor) || '', noEntregado: !!(m.meta && m.meta.noEntregado), manual: !!(m.meta && m.meta.manual), auto: this._autoKey(m.meta) }));
+      const msgs = all.map(m => ({ de: m.de, texto: m.texto, at: m.creado_at, asesor: (m.meta && m.meta.asesor) || '', respondeA: (m.meta && m.meta.respondeA) || '', noEntregado: !!(m.meta && m.meta.noEntregado), manual: !!(m.meta && m.meta.manual), auto: this._autoKey(m.meta) }));
       cache[id] = { ts: c ? c.ultimoAt : '', msgs }; if (this.state.convId === id) this.setState({ msgs, msgsCargando: false }, () => this.scrollMsgs());
     } catch (e) { console.warn('mensajes', e); this.setState({ msgsCargando: false }); this.toast('No se pudieron cargar los mensajes'); }
   }
@@ -1638,6 +1647,9 @@ class Component extends DCLogic {
     const cv = convs.find(x => x.id === s.convId) || {}; const cvE = estConv(cv.estado || 'bot'), cvK = canalInfo(cv.canal || 'web');
     const puedeEscribir = this.puedeEscribir(cv); const canWrite = this._modLevel(a, 'conversaciones') === 'write';
     const msgsUI = (s.msgs || []).map((m, i, arr) => { const im = /^\[IMG:(.+)\]$/.exec(String(m.texto || '').trim()); const dc = im ? null : /^\[DOC:([^|\]]+)\|?([^\]]*)\]$/.exec(String(m.texto || '').trim()); const prev = arr[i - 1]; const dia = m.at ? new Date(m.at).toDateString() : ''; const nuevoDia = !!(dia && (!prev || new Date(prev.at).toDateString() !== dia)); const hora = m.at ? new Date(m.at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) : ''; const base = { texto: (im || dc) ? '' : m.texto, esImg: !!im, img: im ? im[1] : 'data:image/gif;base64,R0lGODlhAQABAAAAACw=', esDoc: !!dc, docUrl: dc ? dc[1] : '#', docNombre: dc ? (dc[2] || decodeURIComponent(dc[1].split('/').pop() || 'archivo').replace(/^\d+_\d+_/, '')) : '', hora, nuevoDia, fechaL: fechaL(m.at), pad: im ? '4px' : '10px 13px', etPad: im ? '6px 9px 0' : '0', noEntregado: false, canalL: cvK.l, nativoUrl: cvK.url };
+      // Cita: en Instagram/Messenger el cliente puede responder sobre un mensaje nuestro.
+      const cita = String(m.respondeA || '').trim(); const citaIm = /^\[IMG:(.+)\]$/.exec(cita);
+      Object.assign(base, { hayCita: !!cita, citaEsImg: !!citaIm, citaImg: citaIm ? citaIm[1] : '', citaTxt: citaIm ? '📷 Foto que le enviamos' : cita.slice(0, 140) });
       if (m.de === 'sistema') return Object.assign(base, { just: 'center', radius: '12px', bg: m.manual ? 'transparent' : 'rgba(181,80,60,0.06)', fg: m.manual ? '#8A8073' : '#8F3A28', border: m.manual ? '1px dashed #B8AE9C' : '1px dashed rgba(181,80,60,0.5)', align: 'center', etiqueta: m.noEntregado ? 'No entregado' : 'Aviso', noEntregado: !!m.noEntregado && !arr.slice(i + 1).some(x => x.manual) });
       if (m.de === 'cliente') return Object.assign(base, { just: 'flex-start', radius: '16px 16px 16px 4px', bg: '#FFFFFF', fg: '#3A3326', border: '1px solid #E4DBCC', align: 'left', etiqueta: '' });
       const bot = m.de === 'bot'; return Object.assign(base, { just: 'flex-end', radius: '16px 16px 4px 16px', bg: bot ? '#EFE6D6' : '#A78659', fg: bot ? '#3A3326' : '#FBF8F2', border: 'none', align: 'left', etiqueta: bot ? (m.auto ? ('Automático · ' + (this.AUTOL[m.auto] || m.auto)) : 'Agente IA') : (this.nombreDe(m.asesor) || 'Asesor') }); });
