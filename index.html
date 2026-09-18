@@ -1320,8 +1320,19 @@ class Component extends DCLogic {
     try { const desde = new Date(Date.now() - this.CONV_DIAS * 86400000).toISOString(); let all = [];
       for (let off = 0, page = 1000; ; off += page) { const { data, error } = await sb.from('mensajes').select('conversacion_id,meta').eq('de', 'bot').gte('creado_at', desde).or('meta->>plantilla.neq.,meta->>carrito.not.is.null').range(off, off + page - 1); if (error) throw error; all = all.concat(data || []); if (!data || data.length < page || off > 20000) break; }
       const by = {}; all.forEach(m => { const k = this._autoKey(m.meta); if (!k) return; (by[m.conversacion_id] = by[m.conversacion_id] || []); if (by[m.conversacion_id].indexOf(k) < 0) by[m.conversacion_id].push(k); });
-      this.setState({ convAutos: by }); }
+      // Misma regla del Hub: un chat que SOLO tiene mensajes automáticos salientes no sale en la
+      // bandeja. Como la app no baja todos los mensajes, se consulta aparte quiénes YA respondieron
+      // (una sola consulta, solo sobre las conversaciones tocadas por una automatización).
+      const cand = Object.keys(by); const conCli = {};
+      if (cand.length) { for (let i = 0; i < cand.length; i += 200) { const chunk = cand.slice(i, i + 200);
+          for (let off = 0, page = 1000; ; off += page) { const { data, error } = await sb.from('mensajes').select('conversacion_id').eq('de', 'cliente').in('conversacion_id', chunk).range(off, off + page - 1); if (error) throw error; (data || []).forEach(r => { conCli[r.conversacion_id] = true; }); if (!data || data.length < page || off > 20000) break; } } }
+      this.setState({ convAutos: by, convConCliente: conCli }); }
     catch (e) { console.warn('autos', e); } finally { this._autosLoading = false; } }
+  // Oculta de la bandeja los chats abiertos por una automatización a los que el cliente
+  // todavía no ha respondido. Si el chat necesita asesor (p. ej. aviso de entrega fallida) sí se ve.
+  _convSoloAuto(c) { const s = this.state; const autos = (s.convAutos || {})[c.id] || []; if (!autos.length) return false;
+    if (c.estado === 'necesita' || c.estado === 'humano' || (c.noLeidos || 0) > 0) return false;
+    return !((s.convConCliente || {})[c.id]); }
   async loadConvs() {
     const sb = this.sb(); if (!sb || this._convLoading) return; if (this._modLevel(this.access(), 'conversaciones') === 'none') return; this._convLoading = true;
     try { const desde = new Date(Date.now() - this.CONV_DIAS * 86400000).toISOString();
@@ -1620,7 +1631,7 @@ class Component extends DCLogic {
     const avat = ['#DCCBAB', '#A8BEA4', '#C9B9A7', '#9C97A2', '#E8B56A', '#8AB38D']; const avatDe = id => { let h = 0; const t = String(id || ''); for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0; return avat[h % avat.length]; };
     const horaDe = iso => { if (!iso) return ''; const d = new Date(iso); if (isNaN(d)) return ''; const hoy = new Date(); const mismo = d.toDateString() === hoy.toDateString(); const ayer = new Date(hoy); ayer.setDate(hoy.getDate() - 1); if (mismo) return d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }); if (d.toDateString() === ayer.toDateString()) return 'Ayer'; return d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' }); };
     const fechaL = iso => { const d = new Date(iso); if (isNaN(d)) return ''; const hoy = new Date(); if (d.toDateString() === hoy.toDateString()) return 'Hoy'; const ayer = new Date(hoy); ayer.setDate(hoy.getDate() - 1); if (d.toDateString() === ayer.toDateString()) return 'Ayer'; return d.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' }); };
-    const convs = s.convs || []; const filtro = s.convFiltro || 'necesita'; const q = String(s.convQ || '').toLowerCase().trim(); const autoSel = s.convAutoSel || 'todos'; const autosDe = c => (s.convAutos && s.convAutos[c.id]) || [];
+    const convs = (s.convs || []).filter(x => !this._convSoloAuto(x)); const filtro = s.convFiltro || 'necesita'; const q = String(s.convQ || '').toLowerCase().trim(); const autoSel = s.convAutoSel || 'todos'; const autosDe = c => (s.convAutos && s.convAutos[c.id]) || [];
     const convsBase = convs.filter(x => filtro === 'todas' || (filtro === 'mias' ? this.esMia(x) : x.estado === filtro));
     const convsVis = convsBase.filter(x => autoSel === 'todos' ? true : autoSel === 'ninguna' ? autosDe(x).length === 0 : autosDe(x).indexOf(autoSel) >= 0).filter(x => !q || (String(x.cliente) + ' ' + String(x.telefono)).toLowerCase().includes(q)).map(x => { const e = estConv(x.estado), k = canalInfo(x.canal); const esp = x.estado === 'necesita'; return Object.assign(canalFlags(x.canal), { nombre: x.cliente, canalBg: k.bg, hora: horaDe(x.ultimoAt), horaFg: esp ? '#B5503C' : '#8A8073', horaW: esp ? 700 : 400, ultimo: String(x.ultimo || '').replace(/^\[IMG:.*\]$/, '📷 imagen'), noLeidos: x.noLeidos || 0, estLabel: e.label, estBg: e.bg, estFg: e.fg, asig: x.asignadoA ? (this.esMia(x) ? 'Tuya' : this.nombreDe(x.asignadoA)) : '', autoL: autosDe(x).map(k2 => this.AUTOL[k2] || k2).join(' · '), open: () => this.openConv(x.id) }); });
     const autoChips = (() => { const cuenta = {}; convsBase.forEach(c => autosDe(c).forEach(k => { cuenta[k] = (cuenta[k] || 0) + 1; })); const sin = convsBase.filter(c => autosDe(c).length === 0).length; const chips = [{ k: 'todos', l: 'Todas', n: convsBase.length }]; Object.keys(this.AUTOL).forEach(k => { if (cuenta[k]) chips.push({ k, l: this.AUTOL[k], n: cuenta[k] }); }); if (sin && chips.length > 1) chips.push({ k: 'ninguna', l: 'Sin automatización', n: sin }); return chips.length > 1 ? chips : []; })();
