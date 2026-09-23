@@ -540,16 +540,30 @@
           <sc-for list="{{ mktTop }}" as="c" hint-placeholder-count="3">
             <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;">
               <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;"><div style="min-width:0;"><div style="font-weight:700;font-size:13.5px;line-height:1.3;">{{ c.nombre }}</div><div style="font-size:11px;font-weight:700;margin-top:3px;color:{{ c.objFg }};">{{ c.objetivo }}</div></div><div style="flex:0 0 auto;display:inline-flex;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;background:{{ c.estBg }};color:{{ c.estFg }};">{{ c.estado }}</div></div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;">
-                <div><div style="font-size:10.5px;color:#8A8073;">Inversión</div><div style="font-weight:800;font-size:13px;margin-top:2px;">{{ c.spendTxt }}</div></div>
-                <div><div style="font-size:10.5px;color:#8A8073;">Ingresos</div><div style="font-weight:800;font-size:13px;margin-top:2px;">{{ c.ingTxt }}</div></div>
-                <div><div style="font-size:10.5px;color:#8A8073;">ROAS</div><div style="font-weight:800;font-size:13px;margin-top:2px;color:{{ c.roasFg }};">{{ c.roasTxt }}</div></div>
+              <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 8px;margin-top:12px;">
+                <sc-for list="{{ c.mets }}" as="m" hint-placeholder-count="12"><div style="min-width:0;"><div style="font-size:10.5px;color:#8A8073;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.label }}</div><div style="font-weight:800;font-size:13px;margin-top:2px;color:{{ m.fg }};">{{ m.valor }}</div></div></sc-for>
               </div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:#8A8073;margin-top:10px;"><span>{{ c.resTxt }}</span><span>·</span><span>{{ c.ctrTxt }}</span><span>·</span><span style="color:{{ c.frecFg }};">{{ c.frecTxt }}</span></div>
             </div>
           </sc-for>
         </div>
         <sc-if value="{{ mktTopNota }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;color:#8A8073;margin-top:10px;">{{ mktTopNota }}</div></sc-if>
+        <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;margin:22px 0 4px;">De dónde vienen los pedidos</div>
+        <div style="font-size:11.5px;color:#8A8073;margin-bottom:10px;line-height:1.4;">{{ mktFuentesNota }}</div>
+        <sc-if value="{{ mktFuentesVacio }}" hint-placeholder-val="{{ false }}"><div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;font-size:13px;color:#574E40;line-height:1.5;">{{ mktFuentesVacioTxt }}</div></sc-if>
+        <sc-if value="{{ mktFuentesHay }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;height:12px;border-radius:999px;overflow:hidden;background:#EFE9DD;">
+              <sc-for list="{{ mktFuentes }}" as="r" hint-placeholder-count="4"><div style="width:{{ r.pct }};background:{{ r.color }};"></div></sc-for>
+            </div>
+            <sc-for list="{{ mktFuentes }}" as="r" hint-placeholder-count="4">
+              <div>
+                <div style="display:flex;align-items:center;gap:8px;"><span style="width:9px;height:9px;border-radius:99px;background:{{ r.color }};flex:0 0 auto;"></span><div style="flex:1;min-width:0;font-size:13px;font-weight:700;line-height:1.3;">{{ r.label }}</div><div style="font-size:13px;font-weight:800;">{{ r.pct }}</div></div>
+                <div style="height:6px;border-radius:999px;background:#EFE9DD;margin:6px 0 0 17px;overflow:hidden;"><div style="height:100%;width:{{ r.pct }};background:{{ r.color }};border-radius:999px;"></div></div>
+                <div style="font-size:11px;color:#8A8073;margin:5px 0 0 17px;line-height:1.4;">{{ r.meta }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
       </sc-if>
     </div>
     </sc-if>
@@ -570,6 +584,31 @@
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
           <sc-for list="{{ finCuentas }}" as="c" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;"><div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:14px;">{{ c.nombre }}</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ c.tipo }}</div></div><div style="font-weight:800;font-size:15px;color:{{ c.fg }};white-space:nowrap;">{{ c.saldoTxt }}</div></div></sc-for>
         </div>
+      </sc-if>
+      <sc-if value="{{ finEsPyg }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:6px;margin-top:12px;overflow-x:auto;scrollbar-width:none;">
+          <sc-for list="{{ pygMeses }}" as="f" hint-placeholder-count="2"><div onClick="{{ f.set }}" style="flex:0 0 auto;padding:6px 12px;border-radius:999px;font-size:11.5px;font-weight:700;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.fg }};">{{ f.label }}</div></sc-for>
+        </div>
+        <sc-if value="{{ pygVacio }}" hint-placeholder-val="{{ false }}"><div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;line-height:1.5;">{{ pygVacioTxt }}</div></sc-if>
+        <sc-if value="{{ pygHay }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:12px;background:#3A3326;color:#FBF8F2;border-radius:18px;padding:18px 20px;">
+            <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;opacity:0.7;">Resultado · {{ pygMes }}</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1;margin-top:6px;color:{{ pygResFg }};">{{ pygResultado }}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
+              <div><div style="font-size:11px;opacity:0.7;">Ventas netas</div><div style="font-size:16px;font-weight:800;margin-top:3px;">{{ pygIngresos }}</div><div style="font-size:10.5px;opacity:0.6;margin-top:2px;">{{ pygDIng }}</div></div>
+              <div><div style="font-size:11px;opacity:0.7;">Utilidad operacional</div><div style="font-size:16px;font-weight:800;margin-top:3px;">{{ pygOper }}</div><div style="font-size:10.5px;opacity:0.6;margin-top:2px;">{{ pygDOper }}</div></div>
+            </div>
+          </div>
+          <div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;overflow:hidden;">
+            <sc-for list="{{ pygFilas }}" as="r" hint-placeholder-count="8">
+              <div style="display:flex;align-items:baseline;gap:10px;padding:{{ r.pad }};border-top:1px solid #EFE9DD;background:{{ r.bg }};">
+                <div style="flex:1;min-width:0;font-size:{{ r.fs }};font-weight:{{ r.fw }};color:#3A3326;line-height:1.35;">{{ r.label }}<span style="font-weight:500;color:#8A8073;font-size:11px;">{{ r.margen }}</span></div>
+                <div style="flex:0 0 auto;font-size:{{ r.fs }};font-weight:800;color:{{ r.fg }};white-space:nowrap;">{{ r.valor }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-size:11px;color:#8A8073;margin-top:10px;line-height:1.5;">{{ pygNota }}</div>
+        </sc-if>
       </sc-if>
       <sc-if value="{{ finEsCobrar }}" hint-placeholder-val="{{ false }}">
         <div style="margin-top:14px;background:#3A3326;color:#FBF8F2;border-radius:18px;padding:18px 20px;"><div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;opacity:0.7;">Por cobrar</div><div style="display:flex;align-items:baseline;gap:10px;margin-top:6px;"><div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1;">{{ finCobrarTotal }}</div><div style="font-size:12px;color:#C1AA81;">{{ finCobrarN }}</div></div></div>
@@ -1519,7 +1558,7 @@ class Component extends DCLogic {
   }
   // ---- informe gerencial: lo publica el Hub ya calculado (informe_snapshot, un mes por fila) ----
   async loadInforme() {
-    const sb = this.sb(); if (!sb || this._infLoading) return; if (this._modLevel(this.access(), 'informes') === 'none') return; this._infLoading = true;
+    const sb = this.sb(); if (!sb || this._infLoading) return; if (this._modLevel(this.access(), 'informes') === 'none' && this._modLevel(this.access(), 'finanzas') === 'none') return; this._infLoading = true;
     try { if (!(await this._asegurarAuth())) throw new Error('Sesión vencida: entra de nuevo'); const { data, error } = await sb.from('informe_snapshot').select('ym,data,actualizado,por').order('ym', { ascending: false }).limit(12); if (error) throw error;
       const list = (data || []).map(r => ({ ym: r.ym, data: r.data || {}, actualizado: r.actualizado || '', por: r.por || '' }));
       this.setState(s => ({ informes: list, infYm: s.infYm && list.some(x => x.ym === s.infYm) ? s.infYm : (list[0] ? list[0].ym : null), infError: '' })); }
@@ -1673,7 +1712,10 @@ class Component extends DCLogic {
     ].filter(p => typeof p.n === 'number' && p.n > 0);
     const activeKey = s.screen === 'modulo' ? 'modulo:' + s.modId : (s.screen === 'chats' || s.screen === 'chat') ? 'modulo:conversaciones' : (s.screen === 'inv' || s.screen === 'invItem' || s.screen === 'conteos') ? 'modulo:inventario' : (s.screen === 'prod' || s.screen === 'prodNueva') ? 'modulo:produccion' : s.screen === 'informe' ? 'modulo:reportes' : s.screen === 'fin' ? 'modulo:finanzas' : s.screen === 'leads' ? 'modulo:leads' : s.screen === 'soporte' ? 'modulo:soporte' : s.screen;
     // ---- finanzas (solo consulta; viene en la fila del mes actual del informe) ----
-    const finRow = (s.informes || []).find(x => x.data && Array.isArray(x.data.finCuentas)); const finD = (finRow && finRow.data) || {}; const finTab = s.finTab || 'caja'; const finQ = String(s.finQ || '').toLowerCase().trim();
+    const finRow = (s.informes || []).find(x => x.data && Array.isArray(x.data.finCuentas)); const finD = (finRow && finRow.data) || {}; const finTab = s.finTab || 'caja';
+    const pygRows = (s.informes || []).filter(x => x.data && x.data.pyg && Array.isArray(x.data.pyg.filas)); const pygRow = pygRows.find(x => x.ym === s.pygYm) || pygRows[0]; const pyg = (pygRow && pygRow.data.pyg) || null;
+    const pygD = (a, b) => { const d = b !== 0 ? (a - b) / Math.abs(b) * 100 : (a !== 0 ? 100 : 0); return (d >= 0 ? '+' : '') + d.toFixed(0) + '% vs ' + (pyg ? pyg.prevLabel : ''); };
+    const finQ = String(s.finQ || '').toLowerCase().trim();
     // ---- cotizaciones ----
     const cotPuede = this._modLevel(a, 'ventas') === 'write';
     const cotQ = String(s.cotQ || '').toLowerCase().trim();
@@ -1799,10 +1841,28 @@ class Component extends DCLogic {
       mktHay: !!mktRow, mktPeriodo: mktD.periodo || '', mktSyncTxt: mktD.syncTs ? 'Meta sincronizado ' + new Date(mktD.syncTs).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '',
       mktSpend: typeof mk.spend === 'number' ? cop(mk.spend) : '—', mktIngresos: typeof mk.ingresos === 'number' ? cop(mk.ingresos) : '—', mktRoas: typeof mk.roas === 'number' ? mk.roas.toFixed(2) + 'x' : '—', mktRoasFg: roasFg(Number(mk.roas) || 0), mktRoasTotal: typeof mk.roasTotal === 'number' && mk.roasTotal !== mk.roas ? 'Sobre toda la inversión ' + mk.roasTotal.toFixed(2) + 'x' : 'Ingresos ÷ inversión en campañas de venta',
       mktKpis: [['Compras', String(mk.resultados ?? '—')], ['Costo por compra', typeof mk.cpa === 'number' && mk.cpa > 0 ? cop(mk.cpa) : '—'], ['CTR', typeof mk.ctr === 'number' ? mk.ctr.toFixed(2) + '%' : '—'], ['CPM', typeof mk.cpm === 'number' ? cop(mk.cpm) : '—'], ['Alcance', mk.alcance != null ? fmtK(mk.alcance) : '—'], ['Impresiones', mk.impresiones != null ? fmtK(mk.impresiones) : '—'], ['Clics', mk.clicks != null ? fmtK(mk.clicks) : '—']].map(([label, valor]) => ({ label, valor })),
-      mktSparkHay: !!mktSpark, mktSpark, mktTop: (mktD.top || []).map(c => ({ nombre: c.nombre, objetivo: c.objetivo, objFg: mktObjFg(c.objetivo), estado: c.estado === 'activa' ? 'Activa' : 'Pausada', estBg: c.estado === 'activa' ? 'rgba(98,123,96,0.14)' : '#EFE9DD', estFg: c.estado === 'activa' ? '#4C6149' : '#8A8073', spendTxt: cop(c.spend || 0), ingTxt: c.ingresos > 0 ? cop(c.ingresos) : '—', roasTxt: c.objetivo === 'Ventas' && c.roas > 0 ? c.roas.toFixed(1) + 'x' : '—', roasFg: c.objetivo === 'Ventas' ? roasFg(c.roas || 0) : '#8A8073', resTxt: (c.resultados || 0) + ' ' + (c.objetivo === 'Mensajes' ? 'conversaciones' : c.objetivo === 'Reconocimiento' ? 'alcance' : 'compras'), ctrTxt: 'CTR ' + (Number(c.ctr) || 0).toFixed(2) + '%', frecTxt: 'Frec. ' + (Number(c.frecuencia) || 0).toFixed(1), frecFg: (Number(c.frecuencia) || 0) >= 3 ? '#8F3A28' : '#8A8073' })),
+      mktSparkHay: !!mktSpark, mktSpark, mktTop: (mktD.top || []).map(c => ({ nombre: c.nombre, objetivo: c.objetivo, objFg: mktObjFg(c.objetivo), estado: c.estado === 'activa' ? 'Activa' : 'Pausada', estBg: c.estado === 'activa' ? 'rgba(98,123,96,0.14)' : '#EFE9DD', estFg: c.estado === 'activa' ? '#4C6149' : '#8A8073', spendTxt: cop(c.spend || 0), ingTxt: c.ingresos > 0 ? cop(c.ingresos) : '—', roasTxt: c.objetivo === 'Ventas' && c.roas > 0 ? c.roas.toFixed(1) + 'x' : '—', roasFg: c.objetivo === 'Ventas' ? roasFg(c.roas || 0) : '#8A8073', mets: (() => { const v = c.objetivo === 'Ventas', ink = '#3A3326', na = '—', fr = Number(c.frecuencia) || 0, ck = Number(c.checkouts) || 0, ci = Number(c.cierre) || 0;
+        return [['Inversión', cop(c.spend || 0), ink], ['Ingresos', c.ingresos > 0 ? cop(c.ingresos) : na, ink], ['ROAS', v ? (Number(c.roas) || 0).toFixed(1) + 'x' : na, v ? roasFg(c.roas || 0) : '#8A8073'],
+          [c.objetivo === 'Mensajes' ? 'Conversaciones' : c.objetivo === 'Reconocimiento' ? 'Resultados' : 'Compras', String(c.resultados || 0), ink], ['Costo por compra', v && c.resultados > 0 && c.cpa > 0 ? cop(c.cpa) : na, ink], ['CTR', (Number(c.ctr) || 0).toFixed(2) + '%', ink],
+          ['CPM', c.cpm != null ? cop(c.cpm) : na, ink], ['Alcance', c.alcance != null ? fmtK(c.alcance) : na, ink], ['Frecuencia', fr.toFixed(1), fr >= 3 ? '#B5503C' : ink],
+          ['Carritos', c.carritos != null ? fmtK(c.carritos) : na, ink], ['Pagos iniciados', c.checkouts != null ? fmtK(c.checkouts) : na, ink], ['Costo por pago iniciado', ck > 0 && c.cpCheckout > 0 ? cop(c.cpCheckout) : na, ink],
+          ['Cierre', ck > 0 ? ci + '%' : na, ck > 0 ? (ci >= 50 ? '#4C6149' : ci >= 30 ? '#7A5E36' : '#B5503C') : '#8A8073']].map(([label, valor, fg]) => ({ label, valor, fg })); })() })),
+      mktFuentes: (mktD.fuentes || []).map(r => ({ label: r.label, color: r.color || '#8C7A5B', pct: r.pct || '0%', meta: r.n + (r.n === 1 ? ' pedido' : ' pedidos') + ' · ' + (r.ing || '') + (r.camp ? ' · ' + r.camp : '') })),
+      mktFuentesHay: !!(mktD.fuentes || []).length, mktFuentesVacio: !!mktRow && !(mktD.fuentes || []).length, mktFuentesNota: mktD.fuentesNota || '',
+      mktFuentesVacioTxt: Array.isArray(mktD.fuentes) ? 'Todavía no hay pedidos con rastro de origen en este periodo.' : 'El origen de los pedidos lo publica el Hub al abrir Marketing → Resumen en este periodo.',
       mktTopVacio: !!mktRow && !(mktD.top || []).length, mktTopNota: mktD.topNota || '', mktAlertas: (mktD.alertas || []).map(a => ({ tipo: a.tipo, txt: a.txt, color: a.color || '#7A5E36' })), mktAlertasVacio: !!mktRow && !(mktD.alertas || []).length,
       isFin: s.screen === 'fin', finSubTxt: finRow ? 'Publicado por el Hub el ' + new Date(finRow.actualizado).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' · solo consulta' : (s.informes ? 'Sin datos' : 'Cargando…'),
-      finTabs: [['caja', 'Caja y bancos'], ['cobrar', 'Por cobrar']].map(([id, label]) => Object.assign({ label, set: () => this.setState({ finTab: id }) }, chip(finTab === id))), finEsCaja: finTab === 'caja', finEsCobrar: finTab === 'cobrar',
+      finTabs: [['caja', 'Caja y bancos'], ['cobrar', 'Por cobrar'], ['pyg', 'PyG']].map(([id, label]) => Object.assign({ label, set: () => this.setState({ finTab: id }) }, chip(finTab === id))), finEsCaja: finTab === 'caja', finEsCobrar: finTab === 'cobrar', finEsPyg: finTab === 'pyg',
+      pygMeses: pygRows.map(x => Object.assign({ label: x.data.pyg.mesLabel || x.ym, set: () => this.setState({ pygYm: x.ym }) }, chip(pygRow && pygRow.ym === x.ym))),
+      pygHay: !!pyg, pygVacio: !!s.informes && !pyg, pygVacioTxt: 'El Hub todavía no ha publicado el PyG. Se publica cuando alguien con permiso de Informes abre el Hub (o la pestaña Informes).',
+      pygMes: pyg ? pyg.mesLabel : '', pygResultado: pyg ? (pyg.resultado < 0 ? '−' : '') + cop(Math.abs(pyg.resultado)) : '—', pygResFg: pyg && pyg.resultado < 0 ? '#E8A594' : '#FBF8F2',
+      pygIngresos: pyg ? cop(pyg.ingresos) : '—', pygOper: pyg ? (pyg.operacional < 0 ? '−' : '') + cop(Math.abs(pyg.operacional)) : '—',
+      pygDIng: pyg ? pygD(pyg.ingresos, pyg.prev.ingresos) : '', pygDOper: pyg ? pygD(pyg.operacional, pyg.prev.operacional) : '',
+      pygFilas: pyg ? pyg.filas.map(r => { const neg = r.total ? r.val < 0 : r.signo === '-'; return { label: r.label, margen: r.margen ? ' · margen ' + r.margen : '',
+        valor: r.total ? (r.val < 0 ? '−' : '') + cop(Math.abs(r.val)) : (r.signo === '-' ? '−' : r.signo === '+' ? '+' : '') + cop(Math.abs(r.val)),
+        fg: r.total ? (r.val >= 0 ? '#4C6149' : '#B5503C') : (neg ? '#B5503C' : r.signo === '+' ? '#4C6149' : '#3A3326'),
+        bg: r.total ? '#F7F2E9' : '#FFFFFF', fw: r.total ? 800 : 500, fs: r.total ? '14px' : '13px', pad: r.total ? '12px 16px' : '10px 16px' }; }) : [],
+      pygNota: pyg ? pyg.nVentas + ' ventas en el mes · mismas cifras de Finanzas → PyG del Hub (costos congelados, gastos a base neta)' + (pygRow.actualizado ? ' · publicado el ' + new Date(pygRow.actualizado).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '') : '',
       finVacio: !!s.informes && !finRow, finVacioTxt: s.infError ? s.infError : 'El Hub todavía no ha publicado los saldos. Abre el Hub con el administrador y espera medio minuto.',
       finSaldoTotal: typeof finD.finSaldoTotal === 'number' ? cop(finD.finSaldoTotal) : '—', finCuentas: (finD.finCuentas || []).map(c => ({ nombre: c.nombre, tipo: c.tipo, saldoTxt: (c.saldo < 0 ? '−' : '') + cop(Math.abs(c.saldo)), fg: c.saldo < 0 ? '#B5503C' : '#3A3326' })),
       finCobrarTotal: cop(finCobrarAll.reduce((t, r) => t + (Number(r.saldo) || 0), 0)), finCobrarN: finCobrarAll.length + (finCobrarAll.length === 1 ? ' venta' : ' ventas'), finQ: s.finQ || '', setFinQ: e => this.setState({ finQ: e.target.value }), finCobrar,
