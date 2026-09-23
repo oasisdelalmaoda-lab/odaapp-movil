@@ -1320,8 +1320,8 @@ class Component extends DCLogic {
   nombreDe(uid) { if (!uid) return ''; const p = (this.state.profiles || []).find(q => q.id === uid); if (p) return p.nombre || (p.email || '').split('@')[0] || 'Usuario'; const u = this.users.find(q => q.id === uid); return u ? u.name : ''; }
   async loadProfiles() { const sb = this.sb(); if (!sb) return; try { let r = await sb.from('profiles').select('id,nombre,rol,email'); if (r.error) r = await sb.from('profiles').select('id,nombre,rol'); if (!r.error && r.data) this.setState({ profiles: r.data }); } catch (e) {} }
   // Clave interna de la automatización que tocó un mensaje — ESPEJO de _autoKey del Hub (regla 35).
-  AUTOL = { pedido_despachado: 'Despachado', recordatorio_pago: 'Recordatorio de pago', pedido_contraentrega: 'Contraentrega', postventa: 'Postventa', carrito_abandonado: 'Carrito abandonado' };
-  _autoKey(meta) { const m = meta || {}; const p = String(m.plantilla || '').trim(); if (this.AUTOL[p]) return p; if (m.carrito) return 'carrito_abandonado'; if (/carrito/i.test(p)) return 'carrito_abandonado'; if (/postventa/i.test(p)) return 'postventa'; if (/contraentrega/i.test(p)) return 'pedido_contraentrega'; if (/despach/i.test(p)) return 'pedido_despachado'; if (/recordatorio|pago/i.test(p)) return 'recordatorio_pago'; return p; }
+  AUTOL = { pedido_despachado: 'Despachado', recordatorio_pago: 'Recordatorio de pago', pedido_contraentrega: 'Contraentrega', postventa: 'Postventa', carrito_abandonado: 'Carrito abandonado', campana: 'Campaña' };
+  _autoKey(meta) { const m = meta || {}; const p = String(m.plantilla || '').trim(); if (this.AUTOL[p]) return p; if (m.campana || /^promo/i.test(p)) return 'campana'; if (m.carrito) return 'carrito_abandonado'; if (/carrito/i.test(p)) return 'carrito_abandonado'; if (/postventa/i.test(p)) return 'postventa'; if (/contraentrega/i.test(p)) return 'pedido_contraentrega'; if (/despach/i.test(p)) return 'pedido_despachado'; if (/recordatorio|pago/i.test(p)) return 'recordatorio_pago'; return p; }
   // Qué automatizaciones tocaron cada conversación de la bandeja: UNA consulta ligera (solo id+meta de
   // los mensajes con plantilla o carrito, paginada), solo cuando cambió la bandeja. La app no baja los
   // mensajes de todas las conversaciones (velocidad), por eso va aparte.
@@ -1507,7 +1507,8 @@ class Component extends DCLogic {
     try { const b = new Blob([html], { type: 'text/html' }); const u = URL.createObjectURL(b); const w = window.open(u, '_blank'); if (!w) this.toast('Permite las ventanas emergentes para ver el documento'); setTimeout(() => URL.revokeObjectURL(u), 60000); }
     catch (e) { this.toast('No se pudo abrir el documento'); } }
   // ---- marketing: resumen de Meta Ads publicado por el Hub (marketing_snapshot, una fila por rango) ----
-  MKT_RANGOS = [['today', 'Hoy'], ['mes', 'Este mes'], ['mesant', 'Mes anterior'], ['year', 'Este año']];
+  MKT_RANGOS = [['today', 'Hoy'], ['d4', 'Últimos 4 días'], ['d7', 'Últimos 7 días'], ['mes', 'Este mes'], ['mesant', 'Mes anterior'], ['year', 'Este año']];
+  MKT_OPCIONALES = { d4: 1, d7: 1 };
   async loadMarketing() {
     const sb = this.sb(); if (!sb || this._mktLoading) return; if (this._modLevel(this.access(), 'marketing') === 'none') return; this._mktLoading = true;
     try { if (!(await this._asegurarAuth())) throw new Error('Sesión vencida: entra de nuevo'); const { data, error } = await sb.from('marketing_snapshot').select('rango,data,actualizado,por'); if (error) throw error;
@@ -1793,7 +1794,7 @@ class Component extends DCLogic {
       cnGuardar: () => this.guardarCot(null), cnGuardarWa: () => this.guardarCot('wa'), cnGuardarDoc: () => this.guardarCot('doc'),
       cnGuardarTxt: s.cotSaving ? 'Guardando…' : 'Guardar',
       isMkt: s.screen === 'mkt', mktSubTxt: mktRow ? 'Meta Ads · actualizado el ' + new Date(mktRow.actualizado).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : (s.mkt ? 'Sin datos publicados' : 'Cargando…'),
-      mktRangos: this.MKT_RANGOS.map(([id, label]) => Object.assign({ label, set: () => this.setState({ mktRango: id }) }, chip(mktRango === id))),
+      mktRangos: this.MKT_RANGOS.filter(([id]) => !this.MKT_OPCIONALES[id] || (s.mkt || {})[id]).map(([id, label]) => Object.assign({ label, set: () => this.setState({ mktRango: id }) }, chip(mktRango === id))),
       mktVacio: !!s.mkt && !mktRow, mktVacioTxt: s.mktError ? s.mktError : 'Todavía no hay datos de este rango. Se actualizan solos cada 6 horas desde Meta; si acabas de activar el módulo, espera la primera corrida o abre Marketing → Resumen en el Hub.',
       mktHay: !!mktRow, mktPeriodo: mktD.periodo || '', mktSyncTxt: mktD.syncTs ? 'Meta sincronizado ' + new Date(mktD.syncTs).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '',
       mktSpend: typeof mk.spend === 'number' ? cop(mk.spend) : '—', mktIngresos: typeof mk.ingresos === 'number' ? cop(mk.ingresos) : '—', mktRoas: typeof mk.roas === 'number' ? mk.roas.toFixed(2) + 'x' : '—', mktRoasFg: roasFg(Number(mk.roas) || 0), mktRoasTotal: typeof mk.roasTotal === 'number' && mk.roasTotal !== mk.roas ? 'Sobre toda la inversión ' + mk.roasTotal.toFixed(2) + 'x' : 'Ingresos ÷ inversión en campañas de venta',
