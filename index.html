@@ -1369,7 +1369,9 @@ class Component extends DCLogic {
   // con `destino` = correo de quien alista. La persona ve sus pendientes; el admin ve todas.
   async loadAlists() { const sb = this.sb(); if (!sb || !this.state.user) return null; const email = String(this.state.user.email || '').toLowerCase();
     try { let q = sb.from('alertas_app').select('id,data,estado,destino,creado_at').eq('estado', 'pendiente').order('creado_at', { ascending: false }).limit(100);
-      if (!this.isAdmin()) q = q.eq('destino', email);
+      // Quien tiene el rol de bodega ve TODAS las pendientes (así no depende de que el correo del Hub coincida con el de su cuenta).
+      const rol = String((this.state.user && this.state.user.role) || '').toLowerCase();
+      if (!this.isAdmin() && !/bodega|producci/.test(rol)) q = q.eq('destino', email);
       const { data, error } = await q; if (error) throw error; this.setState({ alists: data || [], alistsError: '' }); return data || [];
     } catch (e) { const m = String((e && e.message) || e); console.warn('alertas', m); this.setState({ alistsError: /alertas_app/.test(m) ? 'Falta crear la tabla de alertas en la nube' : m }); return null; } }
   async marcarAlistado(id) { const sb = this.sb(); if (!sb || this._alistBusy) return; const row = (this.state.alists || []).find(r => r.id === id); if (!row) return;
