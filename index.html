@@ -634,6 +634,33 @@
     </sc-if>
 
     <!-- ===== LEADS ===== -->
+    <sc-if value="{{ isAlist }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Alistamiento" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInicio }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="flex:1;min-width:0;"><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;line-height:1.1;">Alistamiento</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ alistSubTxt }}</div></div>
+      </div>
+      <sc-if value="{{ alistVacio }}" hint-placeholder-val="{{ false }}"><div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;">No hay envíos por alistar. Cuando servicio al cliente cree una alerta, aparece aquí.</div></sc-if>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+        <sc-for list="{{ alistsVis }}" as="al" hint-placeholder-count="2">
+          <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#7A5E36;font-weight:700;">{{ al.titulo }}</div>
+            <div><div style="font-weight:700;font-size:15px;">{{ al.cliente }}</div><div style="font-size:12px;color:#574E40;margin-top:2px;">{{ al.ciudad }} · {{ al.direccion }}</div><div style="font-size:12px;color:#8A8073;margin-top:2px;">{{ al.motivo }}</div></div>
+            <div style="background:#F7F2E9;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;">
+              <sc-for list="{{ al.items }}" as="it" hint-placeholder-count="2"><div style="font-size:13px;font-weight:700;color:#3A3326;">{{ it.txt }}</div></sc-for>
+            </div>
+            <div style="font-size:12px;color:#574E40;">{{ al.envio }}</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <sc-if value="{{ al.tieneTel }}" hint-placeholder-val="{{ false }}"><a href="{{ al.telUrl }}" style="height:44px;padding:0 14px;border-radius:999px;border:1px solid #B8AE9C;color:#5A4A33;display:flex;align-items:center;font-weight:700;font-size:12px;text-decoration:none;">Llamar</a></sc-if>
+              <div style="flex:1;"></div>
+              <div onClick="{{ al.marcar }}" style="height:44px;padding:0 18px;border-radius:999px;background:#A78659;color:#FBF8F2;display:flex;align-items:center;font-weight:700;font-size:13px;white-space:nowrap;">{{ al.btnTxt }}</div>
+            </div>
+            <div style="font-size:11px;color:#8A8073;">{{ al.meta }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
     <sc-if value="{{ isLeads }}" hint-placeholder-val="{{ false }}">
     <div data-screen-label="Leads" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
       <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
@@ -1131,7 +1158,7 @@ class Component extends DCLogic {
   subModDef = {
     compras: ['resumen', 'proveedores', 'materias', 'servicios', 'reorden', 'ordenes'], desarrollo: ['mezclas', 'productos', 'kits'], produccion: ['prodmez', 'prodpt'],
     inventario: ['resumen', 'items', 'consig', 'conteos', 'kardex'], ventas: ['registro', 'base', 'cotizador', 'servicio'], conversaciones: ['bandeja', 'informe', 'agente', 'canales'],
-    finanzas: ['finresumen', 'finpagar', 'fincobrar', 'finrecaudos', 'finbold', 'fincaja', 'gastos'], marketing: ['mktresumen', 'mktconexion'], informes: ['gerencial'],
+    finanzas: ['finresumen', 'finpagar', 'fincobrar', 'finrecaudos', 'finbold', 'fincaja', 'gastos'], marketing: ['mktresumen', 'mktwa', 'mktconexion'], informes: ['gerencial'], logistica: ['seguimiento', 'plazos'],
   };
   // Módulos de la app móvil y qué permiso del Hub los abre.
   MODS = [
@@ -1334,8 +1361,25 @@ class Component extends DCLogic {
     if (this.isAdmin()) c.conteosPend = await cnt('conteos', 'estado', 'pendiente');
     if (this._modLevel(a, 'ventas') !== 'none') c.leadsNuevos = await cnt('leads', 'estado', 'Nuevo');
     if (this._modLevel(a, 'ventas') !== 'none' || this._modLevel(a, 'finanzas') !== 'none') { const r = await this.loadVentasResumen(); if (r._error) { this.setState({ countsError: r._error }); const prev = this.state.counts || {}; ['ventasHoy','ventasHoyN','ventasAyer','ventasMes','ventasMesN','ventasMesAnt','ventasMesAntTotal','porCobrar'].forEach(k => { if (k in prev) c[k] = prev[k]; }); } else { Object.assign(c, r); this.setState({ countsError: '' }); } }
+    { const al = await this.loadAlists(); if (al) c.alistPend = al.length; }
     this.setState({ counts: c, countsAt: Date.now() }, () => this.persistSession());
   }
+  // ===== ALERTAS DE ALISTAMIENTO (1-oct) =====
+  // El Hub (Servicio al cliente → caso → «Crear alerta de alistamiento») escribe en `alertas_app`
+  // con `destino` = correo de quien alista. La persona ve sus pendientes; el admin ve todas.
+  async loadAlists() { const sb = this.sb(); if (!sb || !this.state.user) return null; const email = String(this.state.user.email || '').toLowerCase();
+    try { let q = sb.from('alertas_app').select('id,data,estado,destino,creado_at').eq('estado', 'pendiente').order('creado_at', { ascending: false }).limit(100);
+      if (!this.isAdmin()) q = q.eq('destino', email);
+      const { data, error } = await q; if (error) throw error; this.setState({ alists: data || [], alistsError: '' }); return data || [];
+    } catch (e) { const m = String((e && e.message) || e); console.warn('alertas', m); this.setState({ alistsError: /alertas_app/.test(m) ? 'Falta crear la tabla de alertas en la nube' : m }); return null; } }
+  async marcarAlistado(id) { const sb = this.sb(); if (!sb || this._alistBusy) return; const row = (this.state.alists || []).find(r => r.id === id); if (!row) return;
+    this._alistBusy = id; this.forceUpdate(); const u = this.state.user || {};
+    try { const data = Object.assign({}, row.data || {}, { alistadoPor: u.name || u.email || '', alistadoAt: new Date().toISOString() });
+      const { data: r, error } = await sb.from('alertas_app').update({ estado: 'alistado', data, actualizado: new Date().toISOString() }).eq('id', id).select('id');
+      if (error || !r || !r.length) throw (error || new Error('la nube no confirmó'));
+      this.setState(s => ({ alists: (s.alists || []).filter(x => x.id !== id), counts: Object.assign({}, s.counts || {}, { alistPend: Math.max(0, ((s.counts || {}).alistPend || 1) - 1) }) }), () => this.persistSession());
+      this.toast('Listo · marcado como alistado');
+    } catch (e) { this.toast('No se pudo marcar: ' + ((e && e.message) || e)); } finally { this._alistBusy = null; this.forceUpdate(); } }
   // Resumen de ventas: baja `data` de la tabla ventas por páginas (la API corta en ~1000) y
   // suma hoy / mes / mes pasado / por cobrar con las mismas reglas del Hub (histórico excluido).
   async loadVentasResumen() {
@@ -1755,6 +1799,7 @@ class Component extends DCLogic {
       { titulo: 'Chats que necesitan asesor', sub: 'El bot escaló y nadie ha respondido', n: (s.convs ? convs.filter(x => x.estado === 'necesita').length : c.convsNecesita), color: '#B5503C', go: () => { this.setState({ screen: 'chats', convFiltro: 'necesita' }); this.loadConvs(); } },
       { titulo: 'Conteos por aprobar', sub: 'Solo el administrador los aprueba', n: c.conteosPend, color: '#C9962F', go: () => { this.setState({ screen: 'conteos', ctFiltro: 'pendiente' }); this.loadInventario(); } },
       { titulo: 'Leads nuevos', sub: 'Sin contactar todavía', n: c.leadsNuevos, color: '#6596A6', go: go('modulo', { modId: 'leads' }) },
+      { titulo: 'Alistamientos pendientes', sub: 'Envíos de servicio al cliente por preparar', n: (s.alists ? s.alists.length : c.alistPend), color: '#A78659', go: () => { this.setState({ screen: 'alist' }); this.loadAlists(); } },
     ].filter(p => typeof p.n === 'number' && p.n > 0);
     const activeKey = s.screen === 'modulo' ? 'modulo:' + s.modId : (s.screen === 'chats' || s.screen === 'chat') ? 'modulo:conversaciones' : (s.screen === 'inv' || s.screen === 'invItem' || s.screen === 'conteos') ? 'modulo:inventario' : (s.screen === 'prod' || s.screen === 'prodNueva') ? 'modulo:produccion' : s.screen === 'informe' ? 'modulo:reportes' : s.screen === 'fin' ? 'modulo:finanzas' : s.screen === 'leads' ? 'modulo:leads' : s.screen === 'soporte' ? 'modulo:soporte' : s.screen;
     // ---- finanzas (solo consulta; viene en la fila del mes actual del informe) ----
@@ -1914,6 +1959,14 @@ class Component extends DCLogic {
       finVacio: !!s.informes && !finRow, finVacioTxt: s.infError ? s.infError : 'El Hub todavía no ha publicado los saldos. Abre el Hub con el administrador y espera medio minuto.',
       finSaldoTotal: typeof finD.finSaldoTotal === 'number' ? cop(finD.finSaldoTotal) : '—', finCuentas: (finD.finCuentas || []).map(c => ({ nombre: c.nombre, tipo: c.tipo, saldoTxt: (c.saldo < 0 ? '−' : '') + cop(Math.abs(c.saldo)), fg: c.saldo < 0 ? '#B5503C' : '#3A3326' })),
       finCobrarTotal: cop(finCobrarAll.reduce((t, r) => t + (Number(r.saldo) || 0), 0)), finCobrarN: finCobrarAll.length + (finCobrarAll.length === 1 ? ' venta' : ' ventas'), finQ: s.finQ || '', setFinQ: e => this.setState({ finQ: e.target.value }), finCobrar,
+      isAlist: s.screen === 'alist', alistSubTxt: s.alistsError ? s.alistsError : s.alists ? (s.alists.length ? s.alists.length + ' por alistar' : 'Nada pendiente') : 'Cargando…',
+      alistVacio: !!s.alists && !s.alists.length && !s.alistsError,
+      alistsVis: (s.alists || []).map(r => { const d = r.data || {}; const tel = String(d.telefono || '').replace(/\D/g, ''); return {
+        titulo: 'Caso ' + (d.folio || '') + (d.pedido ? ' · ' + d.pedido : ''), cliente: d.cliente || '—', ciudad: d.ciudad || 'Sin ciudad', direccion: d.direccion || 'Sin dirección',
+        telefono: d.telefono || '', tieneTel: tel.length >= 7, telUrl: 'tel:' + tel, motivo: d.motivo || '', envio: (d.transportadora || 'Coordinadora') + ' · guía ' + (d.guia || 'pendiente'),
+        items: (d.items || []).map(it => ({ txt: (Number(it.unidades) || 1) + '× ' + (it.nombre || it.codigo || '') })),
+        meta: 'Creada por ' + (d.creadoPor || 'el Hub') + (r.creado_at ? ' · ' + new Date(r.creado_at).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''),
+        btnTxt: this._alistBusy === r.id ? 'Guardando…' : 'Marcar alistado', marcar: () => this.marcarAlistado(r.id) }; }),
       isLeads: s.screen === 'leads', leadsSubTxt: s.leadsError ? 'Sin datos' : s.leads ? leads.filter(l => l.estado === 'Nuevo').length + ' nuevos · ' + leads.filter(l => l.estado !== 'Ganado' && l.estado !== 'Perdido').length + ' activos' : 'Cargando…',
       leadFiltros: [['activos', 'Activos']].concat(this.LEAD_ESTADOS.map(e => [e, e])).concat([['todos', 'Todos']]).map(([id, label]) => Object.assign({ label, set: () => this.setState({ leadFiltro: id }) }, chip(leadF === id))),
       leadsVis: leadsVis.map(leadRow), leadsVacio: !!s.leads && leadsVis.length === 0, leadsVacioTxt: s.leadsError ? s.leadsError : 'No hay leads en este filtro.',
