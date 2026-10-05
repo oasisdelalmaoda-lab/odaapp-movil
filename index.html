@@ -1158,7 +1158,7 @@ class Component extends DCLogic {
   subModDef = {
     compras: ['resumen', 'proveedores', 'materias', 'servicios', 'reorden', 'ordenes'], desarrollo: ['mezclas', 'productos', 'kits'], produccion: ['prodmez', 'prodpt'],
     inventario: ['resumen', 'items', 'consig', 'conteos', 'kardex'], ventas: ['registro', 'base', 'cotizador', 'servicio'], conversaciones: ['bandeja', 'informe', 'agente', 'canales'],
-    finanzas: ['finresumen', 'finpagar', 'fincobrar', 'finrecaudos', 'finbold', 'fincaja', 'gastos'], marketing: ['mktresumen', 'mktwa', 'mktconexion'], informes: ['gerencial'], logistica: ['seguimiento', 'plazos'],
+    finanzas: ['finresumen', 'finpagar', 'fincobrar', 'finrecaudos', 'finbold', 'fincaja', 'gastos'], marketing: ['mktresumen', 'mktwa', 'mktugc', 'mktconexion'], informes: ['gerencial'], logistica: ['seguimiento', 'plazos'],
   };
   // Módulos de la app móvil y qué permiso del Hub los abre.
   MODS = [
@@ -1801,7 +1801,7 @@ class Component extends DCLogic {
       { titulo: 'Chats que necesitan asesor', sub: 'El bot escaló y nadie ha respondido', n: (s.convs ? convs.filter(x => x.estado === 'necesita').length : c.convsNecesita), color: '#B5503C', go: () => { this.setState({ screen: 'chats', convFiltro: 'necesita' }); this.loadConvs(); } },
       { titulo: 'Conteos por aprobar', sub: 'Solo el administrador los aprueba', n: c.conteosPend, color: '#C9962F', go: () => { this.setState({ screen: 'conteos', ctFiltro: 'pendiente' }); this.loadInventario(); } },
       { titulo: 'Leads nuevos', sub: 'Sin contactar todavía', n: c.leadsNuevos, color: '#6596A6', go: go('modulo', { modId: 'leads' }) },
-      { titulo: 'Alistamientos pendientes', sub: 'Envíos de servicio al cliente por preparar', n: (s.alists ? s.alists.length : c.alistPend), color: '#A78659', go: () => { this.setState({ screen: 'alist' }); this.loadAlists(); } },
+      { titulo: 'Alistamientos pendientes', sub: 'Envíos de servicio al cliente y UGC por preparar', n: (s.alists ? s.alists.length : c.alistPend), color: '#A78659', go: () => { this.setState({ screen: 'alist' }); this.loadAlists(); } },
     ].filter(p => typeof p.n === 'number' && p.n > 0);
     const activeKey = s.screen === 'modulo' ? 'modulo:' + s.modId : (s.screen === 'chats' || s.screen === 'chat') ? 'modulo:conversaciones' : (s.screen === 'inv' || s.screen === 'invItem' || s.screen === 'conteos') ? 'modulo:inventario' : (s.screen === 'prod' || s.screen === 'prodNueva') ? 'modulo:produccion' : s.screen === 'informe' ? 'modulo:reportes' : s.screen === 'fin' ? 'modulo:finanzas' : s.screen === 'leads' ? 'modulo:leads' : s.screen === 'soporte' ? 'modulo:soporte' : s.screen;
     // ---- finanzas (solo consulta; viene en la fila del mes actual del informe) ----
@@ -1964,8 +1964,8 @@ class Component extends DCLogic {
       isAlist: s.screen === 'alist', alistSubTxt: s.alistsError ? s.alistsError : s.alists ? (s.alists.length ? s.alists.length + ' por alistar' : 'Nada pendiente') : 'Cargando…',
       alistVacio: !!s.alists && !s.alists.length && !s.alistsError,
       alistsVis: (s.alists || []).map(r => { const d = r.data || {}; const tel = String(d.telefono || '').replace(/\D/g, ''); return {
-        titulo: 'Caso ' + (d.folio || '') + (d.pedido ? ' · ' + d.pedido : ''), cliente: d.cliente || '—', ciudad: d.ciudad || 'Sin ciudad', direccion: d.direccion || 'Sin dirección',
-        telefono: d.telefono || '', tieneTel: tel.length >= 7, telUrl: 'tel:' + tel, motivo: d.motivo || '', envio: (d.transportadora || 'Coordinadora') + ' · guía ' + (d.guia || 'pendiente'),
+        titulo: d.titulo || ('Caso ' + (d.folio || '') + (d.pedido ? ' · ' + d.pedido : '')), cliente: d.cliente || '—', ciudad: d.ciudad || 'Sin ciudad', direccion: d.direccion || 'Sin dirección',
+        telefono: d.telefono || '', tieneTel: tel.length >= 7, telUrl: 'tel:' + tel, motivo: d.motivo || '', envio: d.envioTxt || ((d.transportadora || 'Coordinadora') + ' · guía ' + (d.guia || 'pendiente')),
         items: (d.items || []).map(it => ({ txt: (Number(it.unidades) || 1) + '× ' + (it.nombre || it.codigo || '') })),
         meta: 'Creada por ' + (d.creadoPor || 'el Hub') + (r.creado_at ? ' · ' + new Date(r.creado_at).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''),
         btnTxt: this._alistBusy === r.id ? 'Guardando…' : 'Marcar alistado', marcar: () => this.marcarAlistado(r.id) }; }),
