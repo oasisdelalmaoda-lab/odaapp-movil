@@ -423,7 +423,33 @@
             </div>
             <div style="display:flex;gap:8px;margin-top:12px;">
               <div onClick="{{ c.wa }}" style="flex:1;height:42px;border-radius:999px;border:1px solid #B8AE9C;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#5A4A33;">WhatsApp</div>
-              <div onClick="{{ c.doc }}" style="flex:1;height:42px;border-radius:999px;background:#EFE6D6;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#5A4A33;">Documento</div>
+              <div onClick="{{ c.doc }}" style="flex:1;height:42px;border-radius:999px;background:#EFE6D6;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#5A4A33;">{{ c.docTxt }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ===== PEDIDOS MANUALES ===== -->
+    <sc-if value="{{ isPed }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Pedidos manuales" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInicio }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="flex:1;min-width:0;"><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;line-height:1.1;">Pedidos manuales</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ pedSubTxt }}</div></div>
+      </div>
+      <input value="{{ pedQ }}" onChange="{{ setPedQ }}" placeholder="Buscar por cliente o número" style="width:100%;box-sizing:border-box;margin-top:12px;height:44px;border-radius:999px;border:1px solid #E4DBCC;background:#FFFFFF;padding:0 16px;font-family:inherit;font-size:14px;color:#3A3326;outline:none;">
+      <sc-if value="{{ pedVacio }}" hint-placeholder-val="{{ false }}"><div style="margin-top:14px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;line-height:1.5;">{{ pedVacioTxt }}</div></sc-if>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+        <sc-for list="{{ pedVis }}" as="p" hint-placeholder-count="3">
+          <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+              <div style="min-width:0;"><div style="font-weight:700;font-size:14px;line-height:1.3;">{{ p.cliente }}</div><div style="font-size:11px;color:#8A8073;margin-top:3px;">{{ p.numero }} · {{ p.sub }}</div></div>
+              <div style="flex:0 0 auto;text-align:right;"><div style="font-weight:800;font-size:15px;">{{ p.totalTxt }}</div><div style="font-size:11px;color:{{ p.saldoFg }};margin-top:2px;font-weight:700;">{{ p.saldoTxt }}</div></div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:12px;">
+              <div style="font-size:11px;color:#8A8073;flex:1;min-width:0;">{{ p.ivaTxt }}</div>
+              <div onClick="{{ p.doc }}" style="flex:0 0 auto;padding:0 20px;height:42px;border-radius:999px;background:#A78659;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#FBF8F2;">{{ p.docTxt }}</div>
             </div>
           </div>
         </sc-for>
@@ -1168,6 +1194,7 @@ class Component extends DCLogic {
     { id: 'finanzas', titulo: 'Finanzas', icono: '◇', mod: 'finanzas', fase: 4, listo: true, desc: 'Saldos por cuenta y ventas por cobrar, publicados por el Hub. Solo consulta.' },
     { id: 'leads', titulo: 'Leads', icono: '✦', mod: 'ventas', fase: 4, listo: true, desc: 'Prospectos por etapa: avanzar, llamar o escribir por WhatsApp con un toque.' },
     { id: 'cotizaciones', titulo: 'Cotizaciones', icono: '❏', mod: 'ventas', fase: 5, listo: true, desc: 'Arma una cotización desde el celular y mándala por WhatsApp o como documento.' },
+    { id: 'pedidos', titulo: 'Pedidos manuales', icono: '▦', mod: 'ventas', fase: 5, listo: true, desc: 'Pedidos creados en el Hub (no Shopify): comparte su PDF por WhatsApp desde el celular, igual al del Hub.' },
     { id: 'marketing', titulo: 'Marketing', icono: '◉', mod: 'marketing', fase: 5, listo: true, desc: 'Resumen de la pauta en Meta Ads: inversión, ingresos, ROAS, campañas principales y alertas. Publicado por el Hub, solo consulta.' },
     { id: 'reportes', titulo: 'Informe gerencial', icono: '▥', mod: 'informes', fase: 4, listo: true, desc: 'El mismo informe gerencial del Hub: ingreso, margen, canales, clientes, inventario, caja y marketing.' },
     { id: 'soporte', titulo: 'Soporte', icono: '?', mod: null, fase: 4, listo: true, desc: 'Reportar un problema de la app o del Hub y confirmar cuando quede resuelto.' },
@@ -1441,7 +1468,7 @@ class Component extends DCLogic {
     if (c.estado === 'necesita' || c.estado === 'humano' || (c.noLeidos || 0) > 0) return false;
     return !((s.convConCliente || {})[c.id]); }
   async loadConvs() {
-    const sb = this.sb(); if (!sb) return; if (this._convLoading) { this._convPend = true; return; } if (this._modLevel(this.access(), 'conversaciones') === 'none') return; this._convLoading = true;
+    const sb = this.sb(); if (!sb) return; if (this._convLoading && (Date.now() - (this._convLoadingAt || 0)) < 45000) { this._convPend = true; return; } if (this._modLevel(this.access(), 'conversaciones') === 'none') return; this._convLoading = true; this._convLoadingAt = Date.now();
     try { const desde = new Date(Date.now() - this.CONV_DIAS * 86400000).toISOString();
       const { data, error } = await sb.from('conversaciones').select('*').gte('ultimo_at', desde).order('ultimo_at', { ascending: false }).limit(1000); if (error) throw error;
       const list = (data || []).map(r => ({ id: r.id, canal: r.canal || 'web', cliente: r.cliente || r.id, telefono: r.telefono || '', estado: r.estado || 'bot', intencion: r.intencion || '', asignadoA: r.asignado_a || '', noLeidos: r.no_leidos || 0, inicio: (r.creado_at || '').slice(0, 10), ultimoAt: r.ultimo_at || '', ultimo: r.ultimo_mensaje || '' }));
@@ -1631,12 +1658,133 @@ class Component extends DCLogic {
       +'<div style="margin-top:34px;border-top:1px solid #E4DBCC;padding-top:14px;font-size:11px;color:#8A8073;text-align:center;line-height:1.7;">Precios en COP. Aceites esenciales 100% puros · Cruelty free · Hecho en Colombia<br>WhatsApp +57 313 406 3259 · @oasisdelalma · www.oasisdelalma.co</div>'
       +'</body></html>');
     return html; }
-  // Igual que descargarCotizacion() del Hub: el documento abre con el diálogo de imprimir → Guardar como PDF.
-  cotDocumento(c) { const html = this.cotDocHtml(c).replace('</body>', '<scr' + 'ipt>window.onload=function(){setTimeout(function(){try{window.print();}catch(e){}},350);};<\/scr' + 'ipt></body>');
-    try { const b = new Blob([html], { type: 'text/html;charset=utf-8' }); const u = URL.createObjectURL(b); const w = window.open(u, '_blank');
-      if (!w) { const el = document.createElement('a'); el.href = u; el.download = 'Cotizacion-' + (c.numero || 'OdA') + '.html'; document.body.appendChild(el); el.click(); setTimeout(() => { try { document.body.removeChild(el); } catch (e) {} }, 1500); this.toast('Cotización descargada · ábrela para guardarla como PDF'); }
-      setTimeout(() => URL.revokeObjectURL(u), 60000); }
-    catch (e) { this.toast('No se pudo descargar la cotización'); } }
+  // ---- PDF + compartir (16-oct): MISMO pipeline del Hub (_docAPdf: html2canvas + jsPDF, una página del alto
+  // exacto, fondo crema de borde a borde) y luego el menú «Compartir» del teléfono (WhatsApp, etc.) con el PDF
+  // como archivo. iOS exige que share() salga de un toque: si el PDF tardó y el sistema lo rechaza, queda en
+  // caché y el siguiente toque comparte al instante.
+  _cargarJs(src){ return new Promise((ok,ko)=>{ if(document.querySelector('script[data-src="'+src+'"]')) return ok(); const s=document.createElement('script'); s.src=src; s.dataset.src=src; s.onload=()=>ok(); s.onerror=()=>ko(new Error('no cargó '+src)); document.head.appendChild(s); }); }
+  async _docPdfBlob(html){
+    await this._cargarJs('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js');
+    await this._cargarJs('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js');
+    const fr=document.createElement('iframe'); fr.setAttribute('aria-hidden','true');
+    fr.style.cssText='position:fixed;left:-10000px;top:0;width:820px;height:1200px;border:0;opacity:0;pointer-events:none;';
+    document.body.appendChild(fr);
+    try{
+      const d=fr.contentDocument; d.open(); d.write(html.replace(/<meta name="viewport"[^>]*>/,'')); d.close();
+      await new Promise(r=>{ if(d.readyState==='complete') r(); else fr.onload=()=>r(); setTimeout(r,2500); });
+      try{ if(d.fonts&&d.fonts.ready) await Promise.race([d.fonts.ready, new Promise(r=>setTimeout(r,2000))]); }catch(e){}
+      await Promise.all([...d.images].map(im=>im.complete?null:new Promise(r=>{ im.onload=im.onerror=r; setTimeout(r,2500); })));
+      const body=d.body; fr.style.height=Math.max(1200, body.scrollHeight+40)+'px';
+      const _tr=c=>!c||c==='transparent'||c==='rgba(0, 0, 0, 0)';
+      let bg=getComputedStyle(body).backgroundColor; if(_tr(bg)) bg=getComputedStyle(d.documentElement).backgroundColor; if(_tr(bg)&&body.firstElementChild) bg=getComputedStyle(body.firstElementChild).backgroundColor; if(_tr(bg)) bg='#FBF8F2';
+      body.style.margin='0'; body.style.background=bg; d.documentElement.style.background=bg;
+      const cv=await window.html2canvas(body,{scale:2, useCORS:true, backgroundColor:bg, windowWidth:820, width:body.scrollWidth, height:body.scrollHeight});
+      const { jsPDF }=window.jspdf; const W=210; const Hmm=Math.max(120, cv.height*W/cv.width);
+      const pdf=new jsPDF({unit:'mm', format:[W,Hmm], orientation:'portrait', compress:true});
+      try{ const m=String(bg).match(/\d+(\.\d+)?/g); if(m&&m.length>=3) pdf.setFillColor(+m[0],+m[1],+m[2]); pdf.rect(0,0,W,Hmm,'F'); }catch(e){}
+      pdf.addImage(cv.toDataURL('image/jpeg',0.92),'JPEG',0,0,W,cv.height*W/cv.width);
+      return new Blob([pdf.output('arraybuffer')],{type:'application/pdf'});
+    } finally { setTimeout(()=>{ try{ document.body.removeChild(fr); }catch(e){} },500); }
+  }
+  _bajarArchivo(file){ const u=URL.createObjectURL(file); const el=document.createElement('a'); el.href=u; el.download=file.name; document.body.appendChild(el); el.click(); setTimeout(()=>{ try{ document.body.removeChild(el); URL.revokeObjectURL(u); }catch(e){} },4000); }
+  async _compartirArchivo(file, titulo){
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file], title:titulo}); return 'ok'; }
+      catch(e){ if(e&&e.name==='AbortError') return 'cancel'; if(e&&e.name==='NotAllowedError') return 'retap'; }
+    }
+    this._bajarArchivo(file); return 'bajado'; }
+  async compartirDoc(key, htmlFn, nombre, titulo){
+    this._pdfCache=this._pdfCache||{}; const hit=this._pdfCache[key];
+    if(hit && Date.now()-hit.at<600000){ const r=await this._compartirArchivo(hit.file, titulo); if(r==='bajado') this.toast('PDF descargado'); return; }
+    if(this._pdfBusy) return; this._pdfBusy=key; this.setState({pdfBusy:key}); this.toast('Preparando PDF…');
+    try{ const blob=await this._docPdfBlob(htmlFn()); const file=new File([blob], nombre.replace(/[^\w.-]/g,'')+'.pdf', {type:'application/pdf'});
+      this._pdfCache[key]={file, at:Date.now()};
+      const r=await this._compartirArchivo(file, titulo);
+      if(r==='retap') this.toast('PDF listo · toca otra vez «Compartir PDF»'); else if(r==='bajado') this.toast('PDF descargado');
+    }catch(e){ console.warn('pdf', e); this.toast('No se pudo armar el PDF ('+((e&&e.message)||'error')+')'); }
+    finally{ this._pdfBusy=null; this.setState({pdfBusy:null}); } }
+  cotDocumento(c){ return this.compartirDoc('cot:'+c.id+':'+(c.actualizado||''), ()=>this.cotDocHtml(c), 'Cotizacion-'+(c.numero||'OdA'), 'Cotización '+(c.numero||'')); }
+  // ---- PEDIDOS MANUALES (16-oct): ventas sin shopifyId; documento = COPIA LITERAL de pedidoDocHtml() del Hub
+  // (incluido el bloque «Información de pago» de la cuenta Nu para pedidos SIN IVA). Si cambia en el Hub, cambiar aquí.
+  async loadPedidos(){ const sb=this.sb(); if(!sb||this._pedLoading) return; if(this._modLevel(this.access(),'ventas')==='none') return; this._pedLoading=true;
+    try{ if(!(await this._asegurarAuth())) throw new Error('Sesión vencida: entra de nuevo');
+      const desde=new Date(Date.now()-120*864e5).toISOString().slice(0,10); const out=[];
+      for(let from=0; from<20000; from+=1000){ const {data,error}=await sb.from('ventas').select('id,data').is('data->>shopifyId', null).range(from, from+999); if(error) throw error;
+        (data||[]).forEach(r=>{ const v=Object.assign({id:r.id}, r.data||{}); if(v.origen==='historico'||v.origen==='shopify'||v.cancelada) return; const f=this.parseFecha(v.fecha); if(!f||f<desde) return; v._f=f; out.push(v); });
+        if(!data||data.length<1000) break; }
+      out.sort((x,y)=>String(y._f).localeCompare(String(x._f))||String(y.ov||'').localeCompare(String(x.ov||'')));
+      let cuentas=this.state.cuentasFin||[]; try{ const r=await sb.from('cuentas_fin').select('id,data'); if(!r.error) cuentas=(r.data||[]).map(x=>Object.assign({id:x.id}, x.data||{})); }catch(e){}
+      if(!this.state.productos) this.loadProductos();
+      this.setState({pedidos:out, cuentasFin:cuentas, pedError:''}); }
+    catch(e){ console.warn('pedidos', e); this.setState({pedidos:this.state.pedidos||[], pedError:'No se pudieron cargar los pedidos ('+((e&&e.message)||'error')+')'}); }
+    finally{ this._pedLoading=false; } }
+  parseFecha(s){ s=String(s||'').trim(); if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10); const m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); if(m) return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0'); return ''; }
+  fixTxt(s){ s=String(s==null?'':s); if(/Ã|Â|â€/.test(s)){ try{ const dec=decodeURIComponent(escape(s)); if(dec && !/\uFFFD/.test(dec)) s=dec; }catch(e){} } return s.replace(/\s+/g,' ').trim(); }
+  titleCase(s){ s=this.fixTxt(s).toLowerCase(); return s.replace(/([a-zá-úñü])([a-zá-úñü']*)/gi,(m,a,b)=>a.toUpperCase()+b); }
+  ventaConIva(v){ if(v && typeof v.cobraIva==='boolean') return v.cobraIva; if(v && v.canal==='Venta Directa') return false; const f=this.parseFecha(v&&v.fecha)||''; return f >= '2026-06-11'; }
+  ventaTotalPed(v){ return (v.items||[]).reduce((a,it)=>a+(Number(it.unidades)||0)*(Number(it.valorUnit)||0),0)+(Number(v.envio)||0); }
+  pedidoNombreItem(it){ const c=it.productoCodigo||it.referencia; const p=(this.state.productos||[]).find(x=>x.codigo===c); return p?p.nombre:(this.fixTxt(it.producto)||c||'Producto'); }
+  cuentasList(){ const c=this.state.cuentasFin; return Array.isArray(c)? c : []; }
+  pedidoCuentaNu(){ const L=this.cuentasList(); const re=/(^|[^a-z])nu([^a-z]|$)|nubank/i;
+    return L.find(c=>re.test(String(c.banco||''))&&String(c.numeroCuenta||c.llave||'').trim()) || L.find(c=>re.test(String(c.nombre||''))&&String(c.numeroCuenta||c.llave||'').trim()) || L.find(c=>re.test(String(c.banco||''))||re.test(String(c.nombre||''))) || null; }
+  _pedidoEsManual(v){ return !v.shopifyId && (v.origen||'manual')==='manual'; }
+  pedidoPagoHtml(v){ if(!this._pedidoEsManual(v) || this.ventaConIva(v) || v.cancelada) return '';
+    const c=this.pedidoCuentaNu(); if(!c || !String(c.numeroCuenta||c.llave||'').trim()) return '';
+    const llave=String(c.numeroCuenta||c.llave).trim(); const esCorreo=/@/.test(llave);
+    const fila=(l,val)=>'<div style="display:flex;gap:10px;padding:4px 0;"><span style="min-width:120px;color:#8A8073;">'+l+'</span><strong style="color:#3A3326;word-break:break-all;">'+val+'</strong></div>';
+    return '<div style="margin-top:28px;background:#F7F2E9;border:1px solid #E4DBCC;border-radius:14px;padding:18px 22px;font-size:13px;">'
+      +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:#A78659;font-weight:700;margin-bottom:8px;">Información de pago</div>'
+      +fila('Banco', String(c.banco||'Nu'))
+      +fila(esCorreo?'Llave (correo)':'Llave / cuenta', llave)
+      +(c.titular? fila('A nombre de', this.titleCase(String(c.titular))) : '')
+      +'</div>'; }
+  pedidoDocHtml(v){ const conIva=this.ventaConIva(v);
+    // Descuentos en el documento: si TODAS las líneas llevan el mismo % (descuento masivo) o la venta trae
+    // descuentoPct, es un descuento DEL PEDIDO y se muestra al final; si no, cada línea muestra su propio
+    // descuento (valor unit. = precio full, subtotal de la línea ya con descuento).
+    const dpOf=(it)=>Math.max(0,Math.min(100,Number(it.descPct)||0));
+    const its=(v.items||[]).map(it=>{ const ob=(it.obsequio===true); const u=Number(it.unidades)||0; const neto=ob?0:(Number(it.valorUnit)||0); const bruto=ob?0:Math.max(neto, Number(it.valorBruto)||neto); return {it, u, neto, bruto, dp:dpOf(it), tax:(conIva && it.taxable!==false), fullLine:Math.round(u*bruto), netLine:Math.round(u*neto)}; });
+    const pctG=Math.max(0,Math.min(100,Number(v.descuentoPct)||0));
+    const conDesc=its.filter(x=>x.u>0 && x.neto>0);
+    const sameP=conDesc.length>0 && conDesc[0].dp>0 && conDesc.every(x=>x.dp===conDesc[0].dp);
+    const orderLevel=pctG>0 || sameP;
+    const sinIva=(x,tax)=>tax? x/1.19 : x;
+    const filas=its.map(x=>{ const nombre=this.pedidoNombreItem(x.it)+((x.it.obsequio===true)?' <span style="color:#B5503C;font-weight:700;">(obsequio)</span>':'');
+      const lineShown=orderLevel? x.fullLine : x.netLine; const descNota=(!orderLevel && x.dp>0)? ('<div style="font-size:11px;color:#B5503C;font-weight:700;">−'+x.dp+'%</div>') : '';
+      return '<tr><td style="padding:10px 14px;border-bottom:1px solid #E4DBCC;">'+nombre+'</td><td style="padding:10px 14px;border-bottom:1px solid #E4DBCC;text-align:center;">'+x.u+'</td><td style="padding:10px 14px;border-bottom:1px solid #E4DBCC;text-align:right;">'+this.fmt(x.bruto)+descNota+'</td><td style="padding:10px 14px;border-bottom:1px solid #E4DBCC;text-align:right;font-weight:700;">'+this.fmt(lineShown)+'</td></tr>'; }).join('');
+    const envio=Number(v.envio)||0; const pagado=Math.round(Number(v.pagado)||0);
+    let subSinIva=0, descSinIva=0, netSum=0, descIncl=0;
+    its.forEach(x=>{ const shown=orderLevel? x.fullLine : x.netLine; subSinIva+=sinIva(shown,x.tax); netSum+=x.netLine;
+      if(orderLevel){ const dLinea=x.fullLine-x.netLine; const dG=x.netLine*pctG/100; descIncl+=dLinea+dG; descSinIva+=sinIva(dLinea+dG,x.tax); } });
+    const descG=Math.round(netSum*pctG/100); const totalMerc=netSum-descG; const sub2SinIva=subSinIva-descSinIva;
+    const iva=conIva? Math.max(0, totalMerc-Math.round(sub2SinIva)) : 0; const total=totalMerc+envio; const saldo=Math.max(0, total-pagado);
+    const descLabel=(sameP && !pctG)? (' ('+conDesc[0].dp+'%)') : ((pctG && !sameP)? (' ('+pctG+'%)') : '');
+    const row=(l,val,sty)=>'<div style="display:flex;justify-content:space-between;padding:5px 0;color:#5A4A33;'+(sty||'')+'"><span>'+l+'</span><span>'+val+'</span></div>';
+    const totalesHtml=row(conIva?'Subtotal sin IVA':'Subtotal', this.fmt(Math.round(subSinIva)))
+      +(descIncl>0? (row('Descuento'+descLabel, '−'+this.fmt(Math.round(descSinIva)), 'color:#B5503C;font-weight:700;')+row(conIva?'Subtotal con descuento':'Subtotal con descuento', this.fmt(Math.round(sub2SinIva)))) : '')
+      +(conIva? row('IVA (19%)', this.fmt(iva)) : '')
+      +(envio>0? row('Envío', this.fmt(envio)) : '');
+    const ths='<tr style="background:#A78659;color:#fff;text-align:left;"><th style="padding:11px 14px;font-weight:600;">Producto</th><th style="padding:11px 14px;text-align:center;font-weight:600;">Unid.</th><th style="padding:11px 14px;text-align:right;font-weight:600;">Valor unit.</th><th style="padding:11px 14px;text-align:right;font-weight:600;">Subtotal</th></tr>';
+    const num=v.ov||v.pedido||'—'; const metodo=v.metodoPago&&v.metodoPago!=='—'?v.metodoPago:'';
+    const html=this._docPrintCss('<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+num+'</title></head>'
+      +'<body style="font-family:Georgia,serif;color:#3A3326;max-width:760px;margin:0 auto;padding:40px 36px;background:#FBF8F2;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #A78659;padding-bottom:18px;margin-bottom:26px;">'
+        +'<div><img src="'+this.LOGO_WORDMARK_BROWN+'" alt="Oasis del Alma" style="height:104px;width:auto;display:block;"><div style="font-size:12px;color:#5A4A33;font-weight:700;margin-top:10px;letter-spacing:0.02em;">ODA LABS S.A.S.</div></div>'
+        +'<div style="text-align:right;padding-top:6px;"><div style="font-size:24px;font-weight:700;color:#5A4A33;">Pedido</div><div style="font-size:14px;color:#A78659;font-weight:700;">'+num+'</div></div>'
+      +'</div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:22px;line-height:1.6;"><div><span style="font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:#A78659;">Para</span><br><strong style="font-size:15px;">'+(this.titleCase(v.cliente)||'Cliente')+'</strong><br>'+[this.titleCase(v.ciudad),v.celular].filter(Boolean).join(' · ')+(v.correo?('<br>'+v.correo):'')+'</div><div style="text-align:right;"><span style="font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:#A78659;">Detalles</span><br><strong>Fecha:</strong> '+this.fmtFecha(v.fecha)+'<br><strong>Canal:</strong> '+(v.canal||'—')+(metodo?('<br><strong>Pago:</strong> '+metodo):'')+'</div></div>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:13px;"><thead>'+ths+'</thead><tbody>'+filas+'</tbody></table>'
+      +'<div style="margin-top:18px;margin-left:auto;width:300px;font-size:13px;">'
+        +totalesHtml
+        +'<div style="display:flex;justify-content:space-between;padding:12px 0 0;border-top:2px solid #A78659;margin-top:6px;font-size:21px;font-weight:700;color:#5A4A33;"><span>Total</span><span>'+this.fmt(total)+'</span></div>'
+        +(pagado>0?('<div style="display:flex;justify-content:space-between;padding:5px 0;color:#4C6149;font-weight:700;margin-top:4px;"><span>Pagado</span><span>'+this.fmt(pagado)+'</span></div>'):'')
+        +(saldo>0?('<div style="display:flex;justify-content:space-between;padding:5px 0;color:#B5503C;font-weight:700;"><span>Saldo por cobrar</span><span>'+this.fmt(saldo)+'</span></div>'):'')
+      +'</div>'
+      +this.pedidoPagoHtml(v)
+      +'<div style="margin-top:34px;border-top:1px solid #E4DBCC;padding-top:14px;font-size:11px;color:#8A8073;text-align:center;line-height:1.7;">Precios en COP. Aceites esenciales 100% puros · Cruelty free · Hecho en Colombia<br>WhatsApp +57 313 406 3259 · @oasisdelalma · www.oasisdelalma.co</div>'
+      +'</body></html>');
+    return html; }
+  pedidoDocumento(v){ return this.compartirDoc('ped:'+v.id+':'+(v.pagado||0)+':'+((v.items||[]).length), ()=>this.pedidoDocHtml(v), 'Pedido-'+String(v.ov||v.pedido||'OdA'), 'Pedido '+(v.ov||'')); }
   // ---- marketing: resumen de Meta Ads publicado por el Hub (marketing_snapshot, una fila por rango) ----
   MKT_RANGOS = [['today', 'Hoy'], ['d4', 'Últimos 4 días'], ['d7', 'Últimos 7 días'], ['mes', 'Este mes'], ['mesant', 'Mes anterior'], ['year', 'Este año']];
   MKT_OPCIONALES = { d4: 1, d7: 1 };
@@ -1762,7 +1910,7 @@ class Component extends DCLogic {
     const s = this.state, a = this.access(), u = s.user || {}, c = s.counts || {};
     const lvlTxt = { none: 'Sin acceso', read: 'Solo lectura', write: 'Lectura y escritura' };
     const cop = n => '$' + Math.round(n).toLocaleString('es-CO');
-    const go = (screen, extra) => () => { if (screen === 'inicio') this.refrescarInicio(false); if (screen === 'modulo' && extra && extra.modId === 'conversaciones') { this.setState({ screen: 'chats' }); this.loadConvs(); return; } if (screen === 'modulo' && extra && extra.modId === 'inventario') { this.setState({ screen: 'inv' }); this.loadInventario(); return; } if (screen === 'modulo' && extra && extra.modId === 'produccion') { this.setState({ screen: 'prod' }); this.loadProduccion(); return; } if (screen === 'modulo' && extra && extra.modId === 'reportes') { this.setState({ screen: 'informe' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'finanzas') { this.setState({ screen: 'fin' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'leads') { this.setState({ screen: 'leads' }); this.loadLeads(); return; } if (screen === 'modulo' && extra && extra.modId === 'marketing') { this.setState({ screen: 'mkt' }); this.loadMarketing(); return; } if (screen === 'modulo' && extra && extra.modId === 'cotizaciones') { this.setState({ screen: 'cot' }); this.loadCotizaciones(); return; } if (screen === 'modulo' && extra && extra.modId === 'soporte') { this.setState({ screen: 'soporte' }); this.loadTickets(); return; } this.setState(Object.assign({ screen }, extra || {})); };
+    const go = (screen, extra) => () => { if (screen === 'inicio') this.refrescarInicio(false); if (screen === 'modulo' && extra && extra.modId === 'conversaciones') { this.setState({ screen: 'chats' }); this.loadConvs(); return; } if (screen === 'modulo' && extra && extra.modId === 'inventario') { this.setState({ screen: 'inv' }); this.loadInventario(); return; } if (screen === 'modulo' && extra && extra.modId === 'produccion') { this.setState({ screen: 'prod' }); this.loadProduccion(); return; } if (screen === 'modulo' && extra && extra.modId === 'reportes') { this.setState({ screen: 'informe' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'finanzas') { this.setState({ screen: 'fin' }); this.loadInforme(); return; } if (screen === 'modulo' && extra && extra.modId === 'leads') { this.setState({ screen: 'leads' }); this.loadLeads(); return; } if (screen === 'modulo' && extra && extra.modId === 'marketing') { this.setState({ screen: 'mkt' }); this.loadMarketing(); return; } if (screen === 'modulo' && extra && extra.modId === 'cotizaciones') { this.setState({ screen: 'cot' }); this.loadCotizaciones(); return; } if (screen === 'modulo' && extra && extra.modId === 'pedidos') { this.setState({ screen: 'ped' }); this.loadPedidos(); return; } if (screen === 'modulo' && extra && extra.modId === 'soporte') { this.setState({ screen: 'soporte' }); this.loadTickets(); return; } this.setState(Object.assign({ screen }, extra || {})); };
     // ---- conversaciones ----
     const chip = on => on ? { bg: '#3A3326', fg: '#FBF8F2', border: '#3A3326' } : { bg: '#FFFFFF', fg: '#574E40', border: '#E4DBCC' };
     const estConv = e => ({ bot: { label: 'Bot', bg: '#EFE6D6', fg: '#7A5E36' }, necesita: { label: 'Necesita asesor', bg: 'rgba(181,80,60,0.14)', fg: '#8F3A28' }, humano: { label: 'Con asesor', bg: 'rgba(101,150,166,0.18)', fg: '#2F5E6E' }, resuelta: { label: 'Resuelta', bg: 'rgba(98,123,96,0.16)', fg: '#3F5A3E' } }[e] || { label: e, bg: '#EFE9DD', fg: '#8A8073' });
@@ -1809,6 +1957,11 @@ class Component extends DCLogic {
     const pygRows = (s.informes || []).filter(x => x.data && x.data.pyg && Array.isArray(x.data.pyg.filas)); const pygRow = pygRows.find(x => x.ym === s.pygYm) || pygRows[0]; const pyg = (pygRow && pygRow.data.pyg) || null;
     const pygD = (a, b) => { const d = b !== 0 ? (a - b) / Math.abs(b) * 100 : (a !== 0 ? 100 : 0); return (d >= 0 ? '+' : '') + d.toFixed(0) + '% vs ' + (pyg ? pyg.prevLabel : ''); };
     const finQ = String(s.finQ || '').toLowerCase().trim();
+    // ---- pedidos manuales ----
+    const pedQ = String(s.pedQ || '').toLowerCase().trim();
+    const pedVis = (s.pedidos || []).filter(v => !pedQ || String(v.cliente || '').toLowerCase().includes(pedQ) || String(v.ov || '').toLowerCase().includes(pedQ)).slice(0, 60).map(v => { const tot = this.ventaTotalPed(v); const saldo = Math.max(0, tot - Math.round(Number(v.pagado) || 0)); const key = 'ped:' + v.id + ':' + (v.pagado || 0) + ':' + ((v.items || []).length);
+      return { cliente: this.titleCase(v.cliente) || 'Cliente', numero: v.ov || '—', sub: String(v._f || '').split('-').reverse().join('/') + (v.ciudad ? ' · ' + this.titleCase(v.ciudad) : ''), totalTxt: cop(tot), saldoTxt: saldo > 0 ? 'Saldo ' + cop(saldo) : 'Pagado', saldoFg: saldo > 0 ? '#B5503C' : '#4C6149',
+        ivaTxt: this.ventaConIva(v) ? 'Con IVA' : 'Sin IVA · lleva datos de pago Nu', doc: () => this.pedidoDocumento(v), docTxt: s.pdfBusy === key ? 'Preparando…' : 'Compartir PDF' }; });
     // ---- cotizaciones ----
     const cotPuede = this._modLevel(a, 'ventas') === 'write';
     const cotQ = String(s.cotQ || '').toLowerCase().trim();
@@ -1897,12 +2050,16 @@ class Component extends DCLogic {
       isInicio: s.screen === 'inicio', refrescar: () => this.refrescarInicio(true), actualizadoTxt: s.countsCargando ? 'Actualizando…' : s.countsError ? 'No se pudo actualizar (' + s.countsError + ') · toca para reintentar' : s.countsAt ? 'Actualizado ' + new Date(s.countsAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) + ' · toca para refrescar' : 'Cargando…', isModulo: s.screen === 'modulo', isPerfil: s.screen === 'perfil', goInicio: go('inicio'), goPerfil: go('perfil'),
       isChats: s.screen === 'chats', isChat: s.screen === 'chat', showTabs: s.screen !== 'chat' && s.screen !== 'invItem' && s.screen !== 'prodNueva', goChats: () => this.setState({ screen: 'chats', convId: null }),
       isCot: s.screen === 'cot', isCotNueva: s.screen === 'cotNueva',
+      isPed: s.screen === 'ped', pedQ: s.pedQ || '', setPedQ: e => this.setState({ pedQ: e.target.value }),
+      pedSubTxt: s.pedError ? s.pedError : s.pedidos ? (s.pedidos.length + ' pedido' + (s.pedidos.length === 1 ? '' : 's') + ' · últimos 120 días') : 'Cargando…',
+      pedVacio: !!s.pedidos && pedVis.length === 0, pedVacioTxt: s.pedError ? s.pedError : (String(s.pedQ || '').trim() ? 'Ningún pedido coincide.' : 'No hay pedidos manuales en los últimos 120 días.'),
+      pedVis,
       cotSubTxt: s.cotizaciones ? (cotList.length + ' cotización' + (cotList.length === 1 ? '' : 'es')) : 'Cargando…',
       cotPuede, nuevaCot: () => this.nuevaCot(),
       cotQ: s.cotQ || '', setCotQ: e => this.setState({ cotQ: e.target.value }),
       cotVis: cotVis.map(c => ({ numero: c.numero || '—', cliente: c.cliente || '—', sub: (String(c.fecha || '').split('-').reverse().join('/')) + (c.ciudad ? ' · ' + c.ciudad : '') + (c._creadoPor ? ' · ' + c._creadoPor : ''),
         totalTxt: cop(this.cotTotal(c)), nItems: (c.items || []).length + ' ítem' + ((c.items || []).length === 1 ? '' : 's'),
-        wa: () => this.cotWhatsApp(c), doc: () => this.cotDocumento(c) })),
+        wa: () => this.cotWhatsApp(c), doc: () => this.cotDocumento(c), docTxt: s.pdfBusy === 'cot:' + c.id + ':' + (c.actualizado || '') ? 'Preparando…' : 'Compartir PDF' })),
       cotVacio: !!s.cotizaciones && cotVis.length === 0, cotVacioTxt: s.cotError ? s.cotError : (cotQ ? 'Ninguna cotización coincide.' : 'Todavía no hay cotizaciones.'),
       cnNum: s.cotizaciones ? this.nextCot() : '…',
       cnCliente: s.cnCliente || '', setCnCliente: e => this.setState({ cnCliente: e.target.value, cnClienteQ: e.target.value }),
