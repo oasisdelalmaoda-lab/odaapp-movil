@@ -659,6 +659,31 @@
     </div>
     </sc-if>
 
+    <!-- ===== CONTEOS DEL DÍA ===== -->
+    <sc-if value="{{ isCtHoy }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Conteos del día" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
+        <div onClick="{{ goInicio }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div style="flex:1;min-width:0;"><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;line-height:1.1;">Conteos del día</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ ctHoySub }}</div></div>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:#574E40;line-height:1.5;text-wrap:pretty;">Cuenta cada ítem en bodega y escribe lo que encuentres. No verás el stock del sistema: así el conteo es real.</div>
+      <sc-if value="{{ ctHoyVacio }}" hint-placeholder-val="{{ false }}"><div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;">Listo por hoy. Mañana a las 7:00 a. m. llegan los siguientes.</div></sc-if>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+        <sc-for list="{{ ctHoyVis }}" as="cp" hint-placeholder-count="3">
+          <div onClick="{{ cp.abrir }}" style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;">
+              <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:{{ cp.catBg }};color:{{ cp.catFg }};">{{ cp.catLabel }}</span><span style="font-size:11px;color:#8A8073;">{{ cp.codigo }}</span></div>
+              <div style="font-weight:700;font-size:15px;line-height:1.3;">{{ cp.nombre }}</div>
+              <div style="font-size:11.5px;color:#8A8073;">{{ cp.motivo }} · en {{ cp.unidad }}</div>
+              <sc-if value="{{ cp.atrasado }}" hint-placeholder-val="{{ false }}"><div style="font-size:11.5px;font-weight:700;color:#B5503C;">{{ cp.atrasoTxt }}</div></sc-if>
+            </div>
+            <div style="height:44px;padding:0 18px;border-radius:999px;background:#A78659;color:#FBF8F2;display:flex;align-items:center;font-weight:700;font-size:13px;flex:0 0 auto;">Contar</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
     <!-- ===== LEADS ===== -->
     <sc-if value="{{ isAlist }}" hint-placeholder-val="{{ false }}">
     <div data-screen-label="Alistamiento" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 110px;">
@@ -961,15 +986,18 @@
     <sc-if value="{{ isInvItem }}" hint-placeholder-val="{{ false }}">
     <div data-screen-label="Conteo físico" style="flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 12px) 20px 40px;">
       <div style="display:flex;align-items:center;gap:6px;margin-left:-10px;">
-        <div onClick="{{ goInv }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
+        <div onClick="{{ goInvBack }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
         <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#8A8073;">{{ item.codigo }} · {{ item.catLabel }}</div>
       </div>
       <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;line-height:1.15;margin-top:6px;">{{ item.nombre }}</div>
+      <sc-if value="{{ ctCiego }}" hint-placeholder-val="{{ false }}"><div style="margin-top:14px;background:rgba(98,123,96,0.12);border:1px solid rgba(98,123,96,0.35);border-radius:18px;padding:14px 16px;font-size:13px;color:#4C6149;line-height:1.5;"><div style="font-weight:700;">Conteo a ciegas</div><div style="margin-top:2px;">Cuenta todo lo que hay de este ítem en bodega y escribe el total en {{ item.unidad }}. El sistema compara solo.</div></div></sc-if>
+      <sc-if value="{{ ctVerStock }}" hint-placeholder-val="{{ true }}">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;">
         <div style="background:#3A3326;color:#FBF8F2;border-radius:18px;padding:14px 16px;"><div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;opacity:0.65;">Stock del sistema</div><div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;line-height:1.1;margin-top:4px;">{{ item.stockTxt }}</div></div>
         <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:14px 16px;"><div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#8A8073;">{{ item.ladoLabel }}</div><div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;line-height:1.1;margin-top:4px;color:#5A4A33;">{{ item.ladoTxt }}</div></div>
       </div>
       <div style="font-size:11px;color:#8A8073;margin-top:8px;line-height:1.4;">{{ item.snapTxt }}</div>
+      </sc-if>
       <sc-if value="{{ item.pendTxt }}" hint-placeholder-val="{{ false }}"><div style="margin-top:10px;background:rgba(201,150,47,0.12);border:1px solid rgba(201,150,47,0.4);border-radius:14px;padding:10px 14px;font-size:12px;color:#7A5E36;">{{ item.pendTxt }}</div></sc-if>
 
       <sc-if value="{{ invPuedeContar }}" hint-placeholder-val="{{ true }}">
@@ -977,7 +1005,7 @@
       <div style="background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;">
         <div style="font-size:12px;color:#574E40;font-weight:700;">Cantidad contada ({{ item.unidad }})</div>
         <input type="number" inputmode="decimal" min="0" value="{{ ctContado }}" onChange="{{ setCtContado }}" placeholder="0" style="width:100%;box-sizing:border-box;margin-top:8px;height:56px;border-radius:14px;border:1px solid #B8AE9C;background:#FBF8F2;padding:0 16px;font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;color:#3A3326;outline:none;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:13px;"><span style="color:#8A8073;">Diferencia</span><span style="font-weight:800;color:{{ ctDifColor }};">{{ ctDifTxt }}</span></div>
+        <sc-if value="{{ ctVerStock }}" hint-placeholder-val="{{ true }}"><div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:13px;"><span style="color:#8A8073;">Diferencia</span><span style="font-weight:800;color:{{ ctDifColor }};">{{ ctDifTxt }}</span></div></sc-if>
         <div style="font-size:12px;color:#574E40;font-weight:700;margin-top:16px;">Motivo</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
           <sc-for list="{{ ctMotivos }}" as="m" hint-placeholder-count="4">
@@ -1260,13 +1288,17 @@ class Component extends DCLogic {
     const contado = Number(s.ctContado); if (!isFinite(contado) || contado < 0) { this.toast('El conteo debe ser un número mayor o igual a cero'); return; }
     const motivo = s.ctMotivo || ''; if (!motivo) { this.toast('Elige el motivo del ajuste'); return; }
     if (motivo === 'Otro' && !String(s.ctNota || '').trim()) { this.toast('Con motivo «Otro» hay que escribir la explicación'); return; }
-    const dif = Math.round((contado - it.stock) * 1000) / 1000; if (dif === 0) { this.toast('El conteo coincide con el sistema · no hay nada que ajustar'); return; }
+    const prog = s.ctProgId ? (s.ctProg || []).find(r => r.id === s.ctProgId) : null;
+    const dif = Math.round((contado - it.stock) * 1000) / 1000; if (dif === 0 && !prog) { this.toast('El conteo coincide con el sistema · no hay nada que ajustar'); return; }
     const admin = this.isAdmin(), yo = (s.user && s.user.name) || '', ahora = new Date().toISOString();
     const row = { id: 'CF-' + Date.now(), codigo: it.codigo, nombre: it.nombre, unidad: it.unidad, clase: it.clase, fecha: ahora.slice(0, 10), sistema: it.stock, contado, diferencia: dif, motivo, nota: String(s.ctNota || '').trim(), solicitado_por: yo, solicitado_at: ahora, estado: admin ? 'aprobado' : 'pendiente', costo_unit: admin ? it.costo : null, valor: admin ? (this.CONTEO_SIN_GASTO.includes(motivo) ? 0 : -dif * it.costo) : null, aprobado_por: admin ? yo : '', aprobado_at: admin ? ahora : null };
     this._ctSaving = true; setTimeout(() => { this._ctSaving = false; }, 1500);
-    const sb = this.sb(); const { error } = await sb.from('conteos').insert(row).select('id'); if (error) { this.toast('No se pudo guardar: ' + error.message); return; }
-    this.setState(s2 => ({ conteos: [this._conteoFromDb(row)].concat(s2.conteos || []), ctContado: '', ctNota: '', ctMotivo: 'Conteo periódico', screen: 'inv' }));
+    const sb = this.sb();
+    if (dif !== 0) { const { error } = await sb.from('conteos').insert(row).select('id'); if (error) { this.toast('No se pudo guardar: ' + error.message); return; } }
+    if (prog) await this._ctProgCerrar(prog, { resultado: dif === 0 ? 'cuadra' : 'diferencia', sistema: it.stock, contado, diferencia: dif, conteo_id: dif !== 0 ? row.id : null });
+    this.setState(s2 => ({ conteos: dif !== 0 ? [this._conteoFromDb(row)].concat(s2.conteos || []) : (s2.conteos || []), ctContado: '', ctNota: '', ctMotivo: 'Conteo periódico', ctProgId: null, screen: prog ? 'ctHoy' : 'inv' }));
     const sg = (dif > 0 ? '+' : '') + this.fmtCant(dif) + ' ' + it.unidad;
+    if (prog && dif === 0) { this.toast('Cuadra con el sistema ✓ · ' + it.codigo); return; }
     this.toast(admin ? 'Conteo aplicado · ' + sg + ' en ' + it.codigo + ' (el Hub actualiza el stock)' : 'Conteo enviado a aprobación · ' + sg + ' en ' + it.codigo);
     this.loadConteos();
   }
@@ -1313,6 +1345,7 @@ class Component extends DCLogic {
       navigator.serviceWorker.addEventListener('message', ev => { const d = ev.data || {}; if (d.tipo === 'abrir' && d.url) this._abrirDesdeUrl(d.url); }); }
     // Si la app se abrió desde una notificación (?conv=id), abrir esa conversación cuando haya sesión.
     try { const cid = new URLSearchParams(location.search).get('conv'); if (cid) { this._convPendiente = cid; history.replaceState(null, '', location.pathname); } } catch (e) {}
+    try { if (new URLSearchParams(location.search).get('conteos')) { this._ctPendiente = true; history.replaceState(null, '', location.pathname); } } catch (e) {}
     this.boot();
   }
   componentWillUnmount() { window.removeEventListener('online', this._onl); window.removeEventListener('offline', this._off); window.removeEventListener('beforeinstallprompt', this._bip); document.removeEventListener('visibilitychange', this._vis); }
@@ -1323,7 +1356,7 @@ class Component extends DCLogic {
   _sesionVencida() { this._authUid = ''; const email = (this.state.user && this.state.user.email) || this.state.loginEmail || ''; try { localStorage.removeItem(this.SESSION_KEY); } catch (e) {} this.setState({ view: 'login', loginEmail: email, loginBusy: false, loginError: 'Tu sesión venció. Entra de nuevo para ver los datos actualizados.', loginInfo: '', loginPwd: '', loginPwdShow: false, countsCargando: false, countsAt: 0 }); }
   // ---- notificaciones push (Web Push; la Edge Function `push` envía, el SW muestra) ----
   VAPID_PUBLIC = 'BPhTrxupKYDNBKZwzg6XDAM8rIr_EnQMkRHGcleZ0J8uEuoYJGgq_A7a3sIfigki4eurngrMJT12QBCfqeqHc1g';
-  _abrirDesdeUrl(url) { try { const cid = new URL(url, location.href).searchParams.get('conv'); if (cid) { if (this.state.view === 'app') { this.setState({ screen: 'chats' }); this.loadConvs(); this.openConv(cid); } else this._convPendiente = cid; } } catch (e) {} }
+  _abrirDesdeUrl(url) { try { if (new URL(url, location.href).searchParams.get('conteos')) { if (this.state.view === 'app') { this.setState({ screen: 'ctHoy' }); this.loadCtProg(); this.loadInventario(); } else this._ctPendiente = true; return; } } catch (e) {} try { const cid = new URL(url, location.href).searchParams.get('conv'); if (cid) { if (this.state.view === 'app') { this.setState({ screen: 'chats' }); this.loadConvs(); this.openConv(cid); } else this._convPendiente = cid; } } catch (e) {} }
   pushSoportado() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
   async pushRefrescarEstado() { if (!this.pushSoportado() || !this._swReg) { this.setState({ pushEstado: 'nosoporta' }); return; } try { const sub = await this._swReg.pushManager.getSubscription(); this.setState({ pushEstado: sub ? 'on' : (Notification.permission === 'denied' ? 'denegado' : 'off') }); if (sub) this._pushSyncSoon(); } catch (e) { this.setState({ pushEstado: 'off' }); } }
   // Mantiene al día quién es el dueño de la suscripción (si cambió de rol o de cuenta, el filtro de destinatarios cambia).
@@ -1355,7 +1388,7 @@ class Component extends DCLogic {
     // Sesión guardada → entra de una (aun sin red); luego la nube confirma o corrige.
     let cached = null; try { cached = JSON.parse(localStorage.getItem(this.SESSION_KEY)); } catch (e) {}
     this._leerRecordado();
-    if (cached && cached.user) this.setState({ view: 'app', user: cached.user, perms: cached.perms || {}, usersCfg: cached.usersCfg || this.state.usersCfg, counts: cached.counts || {} }, () => { if (this._convPendiente) { const cid = this._convPendiente; this._convPendiente = null; this.setState({ screen: 'chats' }); this.loadConvs(); this.openConv(cid); } });
+    if (cached && cached.user) this.setState({ view: 'app', user: cached.user, perms: cached.perms || {}, usersCfg: cached.usersCfg || this.state.usersCfg, counts: cached.counts || {} }, () => { if (this._ctPendiente) { this._ctPendiente = false; this.setState({ screen: 'ctHoy' }); this.loadCtProg(); this.loadInventario(); } if (this._convPendiente) { const cid = this._convPendiente; this._convPendiente = null; this.setState({ screen: 'chats' }); this.loadConvs(); this.openConv(cid); } });
     let tries = 0; while (!this.sb() && tries++ < 40) await new Promise(r => setTimeout(r, 250));
     const sb = this.sb(); if (!sb) { if (!cached) this.setState({ view: 'login', loginError: 'No se pudo conectar con la nube. Revisa tu conexión.' }); return; }
     try { sb.auth.onAuthStateChange((ev, ses) => { const su = ses && ses.user; if (su) this._authUid = su.id; if (ev === 'SIGNED_OUT' && this.state.view === 'app' && !this._saliendo) this._sesionVencida(); }); } catch (e) {}
@@ -1378,7 +1411,7 @@ class Component extends DCLogic {
     if (!lu) { try { await this.sb().auth.signOut(); } catch (e) {} this.setState({ view: 'login', loginBusy: false, loginError: 'Tu cuenta (' + email + ') no está vinculada a un usuario del sistema. Pídele al administrador que te cree en Usuarios y permisos.' }); return; }
     const user = { id: lu.id, name: lu.name, email: lu.email, role: lu.role, color: lu.color || '#A78659' };
     this._authUid = su.id || '';
-    this.setState({ view: 'app', user, loginBusy: false, loginError: '', loginPwd: '' }, () => { this.persistSession(); this._pushSyncSoon(); this.loadCounts(); this.loadProfiles(); this.loadConvs(); this.subscribeConvs(); if (this._convPendiente) { const cid = this._convPendiente; this._convPendiente = null; this.setState({ screen: 'chats' }); this.openConv(cid); } });
+    this.setState({ view: 'app', user, loginBusy: false, loginError: '', loginPwd: '' }, () => { this.persistSession(); this._pushSyncSoon(); this.loadCounts(); this.loadProfiles(); this.loadConvs(); this.subscribeConvs(); if (this._ctPendiente) { this._ctPendiente = false; this.setState({ screen: 'ctHoy' }); this.loadCtProg(); this.loadInventario(); } if (this._convPendiente) { const cid = this._convPendiente; this._convPendiente = null; this.setState({ screen: 'chats' }); this.openConv(cid); } });
   }
   persistSession() { const s = this.state; try { localStorage.setItem(this.SESSION_KEY, JSON.stringify({ user: s.user, perms: s.perms, usersCfg: s.usersCfg, counts: s.counts })); } catch (e) {} }
   async loadCounts() {
@@ -1389,6 +1422,7 @@ class Component extends DCLogic {
     if (this._modLevel(a, 'ventas') !== 'none') c.leadsNuevos = await cnt('leads', 'estado', 'Nuevo');
     if (this._modLevel(a, 'ventas') !== 'none' || this._modLevel(a, 'finanzas') !== 'none') { const r = await this.loadVentasResumen(); if (r._error) { this.setState({ countsError: r._error }); const prev = this.state.counts || {}; ['ventasHoy','ventasHoyN','ventasAyer','ventasMes','ventasMesN','ventasMesAnt','ventasMesAntTotal','porCobrar'].forEach(k => { if (k in prev) c[k] = prev[k]; }); } else { Object.assign(c, r); this.setState({ countsError: '' }); } }
     { const al = await this.loadAlists(); if (al) c.alistPend = al.length; }
+    if (this._modLevel(a, 'inventario') === 'write') { const cp = await this.loadCtProg(); if (cp) c.ctHoy = cp.length; }
     this.setState({ counts: c, countsAt: Date.now() }, () => this.persistSession());
   }
   // ===== ALERTAS DE ALISTAMIENTO (1-oct) =====
@@ -1401,6 +1435,22 @@ class Component extends DCLogic {
       if (!this.isAdmin() && !/bodega|producci/.test(rol)) q = q.eq('destino', email);
       const { data, error } = await q; if (error) throw error; this.setState({ alists: data || [], alistsError: '' }); return data || [];
     } catch (e) { const m = String((e && e.message) || e); console.warn('alertas', m); this.setState({ alistsError: /alertas_app/.test(m) ? 'Falta crear la tabla de alertas en la nube' : m }); return null; } }
+  // ===== CONTEOS DEL DÍA (23-oct) =====
+  // La función conteos-diarios asigna cada mañana hábil 3 ítems en `conteos_programados` (destino = correo de bodega).
+  // Se cuentan A CIEGAS (sin ver el stock del sistema). Si cuadra, solo se cierra aquí; si no, además va a `conteos`.
+  async loadCtProg() { const sb = this.sb(); if (!sb || !this.state.user) return null; const email = String(this.state.user.email || '').toLowerCase();
+    try { let q = sb.from('conteos_programados').select('*').eq('estado', 'pendiente').order('fecha', { ascending: true }).limit(60);
+      const rol = String((this.state.user && this.state.user.role) || '').toLowerCase();
+      if (!this.isAdmin() && !/bodega|producci/.test(rol)) q = q.eq('destino', email);
+      const { data, error } = await q; if (error) throw error; this.setState({ ctProg: data || [], ctProgError: '' }); return data || [];
+    } catch (e) { const m = String((e && e.message) || e); console.warn('conteos del día', m); this.setState({ ctProgError: /conteos_programados/.test(m) ? 'Falta crear la tabla de conteos programados en la nube' : m }); return null; } }
+  abrirCtProg(r) { if (!this.invItem(r.codigo)) { this.loadInventario(); this.toast('Cargando el inventario… vuelve a tocar en un momento'); return; }
+    this.setState({ screen: 'invItem', invCodigo: r.codigo, ctProgId: r.id, ctContado: '', ctNota: '', ctMotivo: 'Conteo periódico' }); }
+  async _ctProgCerrar(prog, patch) { const sb = this.sb(); const u = this.state.user || {};
+    const p = Object.assign({ estado: 'hecho', hecho_por: u.name || u.email || '', hecho_at: new Date().toISOString() }, patch);
+    const { data, error } = await sb.from('conteos_programados').update(p).eq('id', prog.id).select('id');
+    if (error || !data || !data.length) { this.toast('El conteo se guardó pero no se pudo cerrar en la lista del día: ' + (error ? error.message : 'sin permiso')); return false; }
+    this.setState(s => ({ ctProg: (s.ctProg || []).filter(x => x.id !== prog.id), counts: Object.assign({}, s.counts || {}, { ctHoy: Math.max(0, ((s.counts || {}).ctHoy || 1) - 1) }) }), () => this.persistSession()); return true; }
   async marcarAlistado(id) { const sb = this.sb(); if (!sb || this._alistBusy) return; const row = (this.state.alists || []).find(r => r.id === id); if (!row) return;
     this._alistBusy = id; this.forceUpdate(); const u = this.state.user || {};
     try { const data = Object.assign({}, row.data || {}, { alistadoPor: u.name || u.email || '', alistadoAt: new Date().toISOString() });
@@ -1946,6 +1996,7 @@ class Component extends DCLogic {
     if (this._modLevel(a, 'produccion') !== 'none' && _faltaInfOConv) enBarra.push('produccion');
     if (this._modLevel(a, 'inventario') !== 'none' && _faltaInfOConv) enBarra.push('inventario');
     const pend = [
+      { titulo: 'Conteos del día', sub: 'Cuenta estos ítems para tener el inventario al día', n: (s.ctProg ? s.ctProg.length : c.ctHoy), color: '#627B60', go: () => { this.setState({ screen: 'ctHoy' }); this.loadCtProg(); if (!s.inv) this.loadInventario(); } },
       { titulo: 'Chats que necesitan asesor', sub: 'El bot escaló y nadie ha respondido', n: (s.convs ? convs.filter(x => x.estado === 'necesita').length : c.convsNecesita), color: '#B5503C', go: () => { this.setState({ screen: 'chats', convFiltro: 'necesita' }); this.loadConvs(); } },
       { titulo: 'Conteos por aprobar', sub: 'Solo el administrador los aprueba', n: c.conteosPend, color: '#C9962F', go: () => { this.setState({ screen: 'conteos', ctFiltro: 'pendiente' }); this.loadInventario(); } },
       { titulo: 'Leads nuevos', sub: 'Sin contactar todavía', n: c.leadsNuevos, color: '#6596A6', go: go('modulo', { modId: 'leads' }) },
@@ -2008,7 +2059,7 @@ class Component extends DCLogic {
     // ---- inventario ----
     const invLvl = this._modLevel(a, 'inventario'); const inv = s.inv || []; const invQ = String(s.invQ || '').toLowerCase().trim(); const invCat = s.invCat || 'todos';
     const enCat = (r, k) => k === 'todos' ? true : k === 'empenv' ? (r.cat === 'emp' || r.cat === 'env') : r.cat === k;
-    const invRow = r => { const meta = this.CAT_META[r.cat] || this.CAT_META.ins; const bajo = r.cat === 'pt' || r.cat === 'mez' ? r.stock <= 0 : r.stock < r.minimo; return { codigo: r.codigo, nombre: r.nombre, catLabel: meta.label, catBg: meta.bg, catFg: meta.fg, stockTxt: this.fmtCant(r.stock) + ' ' + r.unidad, stockColor: bajo ? '#B5503C' : '#3A3326', subTxt: r.cat === 'pt' || r.cat === 'mez' ? (bajo ? 'Sin stock' : 'OK') : 'mín. ' + this.fmtCant(r.minimo), open: () => this.setState({ screen: 'invItem', invCodigo: r.codigo, ctContado: '', ctNota: '', ctMotivo: 'Conteo periódico' }) }; };
+    const invRow = r => { const meta = this.CAT_META[r.cat] || this.CAT_META.ins; const bajo = r.cat === 'pt' || r.cat === 'mez' ? r.stock <= 0 : r.stock < r.minimo; return { codigo: r.codigo, nombre: r.nombre, catLabel: meta.label, catBg: meta.bg, catFg: meta.fg, stockTxt: this.fmtCant(r.stock) + ' ' + r.unidad, stockColor: bajo ? '#B5503C' : '#3A3326', subTxt: r.cat === 'pt' || r.cat === 'mez' ? (bajo ? 'Sin stock' : 'OK') : 'mín. ' + this.fmtCant(r.minimo), open: () => this.setState({ screen: 'invItem', invCodigo: r.codigo, ctProgId: null, ctContado: '', ctNota: '', ctMotivo: 'Conteo periódico' }) }; };
     const invVis = inv.filter(r => enCat(r, invCat)).filter(r => !invQ || r.nombre.toLowerCase().includes(invQ) || r.codigo.toLowerCase().includes(invQ)).slice(0, 400).map(invRow);
     const snapL = s.invSnapAt ? new Date(s.invSnapAt).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
     const itRaw = this.invItem(s.invCodigo) || { codigo: '', nombre: '', cat: 'ins', unidad: 'und', stock: 0, minimo: 0, costo: 0 }; const itUI = invRow(itRaw);
@@ -2139,6 +2190,13 @@ class Component extends DCLogic {
       infGenerado: infCur ? 'Publicado por el Hub el ' + infGenL + (infCur.por ? ' · ' + infCur.por : '') : (s.informes ? '' : 'Cargando…'),
       infPrev: () => { const n = infs[infIx + 1]; if (n) this.setState({ infYm: n.ym }); }, infNext: () => { const n = infs[infIx - 1]; if (n) this.setState({ infYm: n.ym }); },
       infPrevFg: infs[infIx + 1] ? '#3A3326' : '#C1AA81', infNextFg: infs[infIx - 1] ? '#3A3326' : '#C1AA81',
+      isCtHoy: s.screen === 'ctHoy', goCtHoy: () => { this.setState({ screen: 'ctHoy' }); this.loadCtProg(); },
+      goInvBack: () => this.setState(s.ctProgId ? { screen: 'ctHoy', ctProgId: null } : { screen: 'inv' }),
+      ctVerStock: !s.ctProgId, ctCiego: !!s.ctProgId,
+      ctHoySub: s.ctProgError ? s.ctProgError : s.ctProg ? (s.ctProg.length ? s.ctProg.length + (s.ctProg.length === 1 ? ' ítem por contar' : ' ítems por contar') : 'Todo contado por hoy') : 'Cargando…',
+      ctHoyVacio: !!s.ctProg && !s.ctProg.length && !s.ctProgError,
+      ctHoyVis: (s.ctProg || []).map(r => { const it = this.invItem(r.codigo); const meta = this.CAT_META[r.cat] || this.CAT_META.ins; const hoy = new Date(Date.now() - 5 * 3600 * 1000).toISOString().slice(0, 10);
+        return { k: r.id, nombre: r.nombre || r.codigo, codigo: r.codigo, unidad: r.unidad || (it && it.unidad) || 'und', catLabel: meta.label, catBg: meta.bg, catFg: meta.fg, motivo: r.motivo || '', atrasado: String(r.fecha) < hoy, atrasoTxt: 'Pendiente desde el ' + this.fmtFecha(r.fecha), abrir: () => this.abrirCtProg(r) }; }),
       isInv: s.screen === 'inv', isInvItem: s.screen === 'invItem', isConteos: s.screen === 'conteos', goInv: () => this.setState({ screen: 'inv' }), goConteos: () => { this.setState({ screen: 'conteos' }); this.loadConteos(); },
       isProd: s.screen === 'prod', isProdNueva: s.screen === 'prodNueva', goProd: () => this.setState({ screen: 'prod' }), nuevaOP: () => this.nuevaOP(), prodPuede: prodLvl === 'write',
       prodSubTxt: s.prodError ? 'Sin datos' : s.ops ? opsGrp.length + ' órdenes · hoy ' + this.fmtCant(opsHoy) + ' und' : 'Cargando…',
