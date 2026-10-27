@@ -838,7 +838,14 @@
           <div style="flex:1;"><div style="font-size:12px;color:#574E40;font-weight:700;">Cantidad (und)</div><input type="number" inputmode="numeric" min="1" value="{{ opCant }}" onChange="{{ setOpCant }}" placeholder="0" style="width:100%;box-sizing:border-box;margin-top:8px;height:56px;border-radius:14px;border:1px solid #B8AE9C;background:#FBF8F2;padding:0 14px;font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;color:#3A3326;outline:none;"></div>
           <div onClick="{{ toggleRecarga }}" style="flex:0 0 auto;height:56px;padding:0 14px;border-radius:14px;border:1px solid {{ recBorder }};background:{{ recBg }};color:{{ recFg }};display:flex;align-items:center;font-size:12px;font-weight:700;">Recarga</div>
         </div>
-        <div style="font-size:11px;color:#8A8073;margin-top:8px;line-height:1.4;">Recarga = envase del cliente: solo se descuentan los componentes líquidos.</div>
+        <sc-if value="{{ opRecarga }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12px;color:#574E40;font-weight:700;margin-top:14px;">¿Para qué es esta recarga?</div>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <div onClick="{{ recConsumo }}" style="flex:1;min-height:56px;padding:10px 12px;border-radius:14px;border:1px solid {{ recCBorder }};background:{{ recCBg }};color:{{ recCFg }};"><div style="font-size:13px;font-weight:700;">Consumo interno</div><div style="font-size:11px;margin-top:2px;opacity:0.85;">Gasto · no suma stock</div></div>
+            <div onClick="{{ recVenta }}" style="flex:1;min-height:56px;padding:10px 12px;border-radius:14px;border:1px solid {{ recVBorder }};background:{{ recVBg }};color:{{ recVFg }};"><div style="font-size:13px;font-weight:700;">Para venta</div><div style="font-size:11px;margin-top:2px;opacity:0.85;">Entra al inventario</div></div>
+          </div>
+        </sc-if>
+        <div style="font-size:11px;color:#8A8073;margin-top:8px;line-height:1.4;">Recarga: solo se descuentan los componentes líquidos e insumos (no envase, tapa ni etiqueta).</div>
         <div onClick="{{ addOPLinea }}" style="margin-top:14px;height:46px;border-radius:999px;background:{{ addBg }};color:#FBF8F2;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">Agregar a la orden</div>
       </div>
       <sc-if value="{{ opHayLineas }}" hint-placeholder-val="{{ false }}">
@@ -1250,6 +1257,9 @@ class Component extends DCLogic {
   }
   _conteoFromDb(r) { return { id: r.id, codigo: r.codigo, nombre: r.nombre || '', unidad: r.unidad || 'und', clase: r.clase || 'materia', fecha: r.fecha || '', sistema: Number(r.sistema) || 0, contado: Number(r.contado) || 0, diferencia: Number(r.diferencia) || 0, motivo: r.motivo || '', nota: r.nota || '', solicitadoPor: r.solicitado_por || '', solicitadoAt: r.solicitado_at || '', estado: r.estado || 'pendiente', aprobadoPor: r.aprobado_por || '', aprobadoAt: r.aprobado_at || '', costoUnit: r.costo_unit, valor: r.valor }; }
   async loadConteos() { const sb = this.sb(); if (!sb) return; try { const { data, error } = await sb.from('conteos').select('*').order('solicitado_at', { ascending: false }).limit(500); if (error) throw error; const list = (data || []).map(r => this._conteoFromDb(r)); this.setState(s => ({ conteos: list, counts: Object.assign({}, s.counts, { conteosPend: list.filter(c => c.estado === 'pendiente').length }) })); } catch (e) { console.warn('conteos', e); } }
+  // 26-oct (seguridad): las funciones se llaman con el token de la sesión (no con la clave pública) — igual que el Hub.
+  async _fnFetch(url, opts) { opts = opts || {}; let tok = ''; try { const sb = this.sb(); const s = sb && (await sb.auth.getSession()).data.session; tok = (s && s.access_token) || ''; } catch (e) {}
+    const headers = Object.assign({}, opts.headers || {}, { authorization: 'Bearer ' + (tok || this.CLOUD_KEY) }); return fetch(url, Object.assign({}, opts, { headers })); }
   invItem(codigo) { return (this.state.inv || []).find(x => x.codigo === codigo) || null; }
   // ---- ingresos de mercancía desde bodega (tabla recepciones, misma forma {id,data} del Hub) ----
   // La bodeguera anota lo que llegó; queda pendiente y administración lo asigna a una OC en el Hub.
@@ -1585,9 +1595,9 @@ class Component extends DCLogic {
     const hdr = { 'content-type': 'application/json', apikey: this.CLOUD_KEY, authorization: 'Bearer ' + this.CLOUD_KEY };
     if (c.canal === 'whatsapp') { if (!c.telefono) { this.toast('Esta conversación no tiene número: quedó guardado pero no se envió'); return; }
       const body = { to: c.telefono, text: texto, origen: 'app', conversacion: id }; if (url) { if (adj.esImg) body.imageUrl = url; else { body.documentUrl = url; body.filename = adj.nombre || 'archivo'; } }
-      fetch(this.CLOUD_URL + '/functions/v1/whatsapp', { method: 'POST', headers: hdr, body: JSON.stringify(body) }).then(r => r.json()).then(d => { if (d && d.error) { this.toast('WhatsApp no envió: ' + d.error); this.avisoNoEntregado(id, 'WhatsApp', d.error); } else this.toast('Enviado por WhatsApp'); }).catch(() => { this.toast('Sin conexión: el mensaje no salió a WhatsApp'); this.avisoNoEntregado(id, 'WhatsApp', 'sin conexión con el servidor'); });
+      this._fnFetch(this.CLOUD_URL + '/functions/v1/whatsapp', { method: 'POST', headers: hdr, body: JSON.stringify(body) }).then(r => r.json()).then(d => { if (d && d.error) { this.toast('WhatsApp no envió: ' + d.error); this.avisoNoEntregado(id, 'WhatsApp', d.error); } else this.toast('Enviado por WhatsApp'); }).catch(() => { this.toast('Sin conexión: el mensaje no salió a WhatsApp'); this.avisoNoEntregado(id, 'WhatsApp', 'sin conexión con el servidor'); });
     } else if (c.canal === 'instagram' || c.canal === 'messenger') { const cl = c.canal === 'instagram' ? 'Instagram' : 'Messenger';
-      fetch(this.CLOUD_URL + '/functions/v1/meta-send', { method: 'POST', headers: hdr, body: JSON.stringify({ conversacionId: id, canal: c.canal, texto, imagenUrl: url && adj.esImg ? url : '', archivoUrl: url && !adj.esImg ? url : '' }) }).then(r => r.json()).then(d => { if (d && d.error) { this.toast(cl + ' no envió: ' + d.error); this.avisoNoEntregado(id, cl, d.error); } else this.toast('Enviado por ' + cl); }).catch(() => { this.toast('Sin conexión: el mensaje no salió a ' + cl); this.avisoNoEntregado(id, cl, 'sin conexión con el servidor'); });
+      this._fnFetch(this.CLOUD_URL + '/functions/v1/meta-send', { method: 'POST', headers: hdr, body: JSON.stringify({ conversacionId: id, canal: c.canal, texto, imagenUrl: url && adj.esImg ? url : '', archivoUrl: url && !adj.esImg ? url : '' }) }).then(r => r.json()).then(d => { if (d && d.error) { this.toast(cl + ' no envió: ' + d.error); this.avisoNoEntregado(id, cl, d.error); } else this.toast('Enviado por ' + cl); }).catch(() => { this.toast('Sin conexión: el mensaje no salió a ' + cl); this.avisoNoEntregado(id, cl, 'sin conexión con el servidor'); });
     } else { this.toast('Enviado al chat de la web'); }
   }
   // Sube al bucket `adjuntos` (carpeta chat/) y VERIFICA que la URL pública responda antes de enviar:
@@ -1910,11 +1920,11 @@ class Component extends DCLogic {
     finally { this._prodLoading = false; }
   }
   nextOP() { let max = 0; (this.state.ops || []).forEach(o => { const m = String(o.numero || '').match(/(\d+)$/); if (m) max = Math.max(max, Number(m[1])); }); return 'OP-2026-' + String(max + 1).padStart(3, '0'); }
-  nuevaOP() { this.setState({ screen: 'prodNueva', opFecha: this._hoyLocal(), opLineas: [], opProdQ: '', opCant: '', opRecarga: false, opProdSel: null }); if (!this.state.prodProductos) this.loadProduccion(); }
-  addOPLinea() { const s = this.state; const p = s.opProdSel; const c = Number(s.opCant); if (!p) { this.toast('Elige el producto'); return; } if (!(c > 0)) { this.toast('Indica la cantidad producida'); return; }
-    const lineas = (s.opLineas || []).slice(); const ix = lineas.findIndex(l => l.productoCodigo === p.codigo && !!l.recarga === !!s.opRecarga);
-    if (ix >= 0) lineas[ix] = Object.assign({}, lineas[ix], { cantidad: lineas[ix].cantidad + c }); else lineas.push({ productoCodigo: p.codigo, nombre: p.nombre, cantidad: c, recarga: !!s.opRecarga });
-    this.setState({ opLineas: lineas, opProdSel: null, opProdQ: '', opCant: '', opRecarga: false }); }
+  nuevaOP() { this.setState({ screen: 'prodNueva', opFecha: this._hoyLocal(), opLineas: [], opProdQ: '', opCant: '', opRecarga: false, opRecDestino: '', opProdSel: null }); if (!this.state.prodProductos) this.loadProduccion(); }
+  addOPLinea() { const s = this.state; const p = s.opProdSel; const c = Number(s.opCant); if (!p) { this.toast('Elige el producto'); return; } if (!(c > 0)) { this.toast('Indica la cantidad producida'); return; } if (s.opRecarga && !s.opRecDestino) { this.toast('¿La recarga es para consumo interno o para venta?'); return; }
+    const lineas = (s.opLineas || []).slice(); const dest = s.opRecarga ? s.opRecDestino : ''; const ix = lineas.findIndex(l => l.productoCodigo === p.codigo && !!l.recarga === !!s.opRecarga && (l.recargaDestino || '') === dest);
+    if (ix >= 0) lineas[ix] = Object.assign({}, lineas[ix], { cantidad: lineas[ix].cantidad + c }); else lineas.push({ productoCodigo: p.codigo, nombre: p.nombre, cantidad: c, recarga: !!s.opRecarga, recargaDestino: dest });
+    this.setState({ opLineas: lineas, opProdSel: null, opProdQ: '', opCant: '', opRecarga: false, opRecDestino: '' }); }
   _hoyLocal() { const d = new Date(), p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); }
   async guardarOP() {
     if (this._opSaving) return; const s = this.state; const lineas = (s.opLineas || []).filter(l => l.productoCodigo && l.cantidad > 0);
@@ -1925,7 +1935,7 @@ class Component extends DCLogic {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) fecha = hoyS;
     if (fecha > hoyS) { this.toast('La fecha no puede ser futura'); return; }
     const num = this.nextOP(), ts = Date.now(), yo = (s.user && s.user.name) || '';
-    const rows = lineas.map((l, idx) => ({ id: 'op' + ts + idx, numero: num, productoCodigo: l.productoCodigo, cantidad: l.cantidad, recarga: !!l.recarga, fecha, _creadoPor: yo, _origen: 'app' }));
+    const rows = lineas.map((l, idx) => ({ id: 'op' + ts + idx, numero: num, productoCodigo: l.productoCodigo, cantidad: l.cantidad, recarga: !!l.recarga, ...(l.recarga ? { recargaDestino: l.recargaDestino === 'venta' ? 'venta' : 'consumo' } : {}), fecha, _creadoPor: yo, _origen: 'app' }));
     this._opSaving = true; setTimeout(() => { this._opSaving = false; }, 1500);
     const { error } = await this.sb().from('producciones').upsert(rows.map(o => ({ id: o.id, data: o, actualizado: new Date().toISOString() }))).select('id');
     if (error) { this.toast('No se pudo guardar: ' + error.message); return; }
@@ -2206,9 +2216,12 @@ class Component extends DCLogic {
       opProdVis: opProdVis.map(p => ({ nombre: p.nombre, codigo: p.codigo, pick: () => this.setState({ opProdSel: p, opProdQ: '' }) })), opProdSinMatch: !!opProdQ && !s.opProdSel && opProdVis.length === 0 && !!s.prodProductos,
       opSelBorder: s.opProdSel ? '#A78659' : '#B8AE9C',
       opCant: s.opCant == null ? '' : s.opCant, setOpCant: e => this.setState({ opCant: e.target.value }),
-      opRecarga: !!s.opRecarga, toggleRecarga: () => this.setState({ opRecarga: !s.opRecarga }), recBg: s.opRecarga ? '#3A3326' : '#FFFFFF', recFg: s.opRecarga ? '#FBF8F2' : '#574E40', recBorder: s.opRecarga ? '#3A3326' : '#E4DBCC',
+      opRecarga: !!s.opRecarga, toggleRecarga: () => this.setState({ opRecarga: !s.opRecarga, opRecDestino: '' }),
+      recConsumo: () => this.setState({ opRecDestino: 'consumo' }), recVenta: () => this.setState({ opRecDestino: 'venta' }),
+      recCBg: s.opRecDestino === 'consumo' ? '#3A3326' : '#FFFFFF', recCFg: s.opRecDestino === 'consumo' ? '#FBF8F2' : '#574E40', recCBorder: s.opRecDestino === 'consumo' ? '#3A3326' : '#E4DBCC',
+      recVBg: s.opRecDestino === 'venta' ? '#3A3326' : '#FFFFFF', recVFg: s.opRecDestino === 'venta' ? '#FBF8F2' : '#574E40', recVBorder: s.opRecDestino === 'venta' ? '#3A3326' : '#E4DBCC', recBg: s.opRecarga ? '#3A3326' : '#FFFFFF', recFg: s.opRecarga ? '#FBF8F2' : '#574E40', recBorder: s.opRecarga ? '#3A3326' : '#E4DBCC',
       addOPLinea: () => this.addOPLinea(), addBg: s.opProdSel && Number(s.opCant) > 0 ? '#5A4A33' : '#C1AA81',
-      opLineas: opLineas.map((l, i) => ({ nombre: l.nombre, cantTxt: this.fmtCant(l.cantidad) + ' und', recargaTxt: l.recarga ? 'Recarga' : '', quitar: () => this.setState({ opLineas: opLineas.filter((_, j) => j !== i) }) })), opHayLineas: opLineas.length > 0, opTotalTxt: this.fmtCant(opTotal) + ' und en ' + opLineas.length + (opLineas.length === 1 ? ' línea' : ' líneas'),
+      opLineas: opLineas.map((l, i) => ({ nombre: l.nombre, cantTxt: this.fmtCant(l.cantidad) + ' und', recargaTxt: l.recarga ? (l.recargaDestino === 'venta' ? 'Recarga · para venta' : 'Recarga · consumo interno') : '', quitar: () => this.setState({ opLineas: opLineas.filter((_, j) => j !== i) }) })), opHayLineas: opLineas.length > 0, opTotalTxt: this.fmtCant(opTotal) + ' und en ' + opLineas.length + (opLineas.length === 1 ? ' línea' : ' líneas'),
       guardarOP: () => this.guardarOP(), opBtnBg: opLineas.length ? '#A78659' : '#C1AA81',
       invSubTxt: s.invError ? 'Sin datos' : s.inv ? inv.length + ' ítems · foto del ' + snapL : 'Cargando…', conteosPendN: ctPendN,
       invQ: s.invQ || '', setInvQ: e => this.setState({ invQ: e.target.value }),
