@@ -700,6 +700,25 @@
             <div style="background:#F7F2E9;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;">
               <sc-for list="{{ al.items }}" as="it" hint-placeholder-count="2"><div style="font-size:13px;font-weight:700;color:#3A3326;">{{ it.txt }}</div></sc-for>
             </div>
+            <sc-if value="{{ al.empPuede }}" hint-placeholder-val="{{ false }}">
+              <div style="border:1px solid #E4DBCC;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;">
+                <div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:#7A5E36;font-weight:800;">Material de empaque</div>
+                  <sc-if value="{{ al.empCerrado }}" hint-placeholder-val="{{ true }}"><div onClick="{{ al.empAbrir }}" style="min-height:36px;padding:0 12px;border-radius:999px;border:1px solid #B8AE9C;color:#5A4A33;display:flex;align-items:center;font-weight:700;font-size:12px;">+ Agregar</div></sc-if></div>
+                <sc-for list="{{ al.empaques }}" as="e" hint-placeholder-count="1"><div style="font-size:13px;font-weight:700;color:#3A3326;">{{ e.txt }}</div></sc-for>
+                <sc-if value="{{ al.sinEmp }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#8A8073;">Este pedido no trae material de empaque. Si usas alguno, agrégalo.</div></sc-if>
+                <sc-for list="{{ al.empPend }}" as="x" hint-placeholder-count="0"><div style="display:flex;align-items:center;gap:8px;background:#F1F6EF;border-radius:10px;padding:6px 10px;"><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;color:#3C5A39;">{{ x.txt }}</div><div style="font-size:11px;color:#5E7A5B;">{{ x.sub }}</div></div><div onClick="{{ x.quitar }}" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;color:#B5503C;font-size:18px;">×</div></div></sc-for>
+                <sc-if value="{{ al.empAbierto }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+                    <select value="{{ alistEmpCod }}" onChange="{{ setAlistEmpCod }}" style="height:44px;border:1px solid #B8AE9C;border-radius:12px;padding:0 10px;font-family:inherit;font-size:14px;background:#FFFFFF;color:#3A3326;"><option value="">Elige el material…</option><sc-for list="{{ al.empOpts }}" as="o" hint-placeholder-count="0"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select>
+                    <sc-if value="{{ al.empSinOpts }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#8A8073;">Cargando materiales de empaque…</div></sc-if>
+                    <div style="display:flex;gap:8px;"><input type="number" inputmode="decimal" min="0" value="{{ alistEmpQty }}" onInput="{{ setAlistEmpQty }}" placeholder="Cantidad" style="flex:1;height:44px;border:1px solid #B8AE9C;border-radius:12px;padding:0 12px;font-family:inherit;font-size:15px;min-width:0;">
+                      <div onClick="{{ al.empCancelar }}" style="height:44px;padding:0 14px;border-radius:999px;border:1px solid #B8AE9C;color:#5A4A33;display:flex;align-items:center;font-weight:700;font-size:13px;">Cancelar</div>
+                      <div onClick="{{ al.empGuardar }}" style="height:44px;padding:0 16px;border-radius:999px;background:#3A3326;color:#FBF8F2;display:flex;align-items:center;font-weight:700;font-size:13px;">{{ al.empGuardarTxt }}</div></div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+            <sc-if value="{{ al.hayNota }}" hint-placeholder-val="{{ false }}"><div style="background:#FFF8EC;border:1px solid #E7C98F;border-radius:12px;padding:10px 12px;"><div style="font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:#7A5E36;font-weight:800;">Nota · mensaje al cliente</div><div style="font-size:13.5px;color:#3A3326;margin-top:4px;white-space:pre-wrap;">{{ al.notaAlist }}</div></div></sc-if>
             <div style="font-size:12px;color:#574E40;">{{ al.envio }}</div>
             <div style="display:flex;gap:8px;align-items:center;">
               <sc-if value="{{ al.tieneTel }}" hint-placeholder-val="{{ false }}"><a href="{{ al.telUrl }}" style="height:44px;padding:0 14px;border-radius:999px;border:1px solid #B8AE9C;color:#5A4A33;display:flex;align-items:center;font-weight:700;font-size:12px;text-decoration:none;">Llamar</a></sc-if>
@@ -1461,9 +1480,32 @@ class Component extends DCLogic {
     const { data, error } = await sb.from('conteos_programados').update(p).eq('id', prog.id).select('id');
     if (error || !data || !data.length) { this.toast('El conteo se guardó pero no se pudo cerrar en la lista del día: ' + (error ? error.message : 'sin permiso')); return false; }
     this.setState(s => ({ ctProg: (s.ctProg || []).filter(x => x.id !== prog.id), counts: Object.assign({}, s.counts || {}, { ctHoy: Math.max(0, ((s.counts || {}).ctHoy || 1) - 1) }) }), () => this.persistSession()); return true; }
+  // 30-oct · Material de empaque: bodega puede SUMAR (más bolsas, plegables…). Se guarda en la alerta (empaquesExtra) y el Hub lo
+  // aplica al pedido (descuenta inventario). Bodega no escribe en ventas.
+  async alistEmpAgregar(id) { const sb = this.sb(); if (!sb || this._alistBusy) return; const row = (this.state.alists || []).find(r => r.id === id); if (!row) return;
+    const cod = this.state.alistEmpCod || ''; const q = Number(String(this.state.alistEmpQty || '').replace(',', '.')) || 0;
+    if (!cod) { this.toast('Elige el material de empaque'); return; } if (!(q > 0)) { this.toast('Pon la cantidad'); return; }
+    const it = (this.state.inv || []).find(x => x.codigo === cod) || {}; const u = this.state.user || {};
+    this._alistBusy = id; this.forceUpdate();
+    try { const { data: fr } = await sb.from('alertas_app').select('data').eq('id', id).maybeSingle(); const base = (fr && fr.data) || row.data || {};
+      const ex = (base.empaquesExtra || []).concat([{ id: 'x' + Date.now(), codigo: cod, nombre: it.nombre || cod, unidades: q, por: u.name || u.email || '', at: new Date().toISOString() }]);
+      const data = Object.assign({}, base, { empaquesExtra: ex });
+      const { data: r, error } = await sb.from('alertas_app').update({ data, actualizado: new Date().toISOString() }).eq('id', id).select('id');
+      if (error || !r || !r.length) throw (error || new Error('la nube no confirmó'));
+      this.setState(s => ({ alists: (s.alists || []).map(x => x.id === id ? Object.assign({}, x, { data }) : x), alistEmpOpen: '', alistEmpCod: '', alistEmpQty: '' }));
+      this.toast('Agregado · se suma al pedido en el Hub');
+    } catch (e) { this.toast('No se pudo agregar: ' + ((e && e.message) || e)); } finally { this._alistBusy = null; this.forceUpdate(); } }
+  async alistEmpQuitar(id, xid) { const sb = this.sb(); if (!sb || this._alistBusy) return; this._alistBusy = id; this.forceUpdate();
+    try { const { data: fr } = await sb.from('alertas_app').select('data').eq('id', id).maybeSingle(); const base = (fr && fr.data) || {};
+      const x0 = (base.empaquesExtra || []).find(x => x.id === xid); if (x0 && x0.aplicado) { this.toast('Ya se sumó al pedido: pídele al Hub que lo ajuste'); return; }
+      const data = Object.assign({}, base, { empaquesExtra: (base.empaquesExtra || []).filter(x => x.id !== xid) });
+      const { error } = await sb.from('alertas_app').update({ data, actualizado: new Date().toISOString() }).eq('id', id); if (error) throw error;
+      this.setState(s => ({ alists: (s.alists || []).map(x => x.id === id ? Object.assign({}, x, { data }) : x) }));
+    } catch (e) { this.toast('No se pudo quitar: ' + ((e && e.message) || e)); } finally { this._alistBusy = null; this.forceUpdate(); } }
   async marcarAlistado(id) { const sb = this.sb(); if (!sb || this._alistBusy) return; const row = (this.state.alists || []).find(r => r.id === id); if (!row) return;
     this._alistBusy = id; this.forceUpdate(); const u = this.state.user || {};
-    try { const data = Object.assign({}, row.data || {}, { alistadoPor: u.name || u.email || '', alistadoAt: new Date().toISOString() });
+    try { const { data: fr } = await sb.from('alertas_app').select('data').eq('id', id).maybeSingle(); // datos frescos: no pisar lo que el Hub aplicó
+      const data = Object.assign({}, (fr && fr.data) || row.data || {}, { alistadoPor: u.name || u.email || '', alistadoAt: new Date().toISOString() });
       const { data: r, error } = await sb.from('alertas_app').update({ estado: 'alistado', data, actualizado: new Date().toISOString() }).eq('id', id).select('id');
       if (error || !r || !r.length) throw (error || new Error('la nube no confirmó'));
       this.setState(s => ({ alists: (s.alists || []).filter(x => x.id !== id), counts: Object.assign({}, s.counts || {}, { alistPend: Math.max(0, ((s.counts || {}).alistPend || 1) - 1) }) }), () => this.persistSession());
@@ -2179,12 +2221,20 @@ class Component extends DCLogic {
       finVacio: !!s.informes && !finRow, finVacioTxt: s.infError ? s.infError : 'El Hub todavía no ha publicado los saldos. Abre el Hub con el administrador y espera medio minuto.',
       finSaldoTotal: typeof finD.finSaldoTotal === 'number' ? cop(finD.finSaldoTotal) : '—', finCuentas: (finD.finCuentas || []).map(c => ({ nombre: c.nombre, tipo: c.tipo, saldoTxt: (c.saldo < 0 ? '−' : '') + cop(Math.abs(c.saldo)), fg: c.saldo < 0 ? '#B5503C' : '#3A3326' })),
       finCobrarTotal: cop(finCobrarAll.reduce((t, r) => t + (Number(r.saldo) || 0), 0)), finCobrarN: finCobrarAll.length + (finCobrarAll.length === 1 ? ' venta' : ' ventas'), finQ: s.finQ || '', setFinQ: e => this.setState({ finQ: e.target.value }), finCobrar,
+      alistEmpCod: s.alistEmpCod || '', alistEmpQty: s.alistEmpQty || '', setAlistEmpCod: e => this.setState({ alistEmpCod: e.target.value }), setAlistEmpQty: e => this.setState({ alistEmpQty: e.target.value }),
       isAlist: s.screen === 'alist', alistSubTxt: s.alistsError ? s.alistsError : s.alists ? (s.alists.length ? s.alists.length + ' por alistar' : 'Nada pendiente') : 'Cargando…',
       alistVacio: !!s.alists && !s.alists.length && !s.alistsError,
       alistsVis: (s.alists || []).map(r => { const d = r.data || {}; const tel = String(d.telefono || '').replace(/\D/g, ''); return {
         titulo: d.titulo || ('Caso ' + (d.folio || '') + (d.pedido ? ' · ' + d.pedido : '')), cliente: d.cliente || '—', ciudad: d.ciudad || 'Sin ciudad', direccion: d.direccion || 'Sin dirección',
-        telefono: d.telefono || '', tieneTel: tel.length >= 7, telUrl: 'tel:' + tel, motivo: d.motivo || '', envio: d.envioTxt || ((d.transportadora || 'Coordinadora') + ' · guía ' + (d.guia || 'pendiente')),
+        telefono: d.telefono || '', tieneTel: tel.length >= 7, telUrl: 'tel:' + tel, motivo: d.motivo || '', notaAlist: String(d.notaAlist || '').trim(), hayNota: !!String(d.notaAlist || '').trim(), envio: d.envioTxt || ((d.transportadora || 'Coordinadora') + ' · guía ' + (d.guia || 'pendiente')),
         items: (d.items || []).map(it => ({ txt: (Number(it.unidades) || 1) + '× ' + (it.nombre || it.codigo || '') })),
+        ...(() => { const emp = (d.empaques || []).map(e => ({ txt: (Number(e.unidades) || 1) + '× ' + (e.nombre || e.codigo || '') }));
+          const pend = (d.empaquesExtra || []).filter(x => x && !x.aplicado).map(x => ({ txt: '+' + (Number(x.unidades) || 0) + '× ' + (x.nombre || x.codigo), sub: 'Agregado' + (x.por ? ' por ' + x.por : '') + ' · se suma al pedido', quitar: () => this.alistEmpQuitar(r.id, x.id) }));
+          const esPed = String(r.id || '').indexOf('alist-v-') === 0; const abierto = s.alistEmpOpen === r.id;
+          const opts = (s.inv || []).filter(x => x.cat === 'emp').sort((a, b) => a.nombre.localeCompare(b.nombre)).map(x => ({ v: x.codigo, l: x.nombre + ' · hay ' + (Math.round(x.stock * 100) / 100) + ' ' + x.unidad }));
+          return { empaques: emp, hayEmp: emp.length > 0, sinEmp: emp.length === 0 && esPed, empPend: pend, hayEmpPend: pend.length > 0, empPuede: esPed, empAbierto: abierto, empCerrado: !abierto,
+            empOpts: opts, empSinOpts: abierto && !opts.length, empAbrir: () => { this.setState({ alistEmpOpen: r.id, alistEmpCod: '', alistEmpQty: '' }); if (!(s.inv || []).length) this.loadInventario(); },
+            empCancelar: () => this.setState({ alistEmpOpen: '' }), empGuardar: () => this.alistEmpAgregar(r.id), empGuardarTxt: this._alistBusy === r.id ? 'Guardando…' : 'Agregar' }; })(),
         meta: 'Creada por ' + (d.creadoPor || 'el Hub') + (r.creado_at ? ' · ' + new Date(r.creado_at).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''),
         btnTxt: this._alistBusy === r.id ? 'Guardando…' : 'Marcar alistado', marcar: () => this.marcarAlistado(r.id) }; }),
       isLeads: s.screen === 'leads', leadsSubTxt: s.leadsError ? 'Sin datos' : s.leads ? leads.filter(l => l.estado === 'Nuevo').length + ' nuevos · ' + leads.filter(l => l.estado !== 'Ganado' && l.estado !== 'Perdido').length + ' activos' : 'Cargando…',
