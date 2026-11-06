@@ -1807,7 +1807,7 @@ class Component extends DCLogic {
     finally{ this._pdfBusy=null; this.setState({pdfBusy:null}); } }
   cotDocumento(c){ return this.compartirDoc('cot:'+c.id+':'+(c.actualizado||''), ()=>this.cotDocHtml(c), 'Cotizacion-'+(c.numero||'OdA'), 'Cotización '+(c.numero||'')); }
   // ---- PEDIDOS MANUALES (16-oct): ventas sin shopifyId; documento = COPIA LITERAL de pedidoDocHtml() del Hub
-  // (incluido el bloque «Información de pago» de la cuenta Nu para pedidos SIN IVA). Si cambia en el Hub, cambiar aquí.
+  // (incluido el bloque «Información de pago»: llave ODA LABS con IVA, cuenta Nu sin IVA). Si cambia en el Hub, cambiar aquí.
   async loadPedidos(){ const sb=this.sb(); if(!sb||this._pedLoading) return; if(this._modLevel(this.access(),'ventas')==='none') return; this._pedLoading=true;
     try{ if(!(await this._asegurarAuth())) throw new Error('Sesión vencida: entra de nuevo');
       const desde=new Date(Date.now()-120*864e5).toISOString().slice(0,10); const out=[];
@@ -1830,15 +1830,24 @@ class Component extends DCLogic {
   pedidoCuentaNu(){ const L=this.cuentasList(); const re=/(^|[^a-z])nu([^a-z]|$)|nubank/i;
     return L.find(c=>re.test(String(c.banco||''))&&String(c.numeroCuenta||c.llave||'').trim()) || L.find(c=>re.test(String(c.nombre||''))&&String(c.numeroCuenta||c.llave||'').trim()) || L.find(c=>re.test(String(c.banco||''))||re.test(String(c.nombre||''))) || null; }
   _pedidoEsManual(v){ return !v.shopifyId && (v.origen||'manual')==='manual'; }
-  pedidoPagoHtml(v){ if(!this._pedidoEsManual(v) || this.ventaConIva(v) || v.cancelada) return '';
-    const c=this.pedidoCuentaNu(); if(!c || !String(c.numeroCuenta||c.llave||'').trim()) return '';
-    const llave=String(c.numeroCuenta||c.llave).trim(); const esCorreo=/@/.test(llave);
+  // 6-nov: igual que el Hub (3-nov). Pedidos manuales CON IVA → llave de ODA LABS (la empresa factura): cuenta de Caja y bancos
+  // con titular «ODA LABS» que tenga «Llave de pago»; respaldo: la llave que publica el bot (3134063259). SIN IVA → cuenta Nu.
+  pedidoLlaveOda(){ const re=/oda\s*labs/i; const L=this.cuentasList();
+    const c=L.find(x=>re.test(String(x.titular||''))&&String(x.llave||'').trim()) || L.find(x=>re.test(String(x.nombre||''))&&String(x.llave||'').trim());
+    if(c) return { llave:String(c.llave).trim(), banco:String(c.banco||'').trim(), titular:String(c.titular||'ODA LABS S.A.S.') };
+    return { llave:'3134063259', banco:'', titular:'ODA LABS S.A.S.' }; }
+  _pedidoPagoDatos(v){ if(!this._pedidoEsManual(v) || v.cancelada) return null;
+    if(this.ventaConIva(v)){ const o=this.pedidoLlaveOda(); return o? { banco:o.banco, llave:o.llave, titular:o.titular } : null; }
+    const c=this.pedidoCuentaNu(); if(!c || !String(c.numeroCuenta||c.llave||'').trim()) return null;
+    return { banco:String(c.banco||'Nu'), llave:String(c.numeroCuenta||c.llave).trim(), titular:String(c.titular||'') }; }
+  pedidoPagoHtml(v){ const d=this._pedidoPagoDatos(v); if(!d) return '';
+    const esCorreo=/@/.test(d.llave);
     const fila=(l,val)=>'<div style="display:flex;gap:10px;padding:4px 0;"><span style="min-width:120px;color:#8A8073;">'+l+'</span><strong style="color:#3A3326;word-break:break-all;">'+val+'</strong></div>';
     return '<div style="margin-top:28px;background:#F7F2E9;border:1px solid #E4DBCC;border-radius:14px;padding:18px 22px;font-size:13px;">'
       +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:#A78659;font-weight:700;margin-bottom:8px;">Información de pago</div>'
-      +fila('Banco', String(c.banco||'Nu'))
-      +fila(esCorreo?'Llave (correo)':'Llave / cuenta', llave)
-      +(c.titular? fila('A nombre de', this.titleCase(String(c.titular))) : '')
+      +(d.banco? fila('Banco', d.banco) : '')
+      +fila(esCorreo?'Llave (correo)':'Llave', d.llave)
+      +(d.titular? fila('A nombre de', /oda\s*labs/i.test(d.titular)? 'ODA LABS S.A.S.' : this.titleCase(d.titular)) : '')
       +'</div>'; }
   pedidoDocHtml(v){ const conIva=this.ventaConIva(v);
     // Descuentos en el documento: si TODAS las líneas llevan el mismo % (descuento masivo) o la venta trae
@@ -2064,7 +2073,7 @@ class Component extends DCLogic {
     const pedQ = String(s.pedQ || '').toLowerCase().trim();
     const pedVis = (s.pedidos || []).filter(v => !pedQ || String(v.cliente || '').toLowerCase().includes(pedQ) || String(v.ov || '').toLowerCase().includes(pedQ)).slice(0, 60).map(v => { const tot = this.ventaTotalPed(v); const saldo = Math.max(0, tot - Math.round(Number(v.pagado) || 0)); const key = 'ped:' + v.id + ':' + (v.pagado || 0) + ':' + ((v.items || []).length);
       return { cliente: this.titleCase(v.cliente) || 'Cliente', numero: v.ov || '—', sub: String(v._f || '').split('-').reverse().join('/') + (v.ciudad ? ' · ' + this.titleCase(v.ciudad) : ''), totalTxt: cop(tot), saldoTxt: saldo > 0 ? 'Saldo ' + cop(saldo) : 'Pagado', saldoFg: saldo > 0 ? '#B5503C' : '#4C6149',
-        ivaTxt: this.ventaConIva(v) ? 'Con IVA' : 'Sin IVA · lleva datos de pago Nu', doc: () => this.pedidoDocumento(v), docTxt: s.pdfBusy === key ? 'Preparando…' : 'Compartir PDF' }; });
+        ivaTxt: this.ventaConIva(v) ? 'Con IVA · lleva la llave de ODA LABS' : 'Sin IVA · lleva datos de pago Nu', doc: () => this.pedidoDocumento(v), docTxt: s.pdfBusy === key ? 'Preparando…' : 'Compartir PDF' }; });
     // ---- cotizaciones ----
     const cotPuede = this._modLevel(a, 'ventas') === 'write';
     const cotQ = String(s.cotQ || '').toLowerCase().trim();
