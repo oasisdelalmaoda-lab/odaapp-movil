@@ -691,6 +691,17 @@
         <div onClick="{{ goInicio }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6F49;">‹</div>
         <div style="flex:1;min-width:0;"><div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;line-height:1.1;">Alistamiento</div><div style="font-size:11px;color:#8A8073;margin-top:2px;">{{ alistSubTxt }}</div></div>
       </div>
+      <div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;">
+        <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#7A5E36;font-weight:700;">Buscar pedido · agregar empaque</div>
+        <div style="display:flex;gap:8px;"><input value="{{ alistQ }}" onInput="{{ setAlistQ }}" onKeyDown="{{ alistQKey }}" inputmode="search" placeholder="N.º de Shopify (5383), OV o cliente" style="flex:1;min-width:0;height:44px;border:1px solid #B8AE9C;border-radius:12px;padding:0 12px;font-family:inherit;font-size:15px;background:#FFFFFF;color:#3A3326;"><button onClick="{{ alistBuscar }}" style="height:44px;padding:0 16px;border:none;border-radius:12px;background:#7A5E36;color:#fff;font-family:inherit;font-size:14px;font-weight:700;">{{ alistBuscarTxt }}</button></div>
+        <sc-if value="{{ alistResTxt }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#8A8073;">{{ alistResTxt }}</div></sc-if>
+        <sc-for list="{{ alistRes }}" as="rv" hint-placeholder-count="0">
+          <div onClick="{{ rv.abrir }}" style="border:1px solid #E4DBCC;border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px;background:#F7F2E9;">
+            <div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:14px;">{{ rv.titulo }}</div><div style="font-size:12px;color:#574E40;margin-top:2px;">{{ rv.sub }}</div></div>
+            <div style="font-size:12px;font-weight:700;color:#7A5E36;white-space:nowrap;">{{ rv.accion }}</div>
+          </div>
+        </sc-for>
+      </div>
       <sc-if value="{{ alistVacio }}" hint-placeholder-val="{{ false }}"><div style="margin-top:12px;background:#FFFFFF;border:1px solid #E4DBCC;border-radius:18px;padding:16px;font-size:13px;color:#574E40;">No hay envíos por alistar. Cuando servicio al cliente cree una alerta, aparece aquí.</div></sc-if>
       <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
         <sc-for list="{{ alistsVis }}" as="al" hint-placeholder-count="2">
@@ -1482,6 +1493,37 @@ class Component extends DCLogic {
     this.setState(s => ({ ctProg: (s.ctProg || []).filter(x => x.id !== prog.id), counts: Object.assign({}, s.counts || {}, { ctHoy: Math.max(0, ((s.counts || {}).ctHoy || 1) - 1) }) }), () => this.persistSession()); return true; }
   // 30-oct · Material de empaque: bodega puede SUMAR (más bolsas, plegables…). Se guarda en la alerta (empaquesExtra) y el Hub lo
   // aplica al pedido (descuenta inventario). Bodega no escribe en ventas.
+  // 20-nov (usuario): bodega solo veía los pedidos que el Hub mandó a alistar (los manuales). Ahora puede BUSCAR cualquier pedido
+  // (n.º de Shopify, OV o cliente) para agregarle material de empaque. Si el pedido ya está en alistamiento se abre esa tarjeta; si
+  // no, se crea su tarjeta `alist-v-<venta>` (la misma que crea el Hub) y el Hub suma el empaque al pedido como siempre.
+  async alistBuscar() { const sb = this.sb(); const q0 = String(this.state.alistQ || '').trim(); if (!sb || !q0) return; if (this._alistBuscando) return;
+    this._alistBuscando = true; this.setState({ alistRes: null, alistResTxt: 'Buscando…' });
+    try { const num = q0.replace(/^#/, ''); const esNum = /^\d{3,6}$/.test(num); const esOv = /^oda-?\d+/i.test(q0);
+      let qy = sb.from('ventas').select('id,data').limit(12);
+      if (esNum) qy = qy.or('data->>pedido.eq.#' + num + ',data->>pedido.eq.' + num + ',data->>ov.ilike.%' + num.padStart(5, '0'));
+      else if (esOv) qy = qy.ilike('data->>ov', '%' + q0.replace(/^oda-?/i, '').padStart(5, '0'));
+      else qy = qy.ilike('data->>cliente', '%' + q0.replace(/[%,()]/g, ' ') + '%').order('id', { ascending: false });
+      const { data, error } = await qy; if (error) throw error;
+      const vs = (data || []).map(r => Object.assign({ id: r.id }, r.data || {})).filter(v => !v.cancelada && v.origen !== 'historico');
+      let ya = {}; if (vs.length) { const { data: al } = await sb.from('alertas_app').select('id,estado').in('id', vs.map(v => 'alist-v-' + v.id)); (al || []).forEach(a => { ya[a.id] = a.estado; }); }
+      this.setState({ alistRes: vs.map(v => Object.assign(v, { _al: ya['alist-v-' + v.id] || '' })), alistResTxt: vs.length ? '' : 'No encontré ese pedido (revisa el número)' });
+    } catch (e) { this.setState({ alistRes: [], alistResTxt: 'No se pudo buscar: ' + ((e && e.message) || e) }); } finally { this._alistBuscando = false; this.forceUpdate(); } }
+  async alistAbrirVenta(v) { const sb = this.sb(); if (!sb || this._alistBusy) return; const id = 'alist-v-' + v.id; const u = this.state.user || {};
+    this._alistBusy = id; this.forceUpdate();
+    try { let { data: row } = await sb.from('alertas_app').select('id,data,estado,destino,creado_at').eq('id', id).maybeSingle();
+      if (!row) { const emp = {}; (v.empaques || []).forEach(e => { if (e.soloIngreso) return; const c = e.materiaCodigo || e.codigo || ''; if (!c) return; const it = (this.state.inv || []).find(x => x.codigo === c);
+          emp[c] = emp[c] || { codigo: c, nombre: e.nombre || (it && it.nombre) || c, unidades: 0 }; emp[c].unidades += Number(e.cantidad || e.unidades) || 0; });
+        const guia = String(v.guia || '').trim();
+        const data = { tipo: 'alistamiento', ventaId: v.id, titulo: 'Pedido ' + (v.pedido || v.ov || '') + (v.pedido && v.ov ? ' · ' + v.ov : ''), pedido: v.pedido || v.ov || '', cliente: v.cliente || '', ciudad: v.ciudad || '', direccion: v.direccion || '', telefono: v.celular || '',
+          envioTxt: guia ? ((v.transportadora || 'Coordinadora') + ' · guía ' + guia) : 'Sin guía todavía', motivo: 'Abierto desde bodega para agregar empaque' + (v.canal ? ' · ' + v.canal : ''), notaAlist: String(v.notaAlist || '').trim(),
+          items: (v.items || []).filter(it => !it.soloIngreso).map(it => ({ nombre: it.producto || it.productoCodigo || it.referencia || '', codigo: it.productoCodigo || it.referencia || '', unidades: Number(it.unidades) || 1 })),
+          empaques: Object.values(emp).filter(x => x.unidades > 0), empaquesExtra: [], creadoPor: (u.name || u.email || 'Bodega') + ' (app)', creadoAt: new Date().toISOString(), desdeApp: true };
+        const r = await sb.from('alertas_app').insert({ id, data, destino: String(u.email || '').toLowerCase(), estado: 'pendiente', actualizado: new Date().toISOString() }).select('id,data,estado,destino,creado_at');
+        if (r.error) { const r2 = await sb.from('alertas_app').select('id,data,estado,destino,creado_at').eq('id', id).maybeSingle(); if (!r2.data) throw r.error; row = r2.data; } else row = r.data[0]; }
+      this.setState(s => ({ alists: [row].concat((s.alists || []).filter(x => x.id !== id)), alistEmpOpen: id, alistEmpCod: '', alistEmpQty: '', alistRes: null, alistResTxt: '', alistQ: '' }));
+      if (!(this.state.inv || []).length) this.loadInventario();
+      this.toast(row.estado === 'alistado' ? 'Este pedido ya estaba alistado: igual puedes sumarle empaque' : 'Listo · agrega el material de empaque');
+    } catch (e) { this.toast('No se pudo abrir: ' + ((e && e.message) || e)); } finally { this._alistBusy = null; this.forceUpdate(); } }
   async alistEmpAgregar(id) { const sb = this.sb(); if (!sb || this._alistBusy) return; const row = (this.state.alists || []).find(r => r.id === id); if (!row) return;
     const cod = this.state.alistEmpCod || ''; const q = Number(String(this.state.alistEmpQty || '').replace(',', '.')) || 0;
     if (!cod) { this.toast('Elige el material de empaque'); return; } if (!(q > 0)) { this.toast('Pon la cantidad'); return; }
@@ -2231,6 +2273,9 @@ class Component extends DCLogic {
       finSaldoTotal: typeof finD.finSaldoTotal === 'number' ? cop(finD.finSaldoTotal) : '—', finCuentas: (finD.finCuentas || []).map(c => ({ nombre: c.nombre, tipo: c.tipo, saldoTxt: (c.saldo < 0 ? '−' : '') + cop(Math.abs(c.saldo)), fg: c.saldo < 0 ? '#B5503C' : '#3A3326' })),
       finCobrarTotal: cop(finCobrarAll.reduce((t, r) => t + (Number(r.saldo) || 0), 0)), finCobrarN: finCobrarAll.length + (finCobrarAll.length === 1 ? ' venta' : ' ventas'), finQ: s.finQ || '', setFinQ: e => this.setState({ finQ: e.target.value }), finCobrar,
       alistEmpCod: s.alistEmpCod || '', alistEmpQty: s.alistEmpQty || '', setAlistEmpCod: e => this.setState({ alistEmpCod: e.target.value }), setAlistEmpQty: e => this.setState({ alistEmpQty: e.target.value }),
+      alistQ: s.alistQ || '', setAlistQ: e => this.setState({ alistQ: e.target.value }), alistQKey: e => { if (e.key === 'Enter') this.alistBuscar(); }, alistBuscar: () => this.alistBuscar(), alistBuscarTxt: this._alistBuscando ? '…' : 'Buscar',
+      alistResTxt: s.alistResTxt || '', alistRes: (s.alistRes || []).map(v => ({ titulo: (v.pedido || v.ov || '') + (v.pedido && v.ov ? ' · ' + v.ov : '') + ' · ' + (v.cliente || ''), sub: [v.ciudad, v.fecha, (v.guia ? 'guía ' + v.guia : 'sin guía'), (v._al === 'pendiente' ? 'ya está por alistar' : (v._al === 'alistado' ? 'ya alistado' : ''))].filter(Boolean).join(' · '),
+        accion: this._alistBusy === 'alist-v-' + v.id ? '…' : (v._al ? 'Abrir' : 'Agregar empaque'), abrir: () => this.alistAbrirVenta(v) })),
       isAlist: s.screen === 'alist', alistSubTxt: s.alistsError ? s.alistsError : s.alists ? (s.alists.length ? s.alists.length + ' por alistar' : 'Nada pendiente') : 'Cargando…',
       alistVacio: !!s.alists && !s.alists.length && !s.alistsError,
       alistsVis: (s.alists || []).map(r => { const d = r.data || {}; const tel = String(d.telefono || '').replace(/\D/g, ''); return {
