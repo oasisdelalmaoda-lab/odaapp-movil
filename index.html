@@ -709,7 +709,7 @@
             <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#7A5E36;font-weight:700;">{{ al.titulo }}</div>
             <div><div style="font-weight:700;font-size:15px;">{{ al.cliente }}</div><div style="font-size:12px;color:#574E40;margin-top:2px;">{{ al.ciudad }} · {{ al.direccion }}</div><div style="font-size:12px;color:#8A8073;margin-top:2px;">{{ al.motivo }}</div></div>
             <div style="background:#F7F2E9;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;">
-              <sc-for list="{{ al.items }}" as="it" hint-placeholder-count="2"><div style="font-size:13px;font-weight:700;color:#3A3326;">{{ it.txt }}</div></sc-for>
+              <sc-for list="{{ al.items }}" as="it" hint-placeholder-count="2"><div><div style="font-size:13px;font-weight:700;color:#3A3326;">{{ it.txt }}</div><sc-if value="{{ it.sub }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#574E40;margin-top:1px;line-height:1.35;">{{ it.sub }}</div></sc-if></div></sc-for>
             </div>
             <sc-if value="{{ al.empPuede }}" hint-placeholder-val="{{ false }}">
               <div style="border:1px solid #E4DBCC;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;">
@@ -2103,7 +2103,7 @@ class Component extends DCLogic {
       { titulo: 'Chats que necesitan asesor', sub: 'El bot escaló y nadie ha respondido', n: (s.convs ? convs.filter(x => x.estado === 'necesita').length : c.convsNecesita), color: '#B5503C', go: () => { this.setState({ screen: 'chats', convFiltro: 'necesita' }); this.loadConvs(); } },
       { titulo: 'Conteos por aprobar', sub: 'Solo el administrador los aprueba', n: c.conteosPend, color: '#C9962F', go: () => { this.setState({ screen: 'conteos', ctFiltro: 'pendiente' }); this.loadInventario(); } },
       { titulo: 'Leads nuevos', sub: 'Sin contactar todavía', n: c.leadsNuevos, color: '#6596A6', go: go('modulo', { modId: 'leads' }) },
-      { titulo: 'Alistamientos pendientes', sub: 'Envíos de servicio al cliente y UGC por preparar', n: (s.alists ? s.alists.length : c.alistPend), color: '#A78659', go: () => { this.setState({ screen: 'alist' }); this.loadAlists(); } },
+      { titulo: 'Alistamientos pendientes', sub: 'Envíos de servicio al cliente y UGC por preparar', n: (s.alists ? s.alists.length : c.alistPend), color: '#A78659', go: () => { this.setState({ screen: 'alist' }); this.loadAlists(); if (!(this.state.inv || []).length) this.loadInventario(); } },
     ].filter(p => typeof p.n === 'number' && p.n > 0);
     const activeKey = s.screen === 'modulo' ? 'modulo:' + s.modId : (s.screen === 'chats' || s.screen === 'chat') ? 'modulo:conversaciones' : (s.screen === 'inv' || s.screen === 'invItem' || s.screen === 'conteos') ? 'modulo:inventario' : (s.screen === 'prod' || s.screen === 'prodNueva') ? 'modulo:produccion' : s.screen === 'informe' ? 'modulo:reportes' : s.screen === 'fin' ? 'modulo:finanzas' : s.screen === 'leads' ? 'modulo:leads' : s.screen === 'soporte' ? 'modulo:soporte' : s.screen;
     // ---- finanzas (solo consulta; viene en la fila del mes actual del informe) ----
@@ -2281,7 +2281,10 @@ class Component extends DCLogic {
       alistsVis: (s.alists || []).map(r => { const d = r.data || {}; const tel = String(d.telefono || '').replace(/\D/g, ''); return {
         titulo: d.titulo || ('Caso ' + (d.folio || '') + (d.pedido ? ' · ' + d.pedido : '')), cliente: d.cliente || '—', ciudad: d.ciudad || 'Sin ciudad', direccion: d.direccion || 'Sin dirección',
         telefono: d.telefono || '', tieneTel: tel.length >= 7, telUrl: 'tel:' + tel, motivo: d.motivo || '', notaAlist: String(d.notaAlist || '').trim(), hayNota: !!String(d.notaAlist || '').trim(), envio: d.envioTxt || ((d.transportadora || 'Coordinadora') + ' · guía ' + (d.guia || 'pendiente')),
-        items: (d.items || []).map(it => ({ txt: (Number(it.unidades) || 1) + '× ' + (it.nombre || it.codigo || '') })),
+        // 23-nov: el nombre exacto (aroma/tamaño) sale del inventario por código; Shopify solo trae el título genérico («Aceites Esenciales
+        // 100% Puros»). Los kits muestran qué productos llevan (detalle que arma el Hub).
+        items: (d.items || []).map(it => { const iv = it.codigo ? (s.inv || []).find(x => x.codigo === it.codigo || String(x.codigo).replace(/^0+/, '') === String(it.codigo).replace(/^0+/, '')) : null;
+          const nom = (iv && iv.nombre) || it.nombre || it.codigo || ''; return { txt: (Number(it.unidades) || 1) + '× ' + nom, sub: [it.detalle || '', (it.codigo ? 'Ref. ' + it.codigo : '')].filter(Boolean).join(' · ') }; }),
         ...(() => { const emp = (d.empaques || []).map(e => ({ txt: (Number(e.unidades) || 1) + '× ' + (e.nombre || e.codigo || '') }));
           const pend = (d.empaquesExtra || []).filter(x => x && !x.aplicado).map(x => ({ txt: '+' + (Number(x.unidades) || 0) + '× ' + (x.nombre || x.codigo), sub: 'Agregado' + (x.por ? ' por ' + x.por : '') + ' · se suma al pedido', quitar: () => this.alistEmpQuitar(r.id, x.id) }));
           const esPed = String(r.id || '').indexOf('alist-v-') === 0; const abierto = s.alistEmpOpen === r.id;
